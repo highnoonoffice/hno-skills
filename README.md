@@ -1,6 +1,6 @@
 # hno-skills
 
-OpenClaw skills published to ClawMart by Joseph Voelbel / HNO.
+OpenClaw skills published to ClawMart and used internally by Magnus.
 
 ## Skills
 
@@ -8,6 +8,10 @@ OpenClaw skills published to ClawMart by Joseph Voelbel / HNO.
 Full Ghost CMS publishing skill — migrate, automate, publish articles & newsletters.
 [View on ClawMart](https://www.shopclawmart.com/listings/ghost-publishing-pro-c07cb453)
 
-## Versioning
-Each skill is a subdirectory with its own SKILL.md and references/. 
-Packaged as .skill files and published to shopclawmart.com.
+### hno-github (v1.0)
+HNO GitHub operational skill — built from real production use on the highnoonoffice org.
+Covers credential management, repo creation, deploy flows, commit conventions, token generation.
+Internal use only (not published to ClawMart).
+
+## Convention
+Each skill is a subdirectory with SKILL.md + references/. Packaged as .skill files.
