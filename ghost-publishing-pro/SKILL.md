@@ -1,17 +1,55 @@
 ---
 name: ghost-publishing-pro
-description: Full Ghost CMS publishing skill with autonomous agent operations guide. Covers: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, batch post updates, image uploads, YouTube video posts, book-style typography, SEO metadata, Ghost webhooks, analytics, multi-site management, OpenClaw cron integration, and Ghost's permission model (integration token vs owner-only constraints, code injection workarounds, browser automation patterns). Use when publishing Ghost posts, sending newsletters, migrating blogs, batch updating content, scheduling posts, pulling analytics, or debugging Ghost API permission errors. Built by Joseph Voelbel from real production use.
+version: 1.0.1
+description: Not a generic Ghost API wrapper — this skill is built from real production use running a Ghost Pro newsletter and migrating an entire blog in an afternoon. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes the stuff other Ghost skills skip: autonomous agent permission model, code injection workarounds, browser automation fallbacks, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API permission errors.
+homepage: https://github.com/highnoonoffice/hno-skills
+source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
+config:
+  GHOST_ADMIN_URL:
+    description: Your Ghost site URL (e.g. https://your-site.ghost.io)
+    required: true
+  GHOST_ADMIN_KEY:
+    description: Admin API key in id:secret format from Ghost Admin > Integrations
+    required: true
+  credentials_file:
+    description: Path to credentials JSON — default ~/.openclaw/credentials/ghost-admin.json
+    required: false
 ---
 
 # Ghost Publishing Pro
 
-Full Ghost CMS publishing skill built from real production use. Not a generic API wrapper — this contains proven workflows, hard-won pitfalls, and patterns from actually running a Ghost Pro newsletter and migrating an entire Squarespace blog in an afternoon.
+A full Ghost CMS publishing skill built from real production use — not a generic API wrapper.
+
+This contains proven workflows, hard-won pitfalls, and patterns from actually running a Ghost Pro newsletter and migrating an entire Squarespace blog in an afternoon.
 
 **Built by:** Joseph Voelbel
 
-## Quick Setup
 
-**Credentials file:** `~/.openclaw/credentials/ghost-admin.json`
+---
+
+
+## Required Access
+
+This skill uses Ghost's Admin API. Here's exactly what it does with your credentials:
+
+**Reads:** Post list, member count, analytics, post content, image URLs.
+
+**Writes:** Creates and updates posts, uploads images, schedules content, sends newsletters.
+
+**Cannot do without owner-level access:** Theme uploads, staff management, billing, site settings.
+
+**Recommended setup:** Create a dedicated integration key (Settings > Integrations) — this covers 80% of workflows with minimal scope. The sub-admin path (documented below) unlocks the remaining 20% when full workflow automation is needed.
+
+The skill never stores credentials beyond the file you configure. No external calls outside your Ghost instance.
+
+
+---
+
+
+## Credentials Setup
+
+Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
+
 ```json
 {
   "url": "https://your-site.ghost.io",
@@ -19,24 +57,45 @@ Full Ghost CMS publishing skill built from real production use. Not a generic AP
 }
 ```
 
-Get your key: Ghost Admin → Settings → Integrations → Add custom integration → Admin API Key
+Read it in any operation with:
 
-Read credentials: `cat ~/.openclaw/credentials/ghost-admin.json`
+```bash
+cat ~/.openclaw/credentials/ghost-admin.json
+```
+
+
+---
+
 
 ## Two Access Paths
 
-**Primary — Admin API:** All programmatic operations. Fast, reliable, no browser needed.
+### Path 1 — Integration Token (Recommended)
 
-**Fallback — Browser:** Ghost admin UI at `{url}/ghost` for operations the API handles awkwardly (Lexical card insertions, visual tweaks, manual newsletter resend). Use browser automation when API isn't enough.
+Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
-**Sub-admin setup (recommended for agents):**
-Create a dedicated agent email (e.g., ProtonMail), invite it as a Ghost admin (Settings → Staff → Invite people). Agent has full admin access via both API and browser, but owner account stays separate. Revoke agent access without touching your owner credentials.
+Covers: all post operations, image uploads, scheduling, newsletters, analytics, batch updates.
+
+This is the right starting point for most agent workflows.
+
+
+### Path 2 — Sub-Admin Account (Full Workflow)
+
+For operations the API handles awkwardly (Lexical card insertions, visual tweaks, manual newsletter resend), create a dedicated agent email (e.g., ProtonMail) and invite it as a Ghost admin under Settings > Staff > Invite people.
+
+Why this is more secure than using your owner account: the agent account is isolated and fully revocable. Your owner credentials stay separate. If you ever need to cut access, remove the agent staff account — owner account is untouched.
+
+Use browser automation as a fallback when API isn't sufficient. See Workflow 14 in `references/workflows.md` for the complete autonomous agent permission model.
+
+
+---
+
 
 ## Authentication
 
 Ghost uses short-lived JWT tokens. Generate one before every API call — they expire in 5 minutes.
 
-**Pure Node.js (no npm required):**
+**Pure Node.js — no npm required:**
+
 ```bash
 node -e "
 const crypto=require('crypto');
@@ -50,11 +109,16 @@ console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
 "
 ```
 
-Use `Authorization: Ghost {token}` header on all requests.
+Use `Authorization: Ghost {token}` on all requests.
+
+
+---
+
 
 ## Core Operations
 
 ### Publish a post + send as newsletter (one call)
+
 ```bash
 curl -s -X POST "{url}/ghost/api/admin/posts/?source=html" \
   -H "Authorization: Ghost {token}" \
@@ -67,12 +131,16 @@ curl -s -X POST "{url}/ghost/api/admin/posts/?source=html" \
   }]}'
 ```
 
-**This is the killer feature.** One API call publishes to the web AND sends to all subscribers simultaneously. Do not publish first and try to send separately — use Ghost admin to manually resend if you miss this.
+This is the killer feature — one API call publishes to the web and sends to all subscribers simultaneously. Do not publish first and try to send separately. Use Ghost admin to manually resend if you miss this.
+
 
 ### Create a draft
-Same as above but `"status": "draft"`. No email sent.
+
+Same as above with `"status": "draft"`. No email sent.
+
 
 ### Update an existing post
+
 ```bash
 # 1. Fetch post to get updated_at (required)
 curl -s "{url}/ghost/api/admin/posts/{id}/" -H "Authorization: Ghost {token}"
@@ -84,13 +152,17 @@ curl -s -X PUT "{url}/ghost/api/admin/posts/{id}/?source=html" \
   -d '{"posts":[{"html":"<p>New content</p>","updated_at":"{fetched_updated_at}"}]}'
 ```
 
+
 ### List posts
+
 ```bash
 curl -s "{url}/ghost/api/admin/posts/?limit=15&filter=status:draft&fields=id,title,slug,status,updated_at" \
   -H "Authorization: Ghost {token}"
 ```
 
+
 ### Upload image
+
 ```bash
 curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
   -H "Authorization: Ghost {token}" \
@@ -99,16 +171,24 @@ curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
 # Returns URL — use as feature_image value
 ```
 
+
 ### Schedule a post
+
 Add `"status": "scheduled"` and `"published_at": "2026-03-20T18:00:00.000Z"` (UTC).
+
+
+---
+
 
 ## HTML Content
 
-Always use `?source=html` parameter. Ghost accepts raw HTML in the `html` field.
+Always use `?source=html` in the request URL. Ghost accepts raw HTML in the `html` field.
 
 **Standard article:** `<p>`, `<h2>`, `<h3>`, `<hr>`, `<blockquote>`, `<ul>`, `<ol>`
 
-**Book-style literary typography** (ideal for fiction, essays, and long-form literary content):
+
+**Book-style literary typography** — ideal for fiction, essays, and long-form literary content:
+
 ```html
 <div style="font-family: Georgia, serif; text-align: justify; hyphens: auto; -webkit-hyphens: auto;" lang="en">
   <p style="text-indent: 2em; margin-bottom: 0; margin-top: 0;">Paragraph one.</p>
@@ -116,7 +196,9 @@ Always use `?source=html` parameter. Ghost accepts raw HTML in the `html` field.
 </div>
 ```
 
+
 **YouTube embed:**
+
 ```html
 <figure class="kg-card kg-embed-card">
   <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/{VIDEO_ID}"
@@ -124,32 +206,46 @@ Always use `?source=html` parameter. Ghost accepts raw HTML in the `html` field.
 </figure>
 ```
 
-**Email rules (critical):**
-- JS stripped in email delivery — no scripts or interactive elements
-- Subscribe widgets are web-only — stripped from email
-- Ghost wraps in its own email template — don't add headers/footers
-- Publish + `email_segment` must be in the same API call
+
+**Email rules — critical:**
+
+- JS is stripped in email delivery. No scripts or interactive elements.
+- Subscribe widgets are web-only — stripped from email.
+- Ghost wraps content in its own email template. Don't add headers or footers.
+- The `email_segment` field only fires on first publish. It must be in the same API call as `"status": "published"`.
+
+
+---
+
 
 ## Autonomous Agent Operations
 
-See `references/workflows.md` → Workflow 14 for the complete guide to running Ghost autonomously, including:
+See `references/workflows.md` > Workflow 14 for the complete guide to running Ghost autonomously, including:
+
 - Ghost's two-tier permission model (integration token vs. owner-level)
-- 5 documented constraints with root causes and workarounds
-- Code Injection as a structural fix when theme uploads fail
+- Five documented constraints with root causes and workarounds
+- Code injection as a structural fix when theme uploads fail
 - Known API field behaviors (`?source=html`, Lexical vs HTML, `updated_at` locking)
+
 
 ## Migration Workflows
 
-See `references/workflows.md` for full migration playbooks including:
-- Squarespace XML export → Ghost batch import (proven: full blog migrated in one afternoon)
+See `references/workflows.md` for full migration playbooks:
+
+- Squarespace XML export > Ghost batch import (proven — full blog migrated in one afternoon)
 - WordPress XML migration
 - Substack CSV + HTML migration
 - Batch feature image updates
-- DOCX → book-style Ghost posts with YouTube embeds
+- DOCX > book-style Ghost posts with YouTube embeds
+
 
 ## API Reference
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
+
+
+---
+
 
 ## Common Pitfalls
 
