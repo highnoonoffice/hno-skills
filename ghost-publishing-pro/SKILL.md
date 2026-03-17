@@ -1,19 +1,20 @@
 ---
 name: ghost-publishing-pro
-version: 1.0.1
+version: 1.0.2
 description: Not a generic Ghost API wrapper — this skill is built from real production use running a Ghost Pro newsletter and migrating an entire blog in an afternoon. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes the stuff other Ghost skills skip: autonomous agent permission model, code injection workarounds, browser automation fallbacks, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API permission errors.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
-config:
-  GHOST_ADMIN_URL:
+credentials:
+  - name: GHOST_ADMIN_URL
     description: Your Ghost site URL (e.g. https://your-site.ghost.io)
     required: true
-  GHOST_ADMIN_KEY:
-    description: Admin API key in id:secret format from Ghost Admin > Integrations
+  - name: GHOST_ADMIN_KEY
+    description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations
     required: true
-  credentials_file:
-    description: Path to credentials JSON — default ~/.openclaw/credentials/ghost-admin.json
+  - name: credentials_file
+    description: "Path to JSON credentials file — default: ~/.openclaw/credentials/ghost-admin.json"
     required: false
+metadata:
 ---
 
 # Ghost Publishing Pro
@@ -84,7 +85,7 @@ For operations the API handles awkwardly (Lexical card insertions, visual tweaks
 
 Why this is more secure than using your owner account: the agent account is isolated and fully revocable. Your owner credentials stay separate. If you ever need to cut access, remove the agent staff account — owner account is untouched.
 
-Use browser automation as a fallback when API isn't sufficient. See Workflow 14 in `references/workflows.md` for the complete autonomous agent permission model.
+**Browser automation note:** The fallback browser patterns in this skill use OpenClaw's built-in `browser` tool — no automation code is bundled in this package. Nothing executes in your browser without your agent platform initiating it. See Workflow 14 in `references/workflows.md` for the complete autonomous agent permission model.
 
 
 ---
