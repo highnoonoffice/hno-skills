@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 1.0.3
-description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your vault is a node. The closer to center, the more often it gets accessed. Click any node and the graph reorganizes orbit around it — proximity shifts to show which files appear together in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files. Built on D3.js + React. Includes a Node.js journal parser script, Next.js API route, and a drop-in TypeScript component. Zero vertical specificity."
+version: 2.0.0
+description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -12,7 +12,7 @@ metadata:
 
 **Visualize your agent's cognition as a live, interactive force-directed graph.**
 
-Every markdown file in your vault is a node. Files accessed together in the same session drift toward each other. Click any node and the graph reorganizes its orbit around it — proximity shifts to show what lives in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen.
+Every markdown file in your workspace is a node. Files accessed together in the same session drift toward each other. Click any node and the graph reorganizes its orbit around it — proximity shifts to show what lives in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen.
 
 Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files.
 
@@ -27,7 +27,7 @@ A D3.js force-directed graph embedded in a React component (designed for any Nex
 - **Color-coded groups** — Core Identity, Memory, Publishing, Infrastructure, Skills, General
 - **Live tooltips** — file path, access count, group, co-access sessions on hover
 
-Zero vertical specificity. Works for any OpenClaw agent with a markdown vault and session journal history.
+Zero vertical specificity. Works for any OpenClaw agent with a markdown workspace and session journal history.
 
 ---
 
@@ -59,7 +59,7 @@ Once you have even a handful of journal files, the graph starts building. It get
 
 ### Step 1 — Copy the data extraction script
 
-Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map.js` in your vault. Adjust `VAULT_DIR` and `OUTPUT_PATH` via environment variables if needed.
+Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map.js` in your workspace. Adjust `VAULT_DIR` and `OUTPUT_PATH` via environment variables if needed.
 
 Run it:
 ```bash
