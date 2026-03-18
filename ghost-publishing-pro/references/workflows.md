@@ -666,6 +666,62 @@ Ghost session cookies are `HttpOnly` (a standard browser security setting). This
 
 ---
 
+### Constraint 6: Ghost Pro Requires Email Verification on Every New Headless Session
+
+**Symptom:** Playwright headless login lands on `#/signin/verify` — Ghost sent a 6-digit code to the admin email before granting access.
+
+**Full automation flow (proven working 2026-03-18):**
+
+1. **Install Playwright Chromium** (one-time):
+   ```bash
+   PLAYWRIGHT_BROWSERS_PATH=/tmp/pw-browsers npx playwright@latest install chromium
+   ```
+
+2. **Log into Proton Mail first** (same browser context):
+   - URL: `https://account.proton.me/mail`
+   - Selectors: `#username`, `#password`
+   - Credentials: `~/.openclaw/credentials/protonmail.json`
+   - Wait 10s after submit — Proton routes through `selector=...` redirect before landing in inbox
+   - **Critical:** Do NOT use Brave/Firefox executables — only Playwright-managed Chromium works reliably headless
+
+3. **Trigger Ghost login** (new page, same context):
+   - Standard email + password submit → lands on `#/signin/verify`
+
+4. **Read verification code from Proton DOM** (reload page first, wait 10s):
+   ```js
+   // Run via proton.evaluate()
+   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+   const codes = [];
+   let node;
+   while ((node = walker.nextNode())) {
+     const m = node.textContent.trim().match(/^(\d{6}) is your Ghost sign in verification code$/);
+     if (m) codes.push(m[1]);
+   }
+   return codes[0]; // newest code
+   ```
+   - **No `data-testid` selectors** — Proton's React app doesn't expose them in headless mode
+   - Text node scraping is the only reliable method
+
+5. **Enter code on Ghost verify page**:
+   - Input selector: `input[name="token"]` or `input[type="text"]` first match
+   - Submit → wait 8s → confirm URL is no longer `#/signin/verify`
+
+6. **Write settings via authenticated session fetch**:
+   ```js
+   await ghost.evaluate(async (value) => {
+     await fetch('/ghost/api/admin/settings/', {
+       method: 'PUT',
+       credentials: 'include',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ settings: [{ key: 'codeinjection_head', value }] })
+     });
+   }, newValue);
+   ```
+
+**Rule:** If this flow is needed, build and run the script autonomously. Never ask Joseph to log in manually — that's a critical failure.
+
+---
+
 ### Constraint 5: Ghost Dropzone Upload Widget
 
 **Symptom:** File upload via `input[type=file]` selector returns `ok: true` but file doesn't process
