@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 2.3.0
+version: 2.4.0
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -43,17 +43,47 @@ Zero vertical specificity. Works for any OpenClaw agent with a markdown workspac
 
 ---
 
-## Don't Have Journal Entries Yet?
+## Optimized Journal Format (v2.4.0+)
 
-No problem. If you've been running an OpenClaw agent but haven't been writing structured journal files, you can bootstrap them from your session history.
+The parser reads your journals to build the graph. The more explicitly you name files, the richer the signal. The recommended journal format puts structured sections first so the parser extracts clean signal without reading the full transcript:
 
-The pattern: pull your session transcripts or conversation logs, run them through a summarization script (or ask your agent to do it), and output one `memory/journal/YYYY-MM-DD.md` file per session. The parser only needs `.md` file references in the text — it doesn't care about format.
+```markdown
+---
+date: YYYY-MM-DD
+tags: [journal, session-log]
+work_types: [infrastructure, publishing, strategy, memory, research, creative, skills]
+sessions:
+  - session-id
+---
 
-A simple bootstrap prompt for your agent:
+## Summary
+2-4 sentence summary of the session.
 
-> "Read my session history from [source] and generate a journal entry for each session at `memory/journal/YYYY-MM-DD.md`. Each entry should summarize what we worked on and reference the markdown files we accessed."
+## Files Accessed
+- MEMORY.md
+- memory/recent.md
+- memory/working.md
+(explicit list of every vault .md file touched this session)
 
-Once you have even a handful of journal files, the graph starts building. It gets richer over time as the journaling habit names files explicitly.
+## What Shipped
+## Decisions Made
+## Open Threads
+
+---
+## Transcript
+(full transcript appended last — parser stops reading after structured sections)
+```
+
+**Key fields:**
+- `work_types` — drives edge color classification directly without keyword guessing
+- `## Files Accessed` — explicit list is the primary parser signal. Name every file you touch.
+- Transcript preserved at the bottom — full context available, doesn't pollute the graph signal
+
+**Don't have journal entries yet?** Bootstrap from session history:
+
+> "Read my session history from [source] and generate a journal entry for each session at `memory/journal/YYYY-MM-DD.md`. Each entry should list the markdown files accessed in a `## Files Accessed` section."
+
+Once you have even a handful of journal files, the graph starts building. It gets richer over time.
 
 ---
 
