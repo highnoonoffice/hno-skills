@@ -30,13 +30,11 @@ const { glob } = require('fs');
 const { promisify } = require('util');
 
 // --- CONFIG ---
+// VAULT_DIR: path to your OpenClaw vault (default: ~/.openclaw/vault)
+// OUTPUT_PATH: where to write the graph JSON (default: data/brain-map-graph.json in cwd)
 const VAULT_DIR = process.env.VAULT_DIR || path.join(process.env.HOME, '.openclaw/vault');
 const JOURNAL_DIR = path.join(VAULT_DIR, 'memory/journal');
-const OUTPUT_PATH = process.env.OUTPUT_PATH ||
-  path.join(VAULT_DIR, '../../../.openclaw/vault/../../../', 'hno-mission-control/data/brain-map-graph.json');
-
-// Fallback: write next to vault
-const OUTPUT_FALLBACK = path.join(VAULT_DIR, 'data/brain-map-graph.json');
+const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join(process.cwd(), 'data/brain-map-graph.json');
 
 // --- SESSION TYPE KEYWORDS ---
 const SESSION_TYPE_KEYWORDS = {
@@ -189,13 +187,10 @@ async function main() {
   };
 
   // Write output
-  let outPath = OUTPUT_PATH;
+  const outPath = OUTPUT_PATH;
   const outDir = path.dirname(outPath);
   if (!fs.existsSync(outDir)) {
-    // Try fallback
-    outPath = OUTPUT_FALLBACK;
-    const fallbackDir = path.dirname(outPath);
-    if (!fs.existsSync(fallbackDir)) fs.mkdirSync(fallbackDir, { recursive: true });
+    fs.mkdirSync(outDir, { recursive: true });
   }
 
   fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
@@ -211,7 +206,7 @@ main().catch(err => { console.error(err); process.exit(1); });
 ## Usage
 
 ```bash
-# Default — reads vault at ~/.openclaw/vault, writes to hno-mission-control/data/
+# Default — reads vault at ~/.openclaw/vault, writes to ./data/brain-map-graph.json
 node scripts/build-brain-map.js
 
 # Custom vault

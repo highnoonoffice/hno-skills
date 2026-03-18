@@ -1,14 +1,14 @@
 ---
 name: oc-brain-map
-version: 1.0.1
+version: 1.0.2
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your vault is a node. The closer to center, the more often it gets accessed. Click any node and the graph reorganizes orbit around it — proximity shifts to show which files appear together in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files. Built on D3.js + React. Includes a Node.js journal parser script, Next.js API route, and a drop-in TypeScript component. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
-license: MIT
+license: MIT with Attribution
 metadata:
 ---
 
-# OC Brain Map
+# Brain Map Visualizer
 
 **Visualize your agent's cognition as a live, interactive force-directed graph.**
 
@@ -193,4 +193,4 @@ Higher tier = upstream. Ties broken by access count.
 
 ## License
 
-MIT — use, modify, ship.
+MIT with Attribution. Use and modify freely. Attribution required: retain the original author credit (`@highnoonoffice`) in any published or distributed version.

@@ -120,34 +120,7 @@ export async function GET() {
 
 ---
 
-## Rebuild API Route (Optional)
-
-To trigger a graph rebuild from the UI, add a POST handler. This requires `scripts/build-brain-map.js` to exist in your vault or app root.
-
-```typescript
-import { NextResponse } from 'next/server';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
-
-export async function POST() {
-  try {
-    const vaultDir = process.env.VAULT_DIR || `${process.env.HOME}/.openclaw/vault`;
-    const { stdout, stderr } = await execAsync(
-      `node ${vaultDir}/scripts/build-brain-map.js`,
-      { env: { ...process.env, VAULT_DIR: vaultDir } }
-    );
-    return NextResponse.json({ success: true, output: stdout, errors: stderr });
-  } catch (err) {
-    return NextResponse.json({ success: false, error: String(err) }, { status: 500 });
-  }
-}
-```
-
----
-
 ## Notes
 
 - The API route does not cache (`Cache-Control: no-store`) — graph data rebuilds are infrequent and the file is small.
-- If using the rebuild POST route, the builder script runs synchronously in the request handler. For large vaults, consider spawning a background process or triggering via cron instead.
+- To refresh graph data, run the parser script manually or on a cron schedule. Do not expose a shell-execution endpoint in production.
