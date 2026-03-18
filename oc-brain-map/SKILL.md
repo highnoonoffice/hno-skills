@@ -1,12 +1,11 @@
 ---
-title: "OC Brain Map — SKILL.md"
-created: 2026-03-17
-modified: 2026-03-17
-tags: [brain-map, visualization, d3, memory, journal, graph, cognitive-map]
-status: active
-version: "1.0.0"
+name: oc-brain-map
+version: 1.0.0
+description: Visualize your OpenClaw agent's cognition as a live, interactive D3.js force-directed graph. Parses session journal files to build a co-access matrix — which markdown files appear together per session — then renders that as a navigable node graph. Every vault file is a node. Frequency becomes proximity. Click any node to reorganize its orbit. Flow dots travel edges showing co-access direction and frequency. Includes a Node.js journal parser script, Next.js API route, and a full React + D3 component (BrainMapGraph.tsx). Works for any OpenClaw agent with a markdown vault and session journal history. Zero vertical specificity.
+homepage: https://github.com/highnoonoffice/hno-skills
+source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
-owner: "@highnoonoffice"
+metadata:
 ---
 
 # OC Brain Map
