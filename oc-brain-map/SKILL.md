@@ -1,10 +1,10 @@
 ---
-name: oc-brain-map
-version: 1.0.2
+name: brain-map-visualizer
+version: 1.0.3
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your vault is a node. The closer to center, the more often it gets accessed. Click any node and the graph reorganizes orbit around it — proximity shifts to show which files appear together in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files. Built on D3.js + React. Includes a Node.js journal parser script, Next.js API route, and a drop-in TypeScript component. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
-license: MIT with Attribution
+license: MIT
 metadata:
 ---
 
@@ -12,13 +12,15 @@ metadata:
 
 **Visualize your agent's cognition as a live, interactive force-directed graph.**
 
-Every markdown file in your vault is a node. Every time two files appear in the same session journal, an edge forms between them. Frequency becomes proximity — files accessed together drift together. Watch your memory architecture map itself.
+Every markdown file in your vault is a node. Files accessed together in the same session drift toward each other. Click any node and the graph reorganizes its orbit around it — proximity shifts to show what lives in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen.
+
+Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files.
 
 ---
 
 ## What This Skill Builds
 
-A D3.js force-directed graph embedded in a React component (designed for Mission Control or any Next.js app). It parses your agent's session journals to extract co-access relationships between vault files, then renders them as an interactive graph with:
+A D3.js force-directed graph embedded in a React component (designed for any Next.js dashboard app). It parses your agent's session journals to extract co-access relationships between vault files, then renders them as an interactive graph with:
 
 - **Click-to-focus** — click any node, the graph reorganizes its orbit around it
 - **Flow dots** — luminescent dots travel edges showing co-access direction and frequency
@@ -33,9 +35,23 @@ Zero vertical specificity. Works for any OpenClaw agent with a markdown vault an
 
 - OpenClaw agent with a vault directory containing markdown files
 - Session journals in `memory/journal/YYYY-MM-DD.md` format (each entry references vault files)
-- Mission Control (Next.js app) or equivalent React host — or serve standalone with `npx serve`
+- A Next.js dashboard app or equivalent React host — or serve standalone with `npx serve`
 - Node.js 18+ for the data extraction script
 - `d3` and `@types/d3` installed in your frontend project
+
+---
+
+## Don't Have Journal Entries Yet?
+
+No problem. If you've been running an OpenClaw agent but haven't been writing structured journal files, you can bootstrap them from your session history.
+
+The pattern: pull your session transcripts or conversation logs, run them through a summarization script (or ask your agent to do it), and output one `memory/journal/YYYY-MM-DD.md` file per session. The parser only needs `.md` file references in the text — it doesn't care about format.
+
+A simple bootstrap prompt for your agent:
+
+> "Read my session history from [source] and generate a journal entry for each session at `memory/journal/YYYY-MM-DD.md`. Each entry should summarize what we worked on and reference the markdown files we accessed."
+
+Once you have even a handful of journal files, the graph starts building. It gets richer over time as the journaling habit names files explicitly.
 
 ---
 
@@ -43,12 +59,7 @@ Zero vertical specificity. Works for any OpenClaw agent with a markdown vault an
 
 ### Step 1 — Copy the data extraction script
 
-Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map.js` in your vault (or Mission Control repo). The script:
-
-1. Scans `memory/journal/*.md` for `.md` file references
-2. Builds a co-access matrix (which files appear together per session)
-3. Classifies each session by type (strategy, memory, publishing, infrastructure, research, general)
-4. Outputs `data/brain-map-graph.json`
+Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map.js` in your vault. Adjust `VAULT_DIR` and `OUTPUT_PATH` via environment variables if needed.
 
 Run it:
 ```bash
@@ -65,7 +76,7 @@ app/api/brain-map/graph/route.ts
 
 ### Step 3 — Add the React component
 
-Copy `BrainMapGraph.tsx` from `references/component.md` into your `components/` directory. Import and render it in any page or tab:
+Copy `BrainMapGraph.tsx` from `references/component.md` into your `components/` directory:
 
 ```tsx
 import BrainMapGraph from '@/components/BrainMapGraph';
@@ -126,13 +137,15 @@ See `references/graph-schema.md` for the full spec. Short version:
 
 ## Edge Colors (Session Type)
 
-| Session Type | Color | Keywords |
+Session type is auto-classified from journal text keywords:
+
+| Session Type | Color | Example keywords |
 |---|---|---|
-| Strategy / Planning | Gold | strategy, direction, roadmap, planning, HNO, product, business |
-| Memory / Identity | Purple | memory, SOUL, identity, voice, self, Magnus |
-| Publishing / Content | Green | Ghost, publish, article, newsletter, draft, Borges, stories, YouTube |
-| Infrastructure / Code | Blue | Mission Control, deploy, build, GitHub, PR, API, route, launchd |
-| Research / Analysis | Orange | research, analysis, audit, ClawHub, skill |
+| Strategy / Planning | Gold | strategy, roadmap, planning, product, business |
+| Memory / Identity | Purple | memory, identity, voice, self |
+| Publishing / Content | Green | publish, article, draft, content |
+| Infrastructure / Code | Blue | deploy, build, API, route, server, cron |
+| Research / Analysis | Orange | research, analysis, audit, skill |
 | General / Mixed | Gray | fallback |
 
 ---
@@ -141,10 +154,10 @@ See `references/graph-schema.md` for the full spec. Short version:
 
 | Action | Result |
 |---|---|
-| Click node | Node becomes gravitational center; simulation restarts at alpha 0.8; connected nodes pull in; unconnected drift outward and dim |
+| Click node | Node becomes gravitational center; connected nodes pull in; unconnected drift outward and dim |
 | Click same node again | Opens file in reader panel; graph resets to default |
 | Click different node while focused | Refocuses to new node |
-| Hover node | Tooltip: filename, path, access count, group, interaction hint |
+| Hover node | Tooltip: filename, path, access count, group |
 | Hover edge | Tooltip: session type, source/target, co-access count, session dates |
 | Scroll / drag background | Zoom and pan |
 | Drag node | Temporarily fix position; releases on mouse-up |
@@ -156,10 +169,8 @@ See `references/graph-schema.md` for the full spec. Short version:
 One SVG circle per edge, rendered inside the main `<g>` group so zoom/pan applies automatically.
 
 - **Speed:** `0.00025 + weight * 0.00006` — heavier edges = faster dots
-- **Phase offset:** `i * 0.413` per edge for visual variety
 - **Direction:** upstream → downstream (core identity files are always upstream)
 - **Glow:** SVG feGaussianBlur filter
-- **Opacity:** 0.55 default, 0.9 on focused edge, 0 on unconnected edge
 
 ### Upstream Tier Hierarchy
 
@@ -177,7 +188,7 @@ Higher tier = upstream. Ties broken by access count.
 
 ## Known Limitations
 
-- Journal summaries reference files inconsistently — graph data is accurate but sparse until journaling habitually names files explicitly. Expected to improve over time.
+- Journal summaries reference files inconsistently — graph data improves naturally as journaling explicitly names files.
 - Graph rebuilds are not real-time; run the parser script to refresh.
 - Reader panel (double-click to open file) requires a `/api/read-file` endpoint in your host app.
 
@@ -193,4 +204,4 @@ Higher tier = upstream. Ties broken by access count.
 
 ## License
 
-MIT with Attribution. Use and modify freely. Attribution required: retain the original author credit (`@highnoonoffice`) in any published or distributed version.
+MIT. Copyright (c) 2026 @highnoonoffice. Retain this notice in any distributed version.
