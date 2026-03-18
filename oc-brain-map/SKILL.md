@@ -10,7 +10,7 @@ metadata:
 
 # Brain Map Visualizer
 
-![Brain Map Visualizer in action](preview.jpg)
+![Brain Map Visualizer in action](https://raw.githubusercontent.com/highnoonoffice/hno-skills/main/oc-brain-map/preview.jpg)
 
 **Visualize your agent's cognition as a live, interactive force-directed graph.**
 
