@@ -333,12 +333,22 @@ export default function BrainMapGraph() {
   return (
     <div className="relative w-full h-full bg-black" style={{ minHeight: 500 }}>
       {/* Stats bar */}
-      <div className="absolute top-2 left-3 text-xs text-gray-500 z-10 select-none">
-        {stats}
+      <div className="absolute top-2 left-3 text-xs text-gray-500 z-10 select-none flex items-center gap-2">
+        <span>{stats}</span>
         {graphData?.generated && (
-          <span className="ml-3 text-gray-600">
+          <span className="text-gray-600">
             Updated: {new Date(graphData.generated).toLocaleDateString()}
           </span>
+        )}
+        {graphData && (
+          <button
+            onClick={fetchGraph}
+            title="Refresh graph"
+            className="text-gray-600 hover:text-yellow-500 border border-gray-700 hover:border-yellow-700 rounded px-1.5 py-0.5 transition-colors"
+            style={{ fontSize: 11, lineHeight: 1.4, background: 'transparent', cursor: 'pointer' }}
+          >
+            ↺
+          </button>
         )}
       </div>
 

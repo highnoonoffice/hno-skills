@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 2.4.0
+version: 2.4.1
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
