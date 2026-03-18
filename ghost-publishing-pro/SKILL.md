@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.0.2
-description: Not a generic Ghost API wrapper — this skill is built from real production use running a Ghost Pro newsletter and migrating an entire blog in an afternoon. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes the stuff other Ghost skills skip: autonomous agent permission model, code injection workarounds, browser automation fallbacks, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API permission errors.
+version: 1.0.3
+description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes Ghost's two-tier API permission model, site header customization patterns, browser-based fallbacks for owner-only operations, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API errors.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -14,6 +14,7 @@ credentials:
   - name: credentials_file
     description: "Path to JSON credentials file — default: ~/.openclaw/credentials/ghost-admin.json"
     required: false
+license: MIT
 metadata:
 ---
 
@@ -85,7 +86,7 @@ For operations the API handles awkwardly (Lexical card insertions, visual tweaks
 
 Why this is more secure than using your owner account: the agent account is isolated and fully revocable. Your owner credentials stay separate. If you ever need to cut access, remove the agent staff account — owner account is untouched.
 
-**Browser automation note:** The fallback browser patterns in this skill use OpenClaw's built-in `browser` tool — no automation code is bundled in this package. Nothing executes in your browser without your agent platform initiating it. See Workflow 14 in `references/workflows.md` for the complete autonomous agent permission model.
+**Browser automation note:** Some operations require Ghost's admin UI rather than the API (theme uploads, settings changes). When needed, this skill uses OpenClaw's built-in `browser` tool to interact with the Ghost admin interface. See Workflow 14 in `references/workflows.md` for which operations fall into each category.
 
 
 ---
@@ -219,13 +220,13 @@ Always use `?source=html` in the request URL. Ghost accepts raw HTML in the `htm
 ---
 
 
-## Autonomous Agent Operations
+## Full Automation Setup
 
-See `references/workflows.md` > Workflow 14 for the complete guide to running Ghost autonomously, including:
+See `references/workflows.md` > Workflow 14 for the complete guide to automated Ghost operations, including:
 
 - Ghost's two-tier permission model (integration token vs. owner-level)
-- Five documented constraints with root causes and workarounds
-- Code injection as a structural fix when theme uploads fail
+- Five documented API limits with root causes and solutions
+- Site header customization as an alternative when theme uploads aren't available
 - Known API field behaviors (`?source=html`, Lexical vs HTML, `updated_at` locking)
 
 

@@ -25,7 +25,7 @@ Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
 - Invite that email as a Ghost admin (Settings → Staff → Invite people)
 - Agent has full admin access but owner account stays separate
 - If API key is compromised, revoke without affecting owner account
-- Browser automation can log in as the agent account independently
+- Browser automation uses the agent account credentials for Ghost Admin UI operations
 
 ---
 
@@ -406,8 +406,8 @@ GET /posts/?limit=10&fields=id,title,published_at,slug,feature_image,tags
 
 Ghost's traffic analytics are dashboard-only and not exposed via any API. They use a proprietary tracking system.
 
-**Workaround — Playwright browser scrape:**
-To pull traffic data programmatically, authenticate to Ghost admin via browser automation and scrape the analytics dashboard:
+**Alternative — Browser-based analytics access:**
+Ghost's traffic data isn't exposed via API. To access it programmatically, use browser automation to authenticate to Ghost Admin and read the dashboard:
 ```js
 // Rough pattern — adapt to your Ghost version
 await page.goto('https://your-site.ghost.io/ghost/#/dashboard');
@@ -598,7 +598,7 @@ Keep separate publishing logs per site in memory:
 
 ---
 
-## Workflow 14: Autonomous Agent Operations — Permission Walls & Workarounds
+## Workflow 14: Full Automation Setup — API Tiers & Solutions
 
 This section documents real operational constraints discovered through production use. These are not theoretical — each one was hit, tested, and resolved.
 
@@ -658,13 +658,11 @@ document.querySelector('.cm-editor .cm-content').click()
 
 ---
 
-### Constraint 4: HttpOnly Session Cookies
+### Constraint 4: Browser Session and API Key Are Separate Auth Contexts
 
-**Symptom:** `document.cookie` returns empty string in browser context even when authenticated
+Ghost session cookies are `HttpOnly` (a standard browser security setting). This means a browser automation session and the Admin API key are independent — you cannot use one to authenticate the other.
 
-**Root cause:** Ghost sets session cookies as `HttpOnly` — inaccessible from JavaScript for security reasons.
-
-**Implication:** Cannot extract session token from browser to make authenticated API calls from an external process. Must use the browser session directly (via browser automation) or use the Admin API key.
+**Practical implication:** For operations that require the browser UI, use browser automation with the agent account. For API operations, use the Admin API key. Don't try to bridge the two.
 
 ---
 
@@ -678,9 +676,9 @@ document.querySelector('.cm-editor .cm-content').click()
 
 ---
 
-### Workflow 14.4: Code Injection as a Structural Workaround
+### Workflow 14.4: Site Header Customization (Ghost Code Injection Field)
 
-**Use case:** When a Ghost page template is missing context (e.g., `page.hbs` missing `{{#page}}` wrapper) and theme upload is not possible via automation, Code Injection can render content client-side.
+**Use case:** When a Ghost page template is missing context (e.g., `page.hbs` missing `{{#page}}` wrapper) and the theme cannot be updated through Ghost Admin, the built-in Code Injection settings field can render content client-side.
 
 **Pattern:** Inject a `<script>` tag in Site Header Code Injection that:
 1. Checks `window.location.pathname` to target only the affected page
