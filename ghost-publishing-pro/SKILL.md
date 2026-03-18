@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.0.3
-description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes Ghost's two-tier API permission model, site header customization patterns, browser-based fallbacks for owner-only operations, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API errors.
+version: 1.0.4
+description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes Ghost's two-tier API permission model, site header customization patterns, and hard-won API pitfalls. Use when publishing Ghost posts, sending newsletters, migrating blogs, or debugging Ghost API errors.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -11,9 +11,6 @@ credentials:
   - name: GHOST_ADMIN_KEY
     description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations
     required: true
-  - name: credentials_file
-    description: "Path to JSON credentials file — default: ~/.openclaw/credentials/ghost-admin.json"
-    required: false
 license: MIT
 metadata:
 ---
@@ -38,11 +35,11 @@ This skill uses Ghost's Admin API. Here's exactly what it does with your credent
 
 **Writes:** Creates and updates posts, uploads images, schedules content, sends newsletters.
 
-**Cannot do without owner-level access:** Theme uploads, staff management, billing, site settings.
+**Owner-only operations:** Theme uploads, billing, site-wide settings — not automated by this skill.
 
-**Recommended setup:** Create a dedicated integration key (Settings > Integrations) — this covers 80% of workflows with minimal scope. The sub-admin path (documented below) unlocks the remaining 20% when full workflow automation is needed.
+**Recommended setup:** Create a dedicated integration key (Ghost Admin > Settings > Integrations). This covers 90% of publishing workflows with minimal scope.
 
-The skill never stores credentials beyond the file you configure. No external calls outside your Ghost instance.
+This skill makes no external calls. All API requests go directly to your Ghost instance.
 
 
 ---
@@ -50,7 +47,7 @@ The skill never stores credentials beyond the file you configure. No external ca
 
 ## Credentials Setup
 
-Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
+Store your Ghost Admin API key and site URL. The simplest approach is a local JSON file:
 
 ```json
 {
@@ -59,34 +56,30 @@ Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
 }
 ```
 
+Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
+
 Read it in any operation with:
 
 ```bash
-cat ~/.openclaw/credentials/ghost-admin.json
+cat /path/to/your/ghost-credentials.json
 ```
 
 
 ---
 
 
-## Two Access Paths
+## Access Paths
 
 ### Path 1 — Integration Token (Recommended)
 
-Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
-
 Covers: all post operations, image uploads, scheduling, newsletters, analytics, batch updates.
 
-This is the right starting point for most agent workflows.
+This is the right starting point for most publishing workflows.
 
 
-### Path 2 — Sub-Admin Account (Full Workflow)
+### Path 2 — Ghost Admin UI (When Needed)
 
-For operations the API handles awkwardly (Lexical card insertions, visual tweaks, manual newsletter resend), create a dedicated agent email (e.g., ProtonMail) and invite it as a Ghost admin under Settings > Staff > Invite people.
-
-Why this is more secure than using your owner account: the agent account is isolated and fully revocable. Your owner credentials stay separate. If you ever need to cut access, remove the agent staff account — owner account is untouched.
-
-**Browser automation note:** Some operations require Ghost's admin UI rather than the API (theme uploads, settings changes). When needed, this skill uses OpenClaw's built-in `browser` tool to interact with the Ghost admin interface. See Workflow 14 in `references/workflows.md` for which operations fall into each category.
+A small number of operations (theme uploads, site settings) require Ghost's admin interface rather than the API. For those, you can use OpenClaw's `browser` tool to navigate your own Ghost admin panel. See Workflow 14 in `references/workflows.md` for the full breakdown of which operations fall into each category.
 
 
 ---
@@ -101,13 +94,14 @@ Ghost uses short-lived JWT tokens. Generate one before every API call — they e
 ```bash
 node -e "
 const crypto=require('crypto');
-const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
-const [id,secret]=creds.key.split(':');
+const url='https://your-site.ghost.io';
+const key='your-id:your-secret';
+const [id,secret]=key.split(':');
 const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
 const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
+console.log(JSON.stringify({token:h+'.'+p+'.'+s,url}));
 "
 ```
 
