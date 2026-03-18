@@ -10,7 +10,7 @@ status: active
 
 Parses `memory/journal/*.md` session files, extracts `.md` file references per session, builds a co-access matrix, classifies session types, and writes `data/brain-map-graph.json`.
 
-Copy this script to `scripts/build-brain-map.js` in your vault or Mission Control repo. Adjust `VAULT_DIR` and `OUTPUT_PATH` for your environment.
+Copy this script to `scripts/build-brain-map.js` in your vault or Mission Control repo. Adjust `WORKSPACE_DIR` and `OUTPUT_PATH` for your environment.
 
 ---
 
@@ -26,14 +26,14 @@ Copy this script to `scripts/build-brain-map.js` in your vault or Mission Contro
 
 const fs = require('fs');
 const path = require('path');
-const { glob } = require('fs');
-const { promisify } = require('util');
 
 // --- CONFIG ---
-// VAULT_DIR: path to your OpenClaw vault (default: ~/.openclaw/vault)
+// WORKSPACE_DIR: path to your OpenClaw workspace (default: ~/.openclaw/vault)
+// This is the root directory OpenClaw uses for your agent's markdown files.
+// Override via environment variable: WORKSPACE_DIR=/path/to/workspace
 // OUTPUT_PATH: where to write the graph JSON (default: data/brain-map-graph.json in cwd)
-const VAULT_DIR = process.env.VAULT_DIR || path.join(process.env.HOME, '.openclaw/vault');
-const JOURNAL_DIR = path.join(VAULT_DIR, 'memory/journal');
+const WORKSPACE_DIR = process.env.WORKSPACE_DIR || process.env.WORKSPACE_DIR || path.join(process.env.HOME, '.openclaw/vault');
+const JOURNAL_DIR = path.join(WORKSPACE_DIR, 'memory/journal');
 const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join(process.cwd(), 'data/brain-map-graph.json');
 
 // --- SESSION TYPE KEYWORDS ---
@@ -74,15 +74,17 @@ function classifySessionType(text) {
 }
 
 function extractMdRefs(text) {
-  // Match things like memory/recent.md, MEMORY.md, PublishingPipeline/WORKFLOW.md, etc.
-  const pattern = /(?:^|[\s`'"([\]])([A-Za-z0-9_\-./]+\.md)(?=[^A-Za-z0-9_\-./]|$)/gm;
+  // Match markdown file references like memory/recent.md, MEMORY.md, etc.
+  // Restricted to safe path characters — no .. traversal, no absolute paths
+  const pattern = /(?:^|[\s`'"([\]])([A-Za-z0-9_\-][A-Za-z0-9_\-./]*\.md)(?=[^A-Za-z0-9_\-./]|$)/gm;
   const refs = new Set();
   let match;
   while ((match = pattern.exec(text)) !== null) {
     const ref = match[1].trim();
-    // Filter out noise
     if (ref.length < 4) continue;
     if (ref.startsWith('http')) continue;
+    if (ref.includes('..')) continue;   // block traversal paths
+    if (ref.startsWith('/')) continue;  // block absolute paths
     refs.add(ref);
   }
   return Array.from(refs);
@@ -206,11 +208,11 @@ main().catch(err => { console.error(err); process.exit(1); });
 ## Usage
 
 ```bash
-# Default — reads vault at ~/.openclaw/vault, writes to ./data/brain-map-graph.json
+# Default — reads workspace at ~/.openclaw/vault, writes to ./data/brain-map-graph.json
 node scripts/build-brain-map.js
 
-# Custom vault
-VAULT_DIR=/path/to/vault node scripts/build-brain-map.js
+# Custom workspace
+WORKSPACE_DIR=/path/to/vault node scripts/build-brain-map.js
 
 # Custom output
 OUTPUT_PATH=/path/to/output/brain-map-graph.json node scripts/build-brain-map.js
