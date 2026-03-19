@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 2.4.1
+version: 2.4.2
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -10,15 +10,15 @@ metadata:
 
 # Brain Map Visualizer
 
-![Brain Map Visualizer in action](https://raw.githubusercontent.com/highnoonoffice/hno-skills/main/oc-brain-map/preview.jpg)
-
 **Visualize your agent's cognition as a live, interactive force-directed graph.**
 
 Every markdown file in your workspace is a node. Files accessed together in the same session drift toward each other. Click any node and the graph reorganizes its orbit around it — proximity shifts to show what lives in the same context. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen.
 
 Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files.
 
----
+**Built by:** Joseph Voelbel
+
+
 
 ## What This Skill Builds
 
@@ -31,7 +31,7 @@ A D3.js force-directed graph embedded in a React component (designed for any Nex
 
 Zero vertical specificity. Works for any OpenClaw agent with a markdown workspace and session journal history.
 
----
+
 
 ## Prerequisites
 
@@ -41,20 +41,20 @@ Zero vertical specificity. Works for any OpenClaw agent with a markdown workspac
 - Node.js 18+ for the data extraction script
 - `d3` and `@types/d3` installed in your frontend project
 
----
+
 
 ## Optimized Journal Format (v2.4.0+)
 
 The parser reads your journals to build the graph. The more explicitly you name files, the richer the signal. The recommended journal format puts structured sections first so the parser extracts clean signal without reading the full transcript:
 
 ```markdown
----
+
 date: YYYY-MM-DD
 tags: [journal, session-log]
 work_types: [infrastructure, publishing, strategy, memory, research, creative, skills]
 sessions:
   - session-id
----
+
 
 ## Summary
 2-4 sentence summary of the session.
@@ -69,7 +69,7 @@ sessions:
 ## Decisions Made
 ## Open Threads
 
----
+
 ## Transcript
 (full transcript appended last — parser stops reading after structured sections)
 ```
@@ -85,7 +85,7 @@ sessions:
 
 Once you have even a handful of journal files, the graph starts building. It gets richer over time.
 
----
+
 
 ## Installation
 
@@ -127,7 +127,7 @@ Run the parser script any time to refresh the graph. Add it to a cron job for we
 0 0 * * 0 cd /path/to/vault && node scripts/build-brain-map.js
 ```
 
----
+
 
 ## Graph Data Format
 
@@ -152,7 +152,7 @@ See `references/graph-schema.md` for the full spec. Short version:
 }
 ```
 
----
+
 
 ## Node Color Groups
 
@@ -165,7 +165,7 @@ See `references/graph-schema.md` for the full spec. Short version:
 | Skills | Orange `#f97316` | skills/* |
 | General | Gray `#6b7280` | Everything else |
 
----
+
 
 ## Edge Colors (Session Type)
 
@@ -180,7 +180,7 @@ Session type is auto-classified from journal text keywords:
 | Research / Analysis | Orange | research, analysis, audit, skill |
 | General / Mixed | Gray | fallback |
 
----
+
 
 ## Interaction Model
 
@@ -194,7 +194,7 @@ Session type is auto-classified from journal text keywords:
 | Scroll / drag background | Zoom and pan |
 | Drag node | Temporarily fix position; releases on mouse-up |
 
----
+
 
 ## Flow Dot Animation
 
@@ -216,7 +216,7 @@ journal / general: 0
 
 Higher tier = upstream. Ties broken by access count.
 
----
+
 
 ## Known Limitations
 
@@ -224,7 +224,7 @@ Higher tier = upstream. Ties broken by access count.
 - Graph rebuilds are not real-time; run the parser script to refresh.
 - Reader panel (double-click to open file) requires a `/api/read-file` endpoint in your host app.
 
----
+
 
 ## References
 
@@ -232,7 +232,7 @@ Higher tier = upstream. Ties broken by access count.
 - `references/component.md` — Full `BrainMapGraph.tsx` React + D3 component
 - `references/graph-schema.md` — Graph JSON spec + Next.js API route
 
----
+
 
 ## License
 
