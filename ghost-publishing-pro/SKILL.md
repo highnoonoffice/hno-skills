@@ -5,12 +5,12 @@ description: Ghost CMS publishing skill built from real production use on a Ghos
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
-  - name: GHOST_ADMIN_URL
-    description: Your Ghost site URL (e.g. https://your-site.ghost.io)
+  - name: ghost-admin.json
+    description: "JSON credentials file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format from Ghost Admin > Settings > Integrations)"
     required: true
-  - name: GHOST_ADMIN_KEY
-    description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations
-    required: true
+binaries:
+  - node
+  - curl
 license: MIT
 metadata:
 ---
