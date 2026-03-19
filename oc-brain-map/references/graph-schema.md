@@ -94,7 +94,14 @@ import path from 'path';
 
 const GRAPH_PATH = path.join(process.cwd(), 'data/brain-map-graph.json');
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Optional access control: set BRAIN_MAP_SECRET env var to restrict API access.
+  // Recommended for any deployment beyond localhost.
+  const secret = process.env.BRAIN_MAP_SECRET;
+  if (secret && request.headers.get('x-brain-map-key') !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     if (!fs.existsSync(GRAPH_PATH)) {
       return NextResponse.json(

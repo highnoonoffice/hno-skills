@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 2.4.2
+version: 2.4.3
 description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -16,9 +16,7 @@ Every markdown file in your workspace is a node. Files accessed together in the 
 
 Double-click any node to open its contents. Works for any agent with a session journal and a vault of markdown files.
 
-**Built by:** Joseph Voelbel
-
-
+---
 
 ## What This Skill Builds
 
@@ -31,7 +29,7 @@ A D3.js force-directed graph embedded in a React component (designed for any Nex
 
 Zero vertical specificity. Works for any OpenClaw agent with a markdown workspace and session journal history.
 
-
+---
 
 ## Prerequisites
 
@@ -41,51 +39,21 @@ Zero vertical specificity. Works for any OpenClaw agent with a markdown workspac
 - Node.js 18+ for the data extraction script
 - `d3` and `@types/d3` installed in your frontend project
 
+---
 
+## Don't Have Journal Entries Yet?
 
-## Optimized Journal Format (v2.4.0+)
+No problem. If you've been running an OpenClaw agent but haven't been writing structured journal files, you can bootstrap them from your session history.
 
-The parser reads your journals to build the graph. The more explicitly you name files, the richer the signal. The recommended journal format puts structured sections first so the parser extracts clean signal without reading the full transcript:
+The pattern: pull your session transcripts or conversation logs, run them through a summarization script (or ask your agent to do it), and output one `memory/journal/YYYY-MM-DD.md` file per session. The parser only needs `.md` file references in the text — it doesn't care about format.
 
-```markdown
+A simple bootstrap prompt for your agent:
 
-date: YYYY-MM-DD
-tags: [journal, session-log]
-work_types: [infrastructure, publishing, strategy, memory, research, creative, skills]
-sessions:
-  - session-id
+> "Read my session history from [source] and generate a journal entry for each session at `memory/journal/YYYY-MM-DD.md`. Each entry should summarize what we worked on and reference the markdown files we accessed."
 
+Once you have even a handful of journal files, the graph starts building. It gets richer over time as the journaling habit names files explicitly.
 
-## Summary
-2-4 sentence summary of the session.
-
-## Files Accessed
-- MEMORY.md
-- memory/recent.md
-- memory/working.md
-(explicit list of every vault .md file touched this session)
-
-## What Shipped
-## Decisions Made
-## Open Threads
-
-
-## Transcript
-(full transcript appended last — parser stops reading after structured sections)
-```
-
-**Key fields:**
-- `work_types` — drives edge color classification directly without keyword guessing
-- `## Files Accessed` — explicit list is the primary parser signal. Name every file you touch.
-- Transcript preserved at the bottom — full context available, doesn't pollute the graph signal
-
-**Don't have journal entries yet?** Bootstrap from session history:
-
-> "Read my session history from [source] and generate a journal entry for each session at `memory/journal/YYYY-MM-DD.md`. Each entry should list the markdown files accessed in a `## Files Accessed` section."
-
-Once you have even a handful of journal files, the graph starts building. It gets richer over time.
-
-
+---
 
 ## Installation
 
@@ -127,7 +95,7 @@ Run the parser script any time to refresh the graph. Add it to a cron job for we
 0 0 * * 0 cd /path/to/vault && node scripts/build-brain-map.js
 ```
 
-
+---
 
 ## Graph Data Format
 
@@ -152,7 +120,7 @@ See `references/graph-schema.md` for the full spec. Short version:
 }
 ```
 
-
+---
 
 ## Node Color Groups
 
@@ -165,7 +133,7 @@ See `references/graph-schema.md` for the full spec. Short version:
 | Skills | Orange `#f97316` | skills/* |
 | General | Gray `#6b7280` | Everything else |
 
-
+---
 
 ## Edge Colors (Session Type)
 
@@ -180,7 +148,7 @@ Session type is auto-classified from journal text keywords:
 | Research / Analysis | Orange | research, analysis, audit, skill |
 | General / Mixed | Gray | fallback |
 
-
+---
 
 ## Interaction Model
 
@@ -194,7 +162,7 @@ Session type is auto-classified from journal text keywords:
 | Scroll / drag background | Zoom and pan |
 | Drag node | Temporarily fix position; releases on mouse-up |
 
-
+---
 
 ## Flow Dot Animation
 
@@ -216,7 +184,30 @@ journal / general: 0
 
 Higher tier = upstream. Ties broken by access count.
 
+---
 
+## Security
+
+The API route that serves graph data (`app/api/brain-map/graph/route.ts`) has optional access control built in.
+
+Set the `BRAIN_MAP_SECRET` environment variable to restrict access:
+
+```bash
+# In your .env.local or deployment environment
+BRAIN_MAP_SECRET=your-secret-key-here
+```
+
+Then pass the key in requests from your component:
+
+```typescript
+fetch('/api/brain-map/graph', {
+  headers: { 'x-brain-map-key': process.env.NEXT_PUBLIC_BRAIN_MAP_SECRET }
+})
+```
+
+If `BRAIN_MAP_SECRET` is not set, the route is open — suitable for localhost development only. For any networked deployment, set the secret.
+
+---
 
 ## Known Limitations
 
@@ -224,7 +215,7 @@ Higher tier = upstream. Ties broken by access count.
 - Graph rebuilds are not real-time; run the parser script to refresh.
 - Reader panel (double-click to open file) requires a `/api/read-file` endpoint in your host app.
 
-
+---
 
 ## References
 
@@ -232,7 +223,7 @@ Higher tier = upstream. Ties broken by access count.
 - `references/component.md` — Full `BrainMapGraph.tsx` React + D3 component
 - `references/graph-schema.md` — Graph JSON spec + Next.js API route
 
-
+---
 
 ## License
 
