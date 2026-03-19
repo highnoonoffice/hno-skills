@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.1.3
-description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, OpenClaw cron scheduling, bulk draft audit/publish patterns, backdating posts, setting feature images from body images, Content API for client-side search, and hard-won API pitfalls. One advanced workflow (writing site-wide code injection / header settings) requires a browser session fetch against the Ghost Admin UI because the Admin API integration token does not have permission to write settings — this is explicitly documented and only used when the user has an active Ghost Admin browser session.
+version: 1.1.5
+description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, OpenClaw cron scheduling, bulk draft audit/publish patterns, backdating posts, setting feature images from body images, and Content API for client-side search. All workflows use the Ghost Admin API exclusively via JWT authentication.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -11,13 +11,6 @@ credentials:
 binaries:
   - node
   - curl
-capabilities:
-  - ghost-admin-api
-  - browser-session-fetch
-browser_access:
-  description: "One workflow (site settings / code injection) uses a browser session fetch() call within an already-authenticated Ghost Admin tab. This is required because Ghost's Admin API integration tokens cannot write site settings — it is an intentional Ghost permission boundary. No external sites are contacted. The browser must already be logged into Ghost Admin for this to work."
-  scope: ghost-admin-ui-only
-  required_for: code-injection-workflow-only
 license: MIT
 metadata:
 ---
@@ -66,27 +59,17 @@ The skill never stores credentials beyond the file you configure. No external ca
 ---
 
 
-## What This Skill Won't Do (Via API Token)
+## What This Skill Won't Do
 
-Ghost's Admin API integration tokens cannot access certain owner-level operations. These require either manual action or the browser session fallback documented below:
+Ghost's Admin API integration tokens cannot access certain owner-level operations. These require manual action in Ghost Admin:
 
 - **Theme uploads** — requires owner authentication in Ghost Admin UI
 - **Staff management and billing** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
 
-If you hit a `NoPermissionError` on settings endpoints, that is expected Ghost behavior — not a bug.
+If you hit a `NoPermissionError` on these endpoints, that is expected Ghost behavior — not a bug.
 
-## Browser Session Fallback (Code Injection / Site Settings)
 
-For writing site-wide code injection or header/footer settings, this skill documents a browser session approach as a fallback — because Ghost's API deliberately blocks integration tokens from these endpoints.
-
-**What it does:** Executes a `fetch()` call from within an already-authenticated Ghost Admin browser tab. This writes settings the same way Ghost's own UI does, using your existing login session.
-
-**Scope:** Only contacts your own Ghost instance (`your-site.ghost.io`). No external services. No credentials are transmitted — it reuses the session cookie already present in your browser.
-
-**When it applies:** Only the code injection / site settings workflow. All publishing, post management, image upload, and newsletter workflows use the standard Admin API token exclusively.
-
-This behavior is fully disclosed here and in the front matter `browser_access` field.
 
 
 ---
