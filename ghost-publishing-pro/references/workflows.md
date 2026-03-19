@@ -43,6 +43,13 @@ This single integration token covers the full publishing workflow: post creation
 - Node.js script to parse and batch import
 
 **The migration script pattern (Node.js):**
+
+This workflow requires one third-party npm package. Install it before running:
+
+```bash
+npm install fast-xml-parser
+```
+
 ```js
 const { XMLParser } = require('fast-xml-parser');
 // Parse items from channel.item array

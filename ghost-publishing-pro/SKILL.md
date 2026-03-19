@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.1.0
+version: 1.1.1
 description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, OpenClaw cron scheduling, bulk draft audit/publish patterns, backdating posts, setting feature images from body images, Content API for client-side search, and hard-won API pitfalls including the Private Network Access gotcha for external script tags.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -22,6 +22,22 @@ A full Ghost CMS publishing skill built from real production use — not a gener
 This contains proven workflows, hard-won pitfalls, and patterns from actually running a Ghost Pro newsletter and migrating an entire Squarespace blog in an afternoon.
 
 **Built by:** Joseph Voelbel
+
+
+---
+
+
+## Dependencies
+
+Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
+
+The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
+
+```bash
+npm install fast-xml-parser
+```
+
+Install this only if you are running a migration script. All other workflows (publish, update, schedule, image upload, analytics) require no third-party packages.
 
 
 ---
@@ -239,3 +255,5 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - External script tag in code injection pointing to a LAN hostname (e.g. `hno-mac-mini.local`) will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline.
 - `PUT /admin/settings/` always returns `403` with integration tokens — site settings require owner access in Ghost Admin
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
+- **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and Ghost renders the literal string `undefined` instead of the post body. Same applies to any other HTML helper output.
+- **Custom excerpts drive search** — Ghost's Content API `fields=excerpt` returns the custom excerpt, not body text. If a post needs to surface in client-side search for a keyword, that keyword must appear in the custom excerpt. Set it explicitly on every post; don't rely on auto-generated excerpts for searchability.

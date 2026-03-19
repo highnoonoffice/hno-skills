@@ -158,6 +158,121 @@ for (const post of posts) {
 
 ---
 
+## Backdate a post on publish
+
+Set `published_at` to any past date in the same PUT call:
+
+```json
+{
+  "posts": [{
+    "id": "post-id",
+    "status": "published",
+    "published_at": "2023-07-12T12:00:00.000Z",
+    "updated_at": "{fresh-updated_at}"
+  }]
+}
+```
+
+This prevents the post from surfacing as "new" on the site. Always fetch a fresh `updated_at` immediately before the PUT.
+
+---
+
+## Set feature image from body image
+
+```json
+{ "feature_image": "https://your-site.ghost.io/content/images/2026/02/image.jpg" }
+```
+
+Include in the same PUT call as status/published_at. No separate upload step needed if the image already exists in Ghost's content store.
+
+---
+
+## Bulk draft audit
+
+Fetch all drafts with HTML for content review:
+
+```
+GET /posts/?limit=all&filter=status:draft&fields=id,title,slug,published_at,created_at,updated_at,html
+```
+
+Note: `tags` is NOT a valid `fields` param — use `&include=tags` as a separate param if you need tag data.
+
+---
+
+## Content API (public — read-only)
+
+For client-side JS (e.g., homepage search), use the public Content API instead of Admin JWT:
+
+**Key location:** Embedded in your site's HTML source — look for `data-key=` in script tags.
+
+```bash
+curl "https://your-site.ghost.io/ghost/api/content/posts/?key=YOUR_KEY&limit=all&fields=title,slug,excerpt,feature_image"
+```
+
+Safe to use in browser JS — read-only, published posts only. No JWT needed.
+Do NOT use the Admin key in client-side code.
+
+---
+
+## Permission walls — do not re-attempt via API
+
+These operations require owner-level access (browser only):
+
+| Operation | Why blocked | Workaround |
+|-----------|------------|------------|
+| `PUT /admin/settings/` (code injection) | Integration tokens read-only on settings | Browser + CM6 dispatch pattern |
+| `GET /admin/integrations/` | Integration tokens cannot list integrations | Extract Content key from site HTML source |
+
+---
+
+## Code injection via browser (CM6 pattern)
+
+Ghost's code injection panel uses CodeMirror 6. Standard DOM input manipulation doesn't work.
+
+Navigate to: `https://your-site.ghost.io/ghost/#/settings/code-injection`
+Click the "Code injection" list item in the left nav, then click "Site footer" tab.
+
+```js
+// Read current value
+const view = document.querySelector('.cm-content').cmView.view;
+const current = view.state.doc.toString();
+
+// Replace entire content
+view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: newContent } });
+
+// Append to end
+const len = view.state.doc.length;
+view.dispatch({ changes: { from: len, insert: appendedContent } });
+```
+
+Then click the Save button.
+
+---
+
+## Homepage search bar pattern
+
+For client-side search across all published posts — inject into Ghost Site footer:
+
+```html
+<script>
+(function(){
+  var KEY='your-content-api-key';
+  var GHOST='https://your-site.ghost.io';
+  // Lazy-load all posts on first input focus
+  // Filter client-side on every keystroke
+  // Place above .site-title using insertBefore
+})();
+</script>
+```
+
+Key points:
+- Use Content API key (safe for client-side), not Admin key
+- Do NOT use an external script tag pointing to a LAN/private hostname — browsers block it (mixed content + Private Network Access policy)
+- All CSS/JS must be inline in the code injection block
+- Placement: `title.parentNode.insertBefore(wrap, title)` inserts ABOVE the site title
+
+---
+
 ## Error codes
 
 - `401` — expired/invalid token (regenerate)
@@ -165,3 +280,4 @@ for (const post of posts) {
 - `409` — `updated_at` mismatch on PUT (re-fetch and retry)
 - `422` — validation error (check required fields, HTML validity)
 - `429` — rate limited (add delays between calls)
+- `403 NoPermissionError` on settings write — integration token limitation, use browser fallback
