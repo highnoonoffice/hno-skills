@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.0.6
-description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, and OpenClaw cron scheduling. Includes Ghost's two-tier API permission model, site header customization patterns, browser-based fallbacks for owner-only operations, hard-won API pitfalls, bulk draft audit/publish patterns, backdating posts, setting feature images from body images, Content API for client-side search, code injection via CM6 browser pattern, and the Private Network Access gotcha for external script tags.
+version: 1.1.0
+description: Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper. Covers the full publishing stack: publish + send newsletter in one API call, migrate from Squarespace/WordPress/Substack, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, OpenClaw cron scheduling, bulk draft audit/publish patterns, backdating posts, setting feature images from body images, Content API for client-side search, and hard-won API pitfalls including the Private Network Access gotcha for external script tags.
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -11,9 +11,6 @@ credentials:
   - name: GHOST_ADMIN_KEY
     description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations
     required: true
-  - name: credentials_file
-    description: "Path to JSON credentials file — default: ~/.openclaw/credentials/ghost-admin.json"
-    required: false
 license: MIT
 metadata:
 ---
@@ -38,11 +35,23 @@ This skill uses Ghost's Admin API. Here's exactly what it does with your credent
 
 **Writes:** Creates and updates posts, uploads images, schedules content, sends newsletters.
 
-**Cannot do without owner-level access:** Theme uploads, staff management, billing, site settings.
-
-**Recommended setup:** Create a dedicated integration key (Settings > Integrations) — this covers 80% of workflows with minimal scope. The sub-admin path (documented below) unlocks the remaining 20% when full workflow automation is needed.
+**Recommended setup:** Create a dedicated integration key (Settings > Integrations > Add custom integration > Admin API Key). This covers the full publishing workflow with minimal scope.
 
 The skill never stores credentials beyond the file you configure. No external calls outside your Ghost instance.
+
+
+---
+
+
+## What This Skill Won't Do
+
+Ghost's Admin API covers the full publishing workflow but does not expose certain owner-level operations via API. These require manual action in Ghost Admin:
+
+- **Theme uploads** — requires owner authentication in the Ghost Admin UI
+- **Site settings changes** (branding, navigation, code injection) — owner-only via Admin UI
+- **Staff management and billing** — owner-only
+
+If you hit a `NoPermissionError` on these endpoints, that's expected behavior — they are not available to integration tokens by design.
 
 
 ---
@@ -65,28 +74,9 @@ Read it in any operation with:
 cat ~/.openclaw/credentials/ghost-admin.json
 ```
 
-
----
-
-
-## Two Access Paths
-
-### Path 1 — Integration Token (Recommended)
-
 Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
 Covers: all post operations, image uploads, scheduling, newsletters, analytics, batch updates.
-
-This is the right starting point for most agent workflows.
-
-
-### Path 2 — Sub-Admin Account (Full Workflow)
-
-For operations the API handles awkwardly (Lexical card insertions, visual tweaks, manual newsletter resend), create a dedicated agent email (e.g., ProtonMail) and invite it as a Ghost admin under Settings > Staff > Invite people.
-
-Why this is more secure than using your owner account: the agent account is isolated and fully revocable. Your owner credentials stay separate. If you ever need to cut access, remove the agent staff account — owner account is untouched.
-
-**Browser automation note:** Some operations require Ghost's admin UI rather than the API (theme uploads, settings changes). When needed, this skill uses OpenClaw's built-in `browser` tool to interact with the Ghost admin interface. See Workflow 14 in `references/workflows.md` for which operations fall into each category.
 
 
 ---
@@ -220,16 +210,6 @@ Always use `?source=html` in the request URL. Ghost accepts raw HTML in the `htm
 ---
 
 
-## Full Automation Setup
-
-See `references/workflows.md` > Workflow 14 for the complete guide to automated Ghost operations, including:
-
-- Ghost's two-tier permission model (integration token vs. owner-level)
-- Five documented API limits with root causes and solutions
-- Site header customization as an alternative when theme uploads aren't available
-- Known API field behaviors (`?source=html`, Lexical vs HTML, `updated_at` locking)
-
-
 ## Migration Workflows
 
 See `references/workflows.md` for full migration playbooks:
@@ -256,6 +236,6 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - Rate limiting — add 500ms delay between calls in batch scripts
 - Token expired mid-batch — regenerate every 50 posts in long operations
 - `tags` in `fields` param causes `400 BadRequestError` — use `&include=tags` instead
-- External script tag in code injection pointing to LAN hostname (e.g. `hno-mac-mini.local`) will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline.
-- `PUT /admin/settings/` always returns `403` with integration tokens — code injection requires browser automation
+- External script tag in code injection pointing to a LAN hostname (e.g. `hno-mac-mini.local`) will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline.
+- `PUT /admin/settings/` always returns `403` with integration tokens — site settings require owner access in Ghost Admin
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
