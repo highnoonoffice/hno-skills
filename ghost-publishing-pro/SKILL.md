@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.3
+version: 1.2.4
 description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -252,7 +252,7 @@ See `references/workflows.md` for full migration playbooks:
 - Batch feature image updates
 - DOCX > book-style Ghost posts with YouTube embeds
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
-- Theme upload and activation via API (no Ghost Admin UI required)
+- Theme management (JWT upload where supported; Ghost Admin fallback)
 
 
 ## API Reference
