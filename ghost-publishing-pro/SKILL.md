@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.2
+version: 1.2.3
 description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -61,6 +61,27 @@ The skill never stores credentials beyond the file you configure. No external ca
 
 ---
 
+
+## Security Model
+
+This skill is designed around minimal-scope credential use. Here's exactly how credential access is scoped and why it's safe:
+
+**Use a dedicated integration key, not your owner credentials.** Ghost Admin → Settings → Integrations → Add custom integration → copy the Admin API Key. This key is isolated to the integration, fully revocable, and scoped to post/image/member operations — your owner account is never exposed.
+
+**The credentials file is read-only at runtime.** The skill reads `~/.openclaw/credentials/ghost-admin.json` to generate a short-lived JWT (5-minute expiry). Nothing is written back to the file. Tokens are captured to shell variables, never logged or persisted.
+
+**No external calls outside your Ghost instance.** Every API call targets your Ghost domain only. No third-party services, no telemetry, no data leaves your site.
+
+**Revocation is instant.** If you need to cut access, delete the integration in Ghost Admin → Settings → Integrations. All tokens derived from that key immediately stop working.
+
+**Recommended credential file permissions:**
+```bash
+chmod 600 ~/.openclaw/credentials/ghost-admin.json
+```
+
+Keep the file out of shared folders and version control.
+
+---
 
 ## What This Skill Won't Do
 
