@@ -1,16 +1,19 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.0
-description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No browser automation. No external calls outside your Ghost instance."
+version: 1.2.2
+description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
-  - name: ghost-admin.json
-    description: "JSON credentials file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format from Ghost Admin > Settings > Integrations)"
+  - name: GHOST_ADMIN_URL
+    description: Your Ghost site URL (e.g. https://your-site.ghost.io)
     required: true
-binaries:
-  - node
-  - curl
+  - name: GHOST_ADMIN_KEY
+    description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration
+    required: true
+  - name: credentials_file
+    description: "Path to JSON credentials file containing url and key — default: ~/.openclaw/credentials/ghost-admin.json"
+    required: false
 license: MIT
 metadata:
 ---
@@ -105,24 +108,11 @@ Covers: all post operations, image uploads, scheduling, newsletters, analytics, 
 
 Ghost uses short-lived JWT tokens. Generate one before every API call — they expire in 5 minutes.
 
-**Pure Node.js — no npm required:**
+**Pure Node.js — no npm required.**
 
-```bash
-node -e "
-const crypto=require('crypto');
-const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
-const [id,secret]=creds.key.split(':');
-const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
-const n=Math.floor(Date.now()/1000);
-const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(h+'.'+p+'.'+s);
-"
-# Capture separately — never print token and URL together
-GHOST_URL=$(node -e "const c=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));console.log(c.url);")
-```
+Token generation uses Node.js built-ins (`crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
 
-Use `Authorization: Ghost {token}` on all requests.
+Tokens expire in 5 minutes. Regenerate before each API call or every 50 posts in batch operations.
 
 
 ---
