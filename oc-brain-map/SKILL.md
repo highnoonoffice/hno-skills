@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 2.5.0
-description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node — discovered via filesystem scan, so nothing is invisible. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Rebuild the graph on demand from Mission Control. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
+version: 2.5.1
+description: "Visualize your OpenClaw's cognition as a live, interactive, force-directed graph. Every markdown file in your workspace is a node. The closer to center, the more often it gets accessed. Moving dots show information flow: upstream files feed downstream ones. Watch cognition happen. Built on D3.js + React. Zero vertical specificity."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -188,9 +188,13 @@ Higher tier = upstream. Ties broken by access count.
 
 ## Security
 
-The API route that serves graph data (`app/api/brain-map/graph/route.ts`) has optional access control built in.
+**Scope:** This skill reads markdown files in your vault directory and session journals to build a graph. It writes one JSON file (`brain-map-graph.json`) as output. No network calls are made beyond fetching the graph data from your own API route. No credentials are requested, stored, or transmitted.
 
-Set the `BRAIN_MAP_SECRET` environment variable to restrict access:
+**Tooltip rendering:** The interactive graph component renders tooltips as structured React elements (filename, group, session counts). No `dangerouslySetInnerHTML` or raw HTML injection is used anywhere in the component.
+
+**Filesystem access:** The journal parser script (`references/journal-parser.md`) reads `.md` files recursively under your configured vault directory. It writes one output file. The read scope is intentional — this is what builds the graph. Run it only from a trusted working directory.
+
+**API access control:** The route that serves graph data (`app/api/brain-map/graph/route.ts`) supports optional token-based access control via environment variable:
 
 ```bash
 # In your .env.local or deployment environment
@@ -209,35 +213,10 @@ If `BRAIN_MAP_SECRET` is not set, the route is open — suitable for localhost d
 
 ---
 
-## Rebuild On Demand
-
-Add a POST endpoint at `app/api/brain-map/rebuild/route.ts` in your dashboard app that runs the parser script and returns fresh stats:
-
-```typescript
-// POST /api/brain-map/rebuild
-// Runs build-brain-map.js, returns { ok, nodeCount, edgeCount, sessionCount, meta }
-```
-
-Wire a "↺ Rebuild" button in your UI to POST to this endpoint. The graph rebuilds in ~5 seconds and the component re-fetches the fresh data automatically. See `references/component.md` for the full button implementation with spinner state and status feedback.
-
-## Improving Edge Quality Over Time
-
-Filesystem scan gives you all nodes. Meaningful edges require explicit file tracking in session journals.
-
-Add a `--files` flag to your journal writer script and use it every session:
-
-```bash
-node scripts/journal-writer.js \
-  --summary "What we worked on" \
-  --files "memory/working.md,memory/ghost-publishing.md,AGENTS.md"
-```
-
-Every `.md` file you read or write in a session should be in that list. The co-access graph is only as rich as this data — files that never appear together in journals will have no edges between them even if you access them constantly.
-
 ## Known Limitations
 
-- Edge quality depends on explicit file tracking in journals — the `--files` flag pattern above is the fix.
-- Graph rebuilds are not real-time; trigger via the rebuild button or run the parser script manually.
+- Journal summaries reference files inconsistently — graph data improves naturally as journaling explicitly names files.
+- Graph rebuilds are not real-time; run the parser script to refresh.
 - Reader panel (double-click to open file) requires a `/api/read-file` endpoint in your host app.
 
 ---

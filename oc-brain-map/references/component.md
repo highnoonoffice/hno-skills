@@ -79,7 +79,7 @@ export default function BrainMapGraph() {
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; html: string } | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; title: string; rows: { label: string; value: string }[]; hint?: string } | null>(null);
   const [focusNode, setFocusNode] = useState<string | null>(null);
   const lastClickRef = useRef<string | null>(null);
   const simRef = useRef<d3.Simulation<Node, Edge> | null>(null);
@@ -191,7 +191,12 @@ export default function BrainMapGraph() {
         setTooltip({
           x: event.pageX + 12,
           y: event.pageY - 28,
-          html: `<strong>${d.id}</strong><br/>Group: ${d.group}<br/>Sessions: ${d.accessCount}<br/><em>Click to focus · Click again to open</em>`,
+          title: d.id,
+          rows: [
+            { label: 'Group', value: d.group },
+            { label: 'Sessions', value: String(d.accessCount) },
+          ],
+          hint: 'Click to focus · Click again to open',
         });
       })
       .on('mousemove', (event) => {
@@ -222,7 +227,12 @@ export default function BrainMapGraph() {
         setTooltip({
           x: event.pageX + 12,
           y: event.pageY - 28,
-          html: `<strong>${src}</strong> → <strong>${tgt}</strong><br/>Type: ${d.sessionType}<br/>Co-access: ${(d as any).weight}×<br/>Sessions: ${d.sessions.slice(0, 3).join(', ')}${d.sessions.length > 3 ? '…' : ''}`,
+          title: `${src} → ${tgt}`,
+          rows: [
+            { label: 'Type', value: d.sessionType },
+            { label: 'Co-access', value: `${(d as any).weight}×` },
+            { label: 'Sessions', value: d.sessions.slice(0, 3).join(', ') + (d.sessions.length > 3 ? '…' : '') },
+          ],
         });
       })
       .on('mousemove', (event) => {
@@ -372,8 +382,13 @@ export default function BrainMapGraph() {
         <div
           className="fixed z-50 pointer-events-none bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded px-2 py-1.5 max-w-xs shadow-lg"
           style={{ left: tooltip.x, top: tooltip.y }}
-          dangerouslySetInnerHTML={{ __html: tooltip.html }}
-        />
+        >
+          <div className="font-semibold mb-1">{tooltip.title}</div>
+          {tooltip.rows.map(r => (
+            <div key={r.label}>{r.label}: {r.value}</div>
+          ))}
+          {tooltip.hint && <div className="mt-1 italic text-gray-400">{tooltip.hint}</div>}
+        </div>
       )}
     </div>
   );
@@ -386,7 +401,7 @@ export default function BrainMapGraph() {
 
 - The component fetches `/api/brain-map/graph` on mount. Ensure the API route is wired (see `references/graph-schema.md`).
 - The `brain-map:open-file` custom event fires on second-click. Wire a listener in your host page to handle file reading if you have a reader panel.
-- Tooltip uses `dangerouslySetInnerHTML` — content is generated internally, not from user input. Safe.
+- Tooltip renders structured data (title, label/value rows, optional hint) as discrete React elements — no `dangerouslySetInnerHTML`, no raw HTML injection.
 - Flow dot animation uses `requestAnimationFrame` and cleans up on unmount via the returned function from `useEffect`.
 - The component is fully self-contained — no external state, no context dependencies.
 
