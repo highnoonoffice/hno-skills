@@ -219,32 +219,24 @@ Do NOT use the Admin key in client-side code.
 
 ## Themes
 
-### Upload theme
-`POST /themes/upload/` (multipart/form-data)
+Theme upload and activation requires owner-level access. Use Ghost Admin → Design → Upload theme for reliable deployment.
 
-Requires session cookie auth (Staff Access Token), not a standard integration JWT. See Workflow 15 in `references/workflows.md` for the full authentication + deploy pattern.
+On newer Ghost Pro versions, the Admin API may accept theme upload via standard JWT:
 
 ```bash
+# Test JWT theme upload — works on some Ghost Pro versions
 curl -s -X POST "{url}/ghost/api/admin/themes/upload/" \
-  -b ~/ghost-session.txt -c ~/ghost-session.txt \
-  -H "Origin: {url}" \
+  -H "Authorization: Ghost {token}" \
   -F "file=@/path/to/theme.zip"
 ```
 
-Returns theme name + package metadata. Theme `name` in `package.json` is used as the identifier.
-
-### Activate theme
-`PUT /themes/{theme-name}/activate/`
-
+If it returns `200` — JWT works, activate with:
 ```bash
 curl -s -X PUT "{url}/ghost/api/admin/themes/{theme-name}/activate/" \
-  -b ~/ghost-session.txt -c ~/ghost-session.txt \
-  -H "Origin: {url}"
+  -H "Authorization: Ghost {token}"
 ```
 
-Returns theme object with `"active": true` on success.
-
-**Ghost Pro note:** Newer Ghost Pro versions may accept standard JWT (`Authorization: Ghost {token}`) on theme endpoints. Test JWT first — fall back to session cookie if you get `403`.
+If `403` — use Ghost Admin directly.
 
 ---
 
