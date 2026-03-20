@@ -214,9 +214,40 @@ Do NOT use the Admin key in client-side code.
 
 ---
 
+## Themes
+
+### Upload theme
+`POST /themes/upload/` (multipart/form-data)
+
+Requires session cookie auth (Staff Access Token), not a standard integration JWT. See Workflow 15 in `references/workflows.md` for the full authentication + deploy pattern.
+
+```bash
+curl -s -X POST "{url}/ghost/api/admin/themes/upload/" \
+  -b ~/ghost-session.txt -c ~/ghost-session.txt \
+  -H "Origin: {url}" \
+  -F "file=@/path/to/theme.zip"
+```
+
+Returns theme name + package metadata. Theme `name` in `package.json` is used as the identifier.
+
+### Activate theme
+`PUT /themes/{theme-name}/activate/`
+
+```bash
+curl -s -X PUT "{url}/ghost/api/admin/themes/{theme-name}/activate/" \
+  -b ~/ghost-session.txt -c ~/ghost-session.txt \
+  -H "Origin: {url}"
+```
+
+Returns theme object with `"active": true` on success.
+
+**Ghost Pro note:** Newer Ghost Pro versions may accept standard JWT (`Authorization: Ghost {token}`) on theme endpoints. Test JWT first — fall back to session cookie if you get `403`.
+
+---
+
 ## Permission walls — do not re-attempt via API
 
-These operations require owner-level access (browser only):
+These operations require owner-level access and have no API workaround:
 
 | Operation | Why blocked | Workaround |
 |-----------|------------|------------|

@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.1.6
-description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No browser automation. No external calls outside your Ghost instance."
+version: 1.2.0
+description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No browser automation. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -61,13 +61,14 @@ The skill never stores credentials beyond the file you configure. No external ca
 
 ## What This Skill Won't Do
 
-Ghost's Admin API integration tokens cannot access certain owner-level operations. These require manual action in Ghost Admin:
+Ghost's Admin API integration tokens cannot access certain owner-level operations:
 
-- **Theme uploads** — requires owner authentication in Ghost Admin UI
 - **Staff management and billing** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
 
-If you hit a `NoPermissionError` on these endpoints, that is expected Ghost behavior — not a bug.
+Theme management (upload + activation) is fully supported via the Admin API — see Workflow 15 below.
+
+If you hit a `NoPermissionError` on settings write endpoints, that is expected Ghost behavior — not a bug.
 
 
 
@@ -237,6 +238,8 @@ See `references/workflows.md` for full migration playbooks:
 - Substack CSV + HTML migration
 - Batch feature image updates
 - DOCX > book-style Ghost posts with YouTube embeds
+- Native audio card embedding (upload MP3, embed as Ghost audio card)
+- Theme upload and activation via API (no Ghost Admin UI required)
 
 
 ## API Reference
@@ -254,7 +257,7 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - Rate limiting — add 500ms delay between calls in batch scripts
 - Token expired mid-batch — regenerate every 50 posts in long operations
 - `tags` in `fields` param causes `400 BadRequestError` — use `&include=tags` instead
-- External script tag in code injection pointing to a LAN hostname (e.g. `hno-mac-mini.local`) will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline.
+- External script tag in code injection pointing to a local/LAN hostname will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline in the code injection block.
 - `PUT /admin/settings/` always returns `403` with integration tokens — site settings require owner access in Ghost Admin
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
 - **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and Ghost renders the literal string `undefined` instead of the post body. Same applies to any other HTML helper output.

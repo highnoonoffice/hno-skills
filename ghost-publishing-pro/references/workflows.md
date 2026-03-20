@@ -582,3 +582,247 @@ Keep separate publishing logs per site in memory:
 - Last published: 2026-03-10
 ```
 
+
+---
+
+## Workflow 14: Native Audio Card Embedding
+
+Use case: Add a playable audio file to any Ghost post — audiobook chapters, podcast episodes, spoken-word articles. Ghost renders this as a native audio card with a built-in player.
+
+This is a two-step process: upload the audio file to Ghost's media store, then embed the returned URL as a `kg-audio-card` HTML block.
+
+**Step 1: Upload the audio file**
+
+Ghost's `/images/upload/` endpoint accepts audio files (MP3, M4A, OGG, WAV). The `purpose=image` field is correct even for audio — that's the only accepted value.
+
+```bash
+curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
+  -H "Authorization: Ghost {token}" \
+  -F "file=@/path/to/audio.mp3" \
+  -F "purpose=image"
+```
+
+Returns:
+```json
+{ "images": [{ "url": "https://your-site.ghost.io/content/media/2026/03/audio-file.mp3" }] }
+```
+
+**Step 2: Embed as a Ghost audio card**
+
+Use the `kg-audio-card` card format in your post HTML. Ghost renders this as its native player — play/pause, seek bar, duration.
+
+```html
+<div class="kg-card kg-audio-card">
+  <audio src="AUDIO_URL" preload="metadata"></audio>
+  <div class="kg-audio-card-container">
+    <div class="kg-audio-title">YOUR AUDIO TITLE</div>
+    <div class="kg-audio-player-container">
+      <button class="kg-audio-play-icon" aria-label="Play audio">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="kg-audio-current-time">0:00</div>
+      <div class="kg-audio-time"> / <span class="kg-audio-duration"></span></div>
+      <input type="range" class="kg-audio-seek-bar" value="0" max="100">
+      <button class="kg-audio-playback-rate">1&#215;</button>
+      <button class="kg-audio-unmute-icon" aria-label="Mute">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      </button>
+      <input type="range" class="kg-audio-volume-bar" value="100" max="100">
+    </div>
+  </div>
+</div>
+```
+
+Replace `AUDIO_URL` with the URL returned in Step 1, and `YOUR AUDIO TITLE` with the display title for the player.
+
+**Step 3: Include in the post HTML**
+
+Add the audio card anywhere in your post's `html` field — top of article, after intro paragraph, wherever it belongs:
+
+```bash
+# Create or update a post with audio embedded
+curl -s -X PUT "{url}/ghost/api/admin/posts/{post_id}/?source=html" \
+  -H "Authorization: Ghost {token}" \
+  -H "Content-Type: application/json" \
+  -d "{\"posts\":[{\"html\":\"<p>Listen to this article:</p>\n\nAUDIO_CARD_HTML\n\n<p>Article body continues here.</p>\",\"updated_at\":\"FETCHED_UPDATED_AT\"}]}"
+```
+
+**Email behavior:** The native Ghost audio card is stripped in email delivery — subscribers see plain text where the player was. If audio is essential to your article, add a fallback line before the card: `<p><em>(Audio version below — web readers only.)</em></p>`
+
+**Format notes:**
+- MP3 is the most broadly supported format — use it by default
+- Ghost does not transcode uploads — upload in the format you want served
+- File size: Ghost Pro has a 100MB upload limit
+- The audio card title field is display-only; it doesn't affect SEO or post metadata
+
+---
+
+## Workflow 15: Theme Upload and Activation via API
+
+Use case: Deploy a custom Ghost theme entirely from the command line — no Ghost Admin UI required. Upload a `.zip` file and activate it in two API calls.
+
+Both endpoints require a **Staff Access Token** (owner-level session token), NOT a standard integration key. Integration keys return `403` on theme endpoints.
+
+**Getting a Staff Access Token:**
+
+The Staff Access Token is available in your Ghost Admin session. The cleanest programmatic path is a session login via the Admin API, which returns a session cookie used for subsequent requests.
+
+```bash
+# Authenticate — Ghost sets a session cookie in the cookie jar file
+curl -s -X POST "{url}/ghost/api/admin/session/" \
+  -H "Content-Type: application/json" \
+  -H "Origin: {url}" \
+  -d '{"username":"your-ghost-admin-email","password":"your-ghost-admin-password"}' \
+  -c ~/ghost-session.txt -b ~/ghost-session.txt
+```
+
+Store credentials in your credentials file, not inline. Load them in your script:
+```bash
+EMAIL=$(jq -r '.email' ~/.openclaw/credentials/ghost-admin.json)
+PASS=$(jq -r '.admin_password' ~/.openclaw/credentials/ghost-admin.json)
+```
+
+Once authenticated, subsequent requests use the cookie jar. No `Authorization` header needed — pass `-c ~/ghost-session.txt -b ~/ghost-session.txt` on every call. Clean up the cookie file after the deploy run.
+
+**Step 1: Upload the theme**
+
+Package your theme as a `.zip` file (the zip must contain your theme files at the root — `index.hbs`, `package.json`, `assets/`, etc.).
+
+```bash
+curl -s -X POST "{url}/ghost/api/admin/themes/upload/" \
+  -b ~/ghost-session.txt -c ~/ghost-session.txt \
+  -H "Origin: {url}" \
+  -F "file=@/path/to/your-theme.zip"
+```
+
+Returns the theme name (matches the `name` field in your theme's `package.json`).
+
+```json
+{
+  "themes": [{
+    "name": "your-theme-name",
+    "package": { "name": "your-theme-name", "version": "1.0.0" },
+    "active": false,
+    "templates": []
+  }]
+}
+```
+
+**Step 2: Activate the theme**
+
+```bash
+curl -s -X PUT "{url}/ghost/api/admin/themes/{theme-name}/activate/" \
+  -b ~/ghost-session.txt -c ~/ghost-session.txt \
+  -H "Origin: {url}"
+```
+
+Replace `{theme-name}` with the name returned in Step 1. Ghost activates the theme and returns the updated theme object with `"active": true`.
+
+**Full deploy script (Node.js — no npm required):**
+
+```js
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+// --- CONFIG ---
+// Load from credentials file — never hardcode credentials in scripts
+const creds = JSON.parse(fs.readFileSync(
+  path.join(process.env.HOME, '.openclaw/credentials/ghost-admin.json'), 'utf8'
+));
+const GHOST_URL = new URL(creds.url);
+const GHOST_HOST = GHOST_URL.hostname;
+const THEME_ZIP = process.env.THEME_ZIP || '/path/to/your-theme.zip';
+const THEME_NAME = process.env.THEME_NAME || 'your-theme-name'; // matches package.json name
+
+// --- GENERATE JWT ---
+const [keyId, keySecret] = creds.key.split(':');
+function makeToken() {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: keyId })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
+  const sig = crypto.createHmac('sha256', Buffer.from(keySecret, 'hex')).update(`${header}.${payload}`).digest('base64url');
+  return `${header}.${payload}.${sig}`;
+}
+
+// --- MULTIPART HELPER ---
+function buildMultipart(boundary, filePath) {
+  const filename = path.basename(filePath);
+  const fileData = fs.readFileSync(filePath);
+  const pre = Buffer.from(
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: application/zip\r\n\r\n`
+  );
+  const post = Buffer.from(`\r\n--${boundary}--\r\n`);
+  return Buffer.concat([pre, fileData, post]);
+}
+
+// --- HTTPS REQUEST HELPER ---
+function request(method, path, headers, body) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({ hostname: GHOST_HOST, path, method, headers }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, body: data }));
+    });
+    req.on('error', reject);
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
+async function deploy() {
+  const token = makeToken();
+
+  // Step 1: Upload theme
+  const boundary = `boundary${crypto.randomBytes(8).toString('hex')}`;
+  const body = buildMultipart(boundary, THEME_ZIP);
+  const uploadRes = await request(
+    'POST',
+    '/ghost/api/admin/themes/upload/',
+    {
+      'Authorization': `Ghost ${token}`,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      'Content-Length': body.length,
+      'Origin': creds.url,
+    },
+    body
+  );
+  console.log('Upload:', uploadRes.status, uploadRes.body);
+  if (uploadRes.status !== 201) throw new Error('Theme upload failed');
+
+  // Step 2: Activate theme
+  const activateRes = await request(
+    'PUT',
+    `/ghost/api/admin/themes/${THEME_NAME}/activate/`,
+    {
+      'Authorization': `Ghost ${makeToken()}`,
+      'Origin': creds.url,
+      'Content-Length': 0,
+    },
+    null
+  );
+  console.log('Activate:', activateRes.status, activateRes.body);
+  if (activateRes.status !== 200) throw new Error('Theme activation failed');
+
+  console.log('Theme deployed and activated.');
+}
+
+deploy().catch(err => { console.error(err.message); process.exit(1); });
+```
+
+**Pitfalls:**
+- Theme `name` in `package.json` must match exactly — Ghost uses this as the identifier in the activate endpoint
+- If the zip contains a top-level folder (e.g. `your-theme/index.hbs`), Ghost accepts it — the folder name becomes the theme name
+- The session cookie expires — don't cache it across sessions. Re-authenticate each deploy run.
+- Ghost validates the theme on upload. If Handlebars templates have errors, upload returns a `422` with a details array. Fix the errors and re-zip before retrying.
+- After activation, Ghost may take 30-60 seconds to fully propagate the new theme to the CDN. Hard-refresh to verify.
+
+**Integration API alternative (Ghost Pro):**
+Ghost Pro plans support Admin API theme upload via `Authorization: Ghost {jwt}` on newer versions. Test with:
+```bash
+curl -s -X POST "{url}/ghost/api/admin/themes/upload/" \
+  -H "Authorization: Ghost {token}" \
+  -F "file=@/path/to/theme.zip"
+```
+If it returns `200` — use JWT. If it returns `403` — fall back to the session cookie method above.
