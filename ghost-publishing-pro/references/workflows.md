@@ -551,8 +551,10 @@ const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('ba
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
 const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:site.url}));
+console.log(h+'.'+p+'.'+s);
 "
+# Read URL separately — never bundle token + URL in the same output
+GHOST_URL=$(node -e "const s=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-sites.json','utf8'));console.log(s.sites['primary'].url);")
 ```
 
 **Cross-post the same content to multiple sites:**
