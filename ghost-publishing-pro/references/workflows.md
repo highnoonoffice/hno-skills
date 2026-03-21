@@ -541,20 +541,18 @@ Running more than one Ghost site? Structure credentials and agent workflows to h
 Store at `~/.openclaw/credentials/ghost-sites.json`
 
 **Token generation per site:**
+
+Use the `scripts/ghost-token.js` pattern from `references/api.md`, pointing it at your multi-site credentials file. Read the token and URL as separate steps — never bundle them in a single output:
+
 ```bash
-node -e "
-const crypto=require('crypto');
-const sites=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-sites.json','utf8'));
-const site=sites.sites['primary']; // change to 'secondary' as needed
-const [id,secret]=site.key.split(':');
-const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
-const n=Math.floor(Date.now()/1000);
-const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(h+'.'+p+'.'+s);
-"
-# Read URL separately — never bundle token + URL in the same output
-GHOST_URL=$(node -e "const s=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-sites.json','utf8'));console.log(s.sites['primary'].url);")
+# Capture token only — no URL in same output
+TOKEN=$(node scripts/ghost-token.js --site primary)
+
+# Read URL separately from credentials
+GHOST_URL=$(node -e "
+const s=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-sites.json','utf8'));
+process.stdout.write(s.sites['primary'].url);
+")
 ```
 
 **Cross-post the same content to multiple sites:**

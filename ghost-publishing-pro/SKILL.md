@@ -1,21 +1,18 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.4
+version: 1.2.5
 description: "Ghost CMS publishing skill built from real production use on a Ghost Pro newsletter — not a generic API wrapper.\n\nCovers the full publishing stack via Ghost Admin API only: publish + send newsletter in one call, native audio card embedding, theme upload and activation, Squarespace/WordPress/Substack migration, book-style literary typography, YouTube embeds, batch updates, image uploads, SEO metadata, analytics, cron scheduling, bulk draft audit, backdating, and Content API for client-side search.\n\nAll workflows use JWT authentication. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
-  - name: GHOST_ADMIN_URL
-    description: Your Ghost site URL (e.g. https://your-site.ghost.io)
+  - name: ghost-admin.json
+    description: "JSON file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration)"
     required: true
-  - name: GHOST_ADMIN_KEY
-    description: Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration
-    required: true
-  - name: credentials_file
-    description: "Path to JSON credentials file containing url and key — default: ~/.openclaw/credentials/ghost-admin.json"
-    required: false
+binaries:
+  - node
+  - curl
 license: MIT
-metadata:
+metadata: ~
 ---
 
 # Ghost Publishing Pro
