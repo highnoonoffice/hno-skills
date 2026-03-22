@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.8
+version: 1.2.9
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -15,7 +15,7 @@ license: MIT
 metadata: ~
 ---
 
-# Publish to Ghost in One Command
+# Ghost Publishing Pro
 
 A full Ghost CMS publishing skill built from real production use — not a generic API wrapper.
 
