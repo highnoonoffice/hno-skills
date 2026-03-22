@@ -1,18 +1,18 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.6
+version: 1.2.7
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching.\n\nCovers drafts, newsletter sends, image uploads, backdating, batch updates, and full Squarespace/WordPress migration. Built from a live Ghost Pro newsletter, not a spec.\n\nAll workflows use JWT authentication. No browser automation. No external calls outside your Ghost instance."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
   - name: ghost-admin.json
-    description: "JSON credentials file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format from Ghost Admin > Settings > Integrations)"
+    description: "JSON file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration)"
     required: true
 binaries:
   - node
   - curl
 license: MIT
-metadata:
+metadata: ~
 ---
 
 # Publish to Ghost in One Command
@@ -59,15 +59,37 @@ The skill never stores credentials beyond the file you configure. No external ca
 ---
 
 
+## Security Model
+
+This skill is designed around minimal-scope credential use. Here's exactly how credential access is scoped and why it's safe:
+
+**Use a dedicated integration key, not your owner credentials.** Ghost Admin → Settings → Integrations → Add custom integration → copy the Admin API Key. This key is isolated to the integration, fully revocable, and scoped to post/image/member operations — your owner account is never exposed.
+
+**The credentials file is read-only at runtime.** The skill reads `~/.openclaw/credentials/ghost-admin.json` to generate a short-lived JWT (5-minute expiry). Nothing is written back to the file. Tokens are captured to shell variables, never logged or persisted.
+
+**No external calls outside your Ghost instance.** Every API call targets your Ghost domain only. No third-party services, no telemetry, no data leaves your site.
+
+**Revocation is instant.** If you need to cut access, delete the integration in Ghost Admin → Settings → Integrations. All tokens derived from that key immediately stop working.
+
+**Recommended credential file permissions:**
+```bash
+chmod 600 ~/.openclaw/credentials/ghost-admin.json
+```
+
+Keep the file out of shared folders and version control.
+
+---
+
 ## What This Skill Won't Do
 
-Ghost's Admin API integration tokens cannot access certain owner-level operations. These require manual action in Ghost Admin:
+Ghost's Admin API integration tokens cannot access certain owner-level operations:
 
-- **Theme uploads** — requires owner authentication in Ghost Admin UI
 - **Staff management and billing** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
 
-If you hit a `NoPermissionError` on these endpoints, that is expected Ghost behavior — not a bug.
+Theme management (upload + activation) is fully supported via the Admin API — see Workflow 15 below.
+
+If you hit a `NoPermissionError` on settings write endpoints, that is expected Ghost behavior — not a bug.
 
 
 
@@ -104,22 +126,11 @@ Covers: all post operations, image uploads, scheduling, newsletters, analytics, 
 
 Ghost uses short-lived JWT tokens. Generate one before every API call — they expire in 5 minutes.
 
-**Pure Node.js — no npm required:**
+**Pure Node.js — no npm required.**
 
-```bash
-node -e "
-const crypto=require('crypto');
-const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
-const [id,secret]=creds.key.split(':');
-const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
-const n=Math.floor(Date.now()/1000);
-const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
-"
-```
+Token generation uses Node.js built-ins (`crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
 
-Use `Authorization: Ghost {token}` on all requests.
+Tokens expire in 5 minutes. Regenerate before each API call or every 50 posts in batch operations.
 
 
 ---
@@ -237,6 +248,8 @@ See `references/workflows.md` for full migration playbooks:
 - Substack CSV + HTML migration
 - Batch feature image updates
 - DOCX > book-style Ghost posts with YouTube embeds
+- Native audio card embedding (upload MP3, embed as Ghost audio card)
+- Theme management (JWT upload where supported; Ghost Admin fallback)
 
 
 ## API Reference
@@ -254,7 +267,7 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - Rate limiting — add 500ms delay between calls in batch scripts
 - Token expired mid-batch — regenerate every 50 posts in long operations
 - `tags` in `fields` param causes `400 BadRequestError` — use `&include=tags` instead
-- External script tag in code injection pointing to a LAN hostname (e.g. `hno-mac-mini.local`) will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline.
+- External script tag in code injection pointing to a local/LAN hostname will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline in the code injection block.
 - `PUT /admin/settings/` always returns `403` with integration tokens — site settings require owner access in Ghost Admin
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
 - **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and Ghost renders the literal string `undefined` instead of the post body. Same applies to any other HTML helper output.
