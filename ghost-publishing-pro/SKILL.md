@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
 version: 1.2.7
-description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching.\n\nCovers drafts, newsletter sends, image uploads, backdating, batch updates, and full Squarespace/WordPress migration. Built from a live Ghost Pro newsletter, not a spec.\n\nAll workflows use JWT authentication. No browser automation. No external calls outside your Ghost instance."
+description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
