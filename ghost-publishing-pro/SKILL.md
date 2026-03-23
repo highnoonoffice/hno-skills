@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.2.9
+version: 1.3.0
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -86,6 +86,7 @@ Ghost's Admin API integration tokens cannot access certain owner-level operation
 
 - **Staff management and billing** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
+- **Redirects and routes files** — `GET/POST /ghost/api/admin/redirects/` returns `403` with integration tokens. Must upload via Ghost Admin → Settings → Labs → Beta features → Redirects upload button
 
 Theme management (upload + activation) is fully supported via the Admin API — see Workflow 15 below.
 
@@ -272,3 +273,6 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
 - **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and Ghost renders the literal string `undefined` instead of the post body. Same applies to any other HTML helper output.
 - **Custom excerpts drive search** — Ghost's Content API `fields=excerpt` returns the custom excerpt, not body text. If a post needs to surface in client-side search for a keyword, that keyword must appear in the custom excerpt. Set it explicitly on every post; don't rely on auto-generated excerpts for searchability.
+- **Links inside HTML cards in Lexical are double-escaped** — if a post contains an HTML card block, its content is stored as an escaped string inside the Lexical JSON. Regex patterns matching `"url":"..."` won't find those links. Use `json.dumps(lexical)` → string replace → `json.loads()` to safely find and replace any URL pattern, including those inside embedded HTML.
+- **Ghost's sitemap is always clean** — Ghost Pro auto-generates sitemaps using the configured site URL. No manual sitemap editing needed. If the site URL is set correctly, the sitemap output is correct.
+- **Squarespace migration leaves /blog/ links** — batch Squarespace imports preserve old internal link paths including the `/blog/` prefix. These pollute Google's index with redirect chains. After any Squarespace import, audit all posts for `/blog/` references in content and fix them via the API.
