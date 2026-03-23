@@ -5,7 +5,7 @@ description: "Visualize how attention moves across your agent's projects. Every 
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
-metadata:
+metadata: ~
 ---
 
 # Brain Map Visualizer
