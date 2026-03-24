@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.3.9
+version: 1.4.0
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -19,22 +19,9 @@ metadata: ~
 
 Ghost's Admin API does everything the CMS does — and more. This is the production-proven playbook for using it directly: publish posts, send newsletters, upload images, schedule content, and batch-update your entire site without opening a browser.
 
-### Before You Install
-
-Three requirements:
-- **Node.js** installed locally (`node --version` to verify)
-- **curl** installed (`curl --version` to verify — standard on macOS/Linux)
-- **Ghost Admin API key** stored at `~/.openclaw/credentials/ghost-admin.json`
-
-Start with Credentials Setup below if you're missing any of these.
-
-
----
-
-
 ## Dependencies
 
-Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
+This skill requires Node.js and curl as local dependencies. Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
@@ -92,12 +79,16 @@ Theme management (upload + activation) is fully supported via the Admin API — 
 If you hit a `NoPermissionError` on settings write endpoints, that is expected Ghost behavior — not a bug.
 
 
+
+
 ---
 
 
 ## Credentials Setup
 
-Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
+This skill requires a Ghost Admin API credentials file at `~/.openclaw/credentials/ghost-admin.json`.
+
+Create the file at `~/.openclaw/credentials/ghost-admin.json`:
 
 ```json
 {
