@@ -1,20 +1,35 @@
 ---
 name: ghost-publishing-pro
-version: 1.4.1
+version: 1.2.9
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
-license: MIT-0
+credentials:
+  - name: ghost-admin.json
+    description: "JSON file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration)"
+    required: true
+binaries:
+  - node
+  - curl
+license: MIT
 metadata: ~
 ---
 
 # Ghost Publishing Pro
 
-Ghost's Admin API does everything the CMS does — and more. This is the production-proven playbook for using it directly: publish posts, send newsletters, upload images, schedule content, and batch-update your entire site without opening a browser.
+A full Ghost CMS publishing skill built from real production use — not a generic API wrapper.
+
+This contains proven workflows, hard-won pitfalls, and patterns from actually running a Ghost Pro newsletter and migrating an entire Squarespace blog in an afternoon.
+
+**Built by:** Joseph Voelbel
+
+
+---
+
 
 ## Dependencies
 
-This skill requires Node.js and curl as local dependencies. Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
+Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
@@ -56,7 +71,12 @@ This skill is designed around minimal-scope credential use. Here's exactly how c
 
 **Revocation is instant.** If you need to cut access, delete the integration in Ghost Admin → Settings → Integrations. All tokens derived from that key immediately stop working.
 
-Keep the credentials file out of shared folders and version control. Restrict file permissions to owner-only read.
+**Recommended credential file permissions:**
+```bash
+chmod 600 ~/.openclaw/credentials/ghost-admin.json
+```
+
+Keep the file out of shared folders and version control.
 
 ---
 
@@ -79,15 +99,19 @@ If you hit a `NoPermissionError` on settings write endpoints, that is expected G
 
 ## Credentials Setup
 
-This skill requires a Ghost Admin API credentials file at `~/.openclaw/credentials/ghost-admin.json`.
-
-Create the file at `~/.openclaw/credentials/ghost-admin.json`:
+Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
 
 ```json
 {
   "url": "https://your-site.ghost.io",
   "key": "id:secret"
 }
+```
+
+Read it in any operation with:
+
+```bash
+cat ~/.openclaw/credentials/ghost-admin.json
 ```
 
 Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
@@ -248,7 +272,3 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
 - **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and Ghost renders the literal string `undefined` instead of the post body. Same applies to any other HTML helper output.
 - **Custom excerpts drive search** — Ghost's Content API `fields=excerpt` returns the custom excerpt, not body text. If a post needs to surface in client-side search for a keyword, that keyword must appear in the custom excerpt. Set it explicitly on every post; don't rely on auto-generated excerpts for searchability.
-
-### License
-
-MIT-0. Copyright (c) 2026 @highnoonoffice. No attribution required.
