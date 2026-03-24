@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 3.1.1
+version: 3.1.2
 description: "Visualize how attention moves across your agent's projects. Every markdown file is a node grouped by an Attention Pocket — an active focus area shaped by session history. First click reorbits the graph around that file's cognitive neighborhood. Second click opens the file. Built on D3.js + React. Local only."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -76,22 +76,10 @@ The reorbit model means clicking is never destructive to the current view. Proje
 
 ---
 
-## Feature List
-
-**Attention Centering**
-The graph layout reflects project-level attention allocation. Files that absorb more session activity in a given pocket are weighted toward the center of that pocket's cluster.
-
-**Reorbit Interaction**
-First click reorganizes the graph around the selected node's cognitive neighborhood. Second click opens the file. The distinction between exploring context (click one) and reading content (click two) is intentional.
-
-**Flow Visualization**
-Animated dots travel along edges showing attention movement — upstream files feeding downstream ones. Speed is proportional to co-access weight. Direction is determined by the upstream tier hierarchy (core identity files are always upstream).
-
-**Color-coded Attention Pockets**
-Six named pockets, each with a distinct color: Core Identity (gold), Memory (purple), Publishing (green), Infrastructure (blue), Skills (orange), General (gray).
+## Additional Features
 
 **Enhanced Tooltips**
-Node hover: file path, access count, Attention Pocket, number of co-access sessions. Edge hover: session type, source/target names, co-access count, session dates.
+Node hover: file path, access count, Attention Pocket, co-access session count. Edge hover: session type, source/target names, co-access count, session dates.
 
 **Edge Filter**
 Toggle minimum co-access weight threshold (default 2x, options: all / 2x / 3x / 5x). Reduces visual noise on dense graphs.
@@ -99,11 +87,8 @@ Toggle minimum co-access weight threshold (default 2x, options: all / 2x / 3x / 
 **Graph Freeze**
 When the simulation cools, nodes lock in place. No ongoing jitter. Drag to reposition any node; it releases on mouse-up.
 
-**Single-click Node Open**
-In project view, single click opens the node's file. In reorbit mode (focused view), single click is reserved for reorbit. Second click opens.
-
 **Rebuild Button**
-Wired to the parser API endpoint. Triggers a full journal rescan and graph data refresh. Shows spinner and status feedback.
+Triggers a full journal rescan and graph data refresh via the parser API endpoint. Shows spinner and status feedback.
 
 ---
 
