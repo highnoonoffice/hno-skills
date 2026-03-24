@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.3.1
+version: 1.3.2
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -11,7 +11,7 @@ credentials:
 binaries:
   - node
   - curl
-license: MIT
+license: MIT-0
 metadata: ~
 ---
 
@@ -57,12 +57,7 @@ This skill is designed around minimal-scope credential use. Here's exactly how c
 
 **Revocation is instant.** If you need to cut access, delete the integration in Ghost Admin → Settings → Integrations. All tokens derived from that key immediately stop working.
 
-**Recommended credential file permissions:**
-```bash
-chmod 600 ~/.openclaw/credentials/ghost-admin.json
-```
-
-Keep the file out of shared folders and version control.
+Keep the credentials file out of shared folders and version control. Restrict file permissions to owner-only read.
 
 ### What This Skill Won't Do
 
@@ -85,12 +80,6 @@ Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
   "url": "https://your-site.ghost.io",
   "key": "id:secret"
 }
-```
-
-Read it in any operation with:
-
-```bash
-cat ~/.openclaw/credentials/ghost-admin.json
 ```
 
 Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
@@ -227,4 +216,4 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 
 ### License
 
-MIT. Copyright (c) 2026 @highnoonoffice. Retain this notice in any distributed version.
+MIT-0. Copyright (c) 2026 @highnoonoffice. No attribution required.
