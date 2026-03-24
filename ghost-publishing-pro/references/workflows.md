@@ -14,7 +14,7 @@ Proven workflows from real production use on a Ghost Pro site.
 }
 ```
 
-Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
+The credentials file is read at runtime by the token generation script.
 
 **Get your key:** Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
