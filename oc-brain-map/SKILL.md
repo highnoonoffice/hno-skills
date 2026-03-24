@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 3.1.2
-description: "Visualize how attention moves across your agent's projects. Every markdown file is a node grouped by an Attention Pocket — an active focus area shaped by session history. First click reorbits the graph around that file's cognitive neighborhood. Second click opens the file. Built on D3.js + React. Local only."
+version: 3.1.3
+description: "Visualize how attention moves across your agent's projects."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -76,21 +76,6 @@ The reorbit model means clicking is never destructive to the current view. Proje
 
 ---
 
-## Additional Features
-
-**Enhanced Tooltips**
-Node hover: file path, access count, Attention Pocket, co-access session count. Edge hover: session type, source/target names, co-access count, session dates.
-
-**Edge Filter**
-Toggle minimum co-access weight threshold (default 2x, options: all / 2x / 3x / 5x). Reduces visual noise on dense graphs.
-
-**Graph Freeze**
-When the simulation cools, nodes lock in place. No ongoing jitter. Drag to reposition any node; it releases on mouse-up.
-
-**Rebuild Button**
-Triggers a full journal rescan and graph data refresh via the parser API endpoint. Shows spinner and status feedback.
-
----
 
 ## Prerequisites
 
