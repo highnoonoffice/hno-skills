@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 3.1.3
+version: 3.1.4
 description: "Visualize how attention moves across your agent's projects."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -52,27 +52,24 @@ The same file can occupy different positions depending on the active Attention P
 
 ## Reorbit Interaction
 
-The graph has two interaction modes: project view and file-centric view.
+The graph has three interaction modes: resting, orbited, and file-open.
 
-**Project view (default)**
-All nodes rendered with full weight according to global co-access frequency. Color-coded by Attention Pocket. Flow dots show system-wide attention movement.
+**Resting (default)**
+All nodes rendered at full weight, color-coded by Attention Pocket. No node is focused.
 
 **First click — reorbit**
-Clicking any node does not open the file. It recenters the graph around that node and reorganizes all other nodes based on co-access strength relative to the selected node:
-
-- Strongly co-accessed nodes pull close
-- Weakly co-accessed nodes drift outward and dim
-- The surrounding cluster is that file's cognitive neighborhood within its Attention Pocket
-
-This shift reveals how a file behaves in context, not just how often it is accessed.
+Clicking any node recenters the graph around it. Strongly co-accessed nodes pull close; weakly connected nodes drift outward and dim. The cluster reveals that file's cognitive neighborhood. No file opens on this click.
 
 **Second click — open file**
-Clicking the already-focused node opens its contents in the reader panel. The graph resets to project view when the reader panel closes.
+Clicking any node already in orbit opens its contents in the reader panel without scrambling the orbit. Browse the surrounding nodes freely — each click opens that file without reorbiting.
 
-**Click different node while focused**
-Refocuses to the new node without resetting first.
+**Third click (same node) — close file**
+Clicking the open node again closes the reader panel. Orbit stays intact.
 
-The reorbit model means clicking is never destructive to the current view. Project view is always one close-reader-panel action away from restoration.
+**Background click — reset**
+Returns to resting state. All nodes return to full weight.
+
+The model separates exploration (reorbit) from reading (open file). The orbit never scrambles until you explicitly reset.
 
 ---
 
