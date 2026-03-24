@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 3.1.0
-description: "Visualize how attention moves across your agent's projects. Every markdown file is a node grouped by an Attention Pocket — an active focus area shaped by session history. First click reorbits the graph around that file's cognitive neighborhood. Second click opens the file. Emerging projects surface automatically from recurring session patterns. Built on D3.js + React. Local only."
+version: 3.1.1
+description: "Visualize how attention moves across your agent's projects. Every markdown file is a node grouped by an Attention Pocket — an active focus area shaped by session history. First click reorbits the graph around that file's cognitive neighborhood. Second click opens the file. Built on D3.js + React. Local only."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -15,8 +15,6 @@ The Brain Map Visualizer renders your agent's cognition as an interactive force-
 Markdown files are nodes. Sessions build the edges. The graph reflects not just which files were accessed, but which files were accessed together, and in what project context. A file that is central in one Attention Pocket may be peripheral in another. That context-dependence is the core insight the graph exposes.
 
 First click on any node reorbits the graph around it: the layout reorganizes to show that file's cognitive neighborhood within its Attention Pocket. Nearby nodes share frequent co-access in the same sessions. Distant nodes rarely overlap. Second click opens the file.
-
-The graph also surfaces Emerging Projects — recurring concepts detected across session journals that have not yet been mapped to a named Attention Pocket. These appear as a separate dimmed section with a Promote action.
 
 Works for any OpenClaw agent with a vault of markdown files and a session journal history.
 
@@ -33,8 +31,6 @@ A D3.js force-directed graph embedded in a React component, designed for any Nex
 **Graph behavior** — the layout reflects attention flow and session patterns. Files that are co-accessed frequently in the same project context stay close. Files with weak or no shared context drift apart and dim.
 
 **Reorbit** — first click on any node shifts the graph from project view to file-centric cognitive view centered on that node. The rest of the graph reorganizes by co-access strength relative to that file.
-
-**Emerging Projects** — concepts appearing in 3 or more session journals that are not yet mapped to a named Attention Pocket surface automatically as candidates for promotion.
 
 ---
 
@@ -80,28 +76,6 @@ The reorbit model means clicking is never destructive to the current view. Proje
 
 ---
 
-## Emerging Projects and Promotion
-
-On each graph rebuild, the journal parser scans session summary text for recurring phrases that do not map to any existing Attention Pocket.
-
-**Detection rule:** A concept or phrase appearing in 3 or more session journals is flagged as Emerging. The detection threshold is tunable via a config parameter in the parser script.
-
-**Weight:** Mentions in journal summaries carry more weight than incidental file access patterns. A phrase appearing once in a summary counts more than a phrase inferred from file path co-occurrence.
-
-**UI behavior:**
-- Emerging concepts appear in a separate Emerging Projects section below the main graph
-- Nodes in this section are visually dimmed relative to active Attention Pocket nodes
-- Each Emerging entry includes a Promote action
-
-**Promotion:**
-- User names the concept and assigns it as a new Attention Pocket
-- On the next rebuild, files matching the new pocket's pattern are grouped and color-coded accordingly
-- The Emerging entry is removed from the dimmed section
-
-Promotion is a local configuration write. No external calls. The result is a new named color group in the graph on the next data refresh.
-
----
-
 ## Feature List
 
 **Attention Centering**
@@ -118,9 +92,6 @@ Six named pockets, each with a distinct color: Core Identity (gold), Memory (pur
 
 **Enhanced Tooltips**
 Node hover: file path, access count, Attention Pocket, number of co-access sessions. Edge hover: session type, source/target names, co-access count, session dates.
-
-**Emerging Projects Panel**
-Automatically surfaced from journal scanning. Dimmed, named, promotable. No manual curation required to surface new patterns.
 
 **Edge Filter**
 Toggle minimum co-access weight threshold (default 2x, options: all / 2x / 3x / 5x). Reduces visual noise on dense graphs.
@@ -285,10 +256,6 @@ Higher tier is upstream. Ties broken by access count.
 
 **Tooltip rendering:** The graph component renders tooltips as structured React elements (filename, group, session counts). No `dangerouslySetInnerHTML` or raw HTML injection is used anywhere in the component.
 
-**Emerging Projects scan:** The journal parser reads existing session journal summaries to detect recurring phrases. This is the same local read scope as the existing co-access scan. No new file system paths are accessed. No writes occur beyond the single output JSON.
-
-**Promotion writes:** When a user promotes an Emerging concept to a named Attention Pocket, the result is a local configuration write within the parser's existing output scope. No external calls.
-
 **API access control:** The route serving graph data supports optional token-based access control:
 
 ```bash
@@ -312,13 +279,12 @@ If `BRAIN_MAP_SECRET` is not set, the route is open — suitable for localhost d
 - Journal summaries reference files inconsistently — graph data improves as journaling explicitly names files.
 - Graph rebuilds are not real-time; run the parser script to refresh.
 - Reader panel (second click to open file) requires a `/api/read-file` endpoint in the host app.
-- Emerging Projects detection depends on journal summary quality. Sparse summaries produce fewer signals.
 
 ---
 
 ## References
 
-- `references/journal-parser.md` — Node.js script to extract co-access data and detect Emerging Projects
+- `references/journal-parser.md` — Node.js script to extract co-access data from session journals
 - `references/component.md` — Full `BrainMapGraph.tsx` React + D3 component
 - `references/graph-schema.md` — Graph JSON spec and Next.js API route
 
