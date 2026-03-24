@@ -1,16 +1,9 @@
 ---
 name: ghost-publishing-pro
-version: 1.4.0
+version: 1.4.1
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
-credentials:
-  - name: ghost-admin.json
-    description: "JSON file at ~/.openclaw/credentials/ghost-admin.json with two fields: url (your Ghost site URL) and key (Admin API key in id:secret format — Ghost Admin > Settings > Integrations > Add custom integration)"
-    required: true
-binaries:
-  - node
-  - curl
 license: MIT-0
 metadata: ~
 ---
