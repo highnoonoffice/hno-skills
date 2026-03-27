@@ -728,3 +728,229 @@ After reviewing the audit output, use Workflow 3 (Batch Update) to fix the flagg
 - `not updated in 90 days` does NOT mean the content is bad — a timeless essay published two years ago that still ranks well doesn't need touching. Use judgment.
 - Slug fixes require adding a redirect in Ghost Admin → Settings → Labs → Redirects (upload a JSON file) before changing the slug, or you'll create dead links.
 
+---
+
+## Workflow 15: Content Performance Intelligence
+
+Use case: You've been publishing for months. You want to know what's actually working — which posts drive email engagement, which content never reached your subscribers, and where your pages have health gaps.
+
+Ghost's Admin API exposes email engagement data (opens, clicks) per post, member counts by tier, post and page metadata. This workflow assembles all of it into a three-section report.
+
+**What this covers:**
+- Audience snapshot: active subscribers, free vs paid split
+- Section 1 — Email performance: open rate, click rate, CTO, divergence analysis
+- Section 2 — Web-only posts: content published but never emailed (amplification candidates + health snapshot)
+- Section 3 — Pages: evergreen content health (AI consultant, about, landing pages etc.)
+
+**What Ghost's API cannot give you** (the ceiling):
+- Per-post or per-page view counts — dashboard-only, backed by Tinybird, no API access
+- Traffic sources / referrers — not exposed
+- Free → paid conversion per post — not exposed
+- Time-on-page — not exposed
+
+For per-post view counts, wire a third-party analytics tool alongside Ghost:
+- **Plausible** (`plausible.io/api/v1/stats/breakdown?property=event:page`) — simple, privacy-first, clean REST API
+- **Fathom** (`usefathom.com/api`) — similar to Plausible
+- **GA4** (`analyticsdata.googleapis.com`) — more complex OAuth but most widely used
+
+All three return per-URL view counts you can join to Ghost post slugs.
+
+### The script
+
+Save as `ghost-performance.js` and run with `node ghost-performance.js`.
+
+```js
+const https = require('https');
+const crypto = require('crypto');
+const fs = require('fs');
+
+const creds = JSON.parse(fs.readFileSync(process.env.HOME + '/.openclaw/credentials/ghost-admin.json', 'utf8'));
+const [id, secret] = creds.key.split(':');
+
+function makeToken() {
+  const h = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
+  const n = Math.floor(Date.now() / 1000);
+  const p = Buffer.from(JSON.stringify({ iat: n, exp: n + 300, aud: '/admin/' })).toString('base64url');
+  const s = crypto.createHmac('sha256', Buffer.from(secret, 'hex')).update(h + '.' + p).digest('base64url');
+  return h + '.' + p + '.' + s;
+}
+
+function apiGet(path) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(creds.url);
+    const options = {
+      hostname: url.hostname,
+      path,
+      method: 'GET',
+      headers: { 'Authorization': 'Ghost ' + makeToken(), 'Accept-Version': 'v5.0' }
+    };
+    const req = https.request(options, res => {
+      let data = '';
+      res.on('data', d => data += d);
+      res.on('end', () => resolve(JSON.parse(data)));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+async function fetchAll(endpoint, include = '') {
+  let page = 1, all = [];
+  const type = endpoint.includes('/pages/') ? 'pages' : 'posts';
+  while (true) {
+    const inc = include ? '&include=' + include : '';
+    const data = await apiGet(`/ghost/api/admin/${endpoint}?limit=15&page=${page}&status=published${inc}`);
+    if (!data[type] || data[type].length === 0) break;
+    all = all.concat(data[type]);
+    if (!data.meta?.pagination?.next) break;
+    page++;
+    await new Promise(r => setTimeout(r, 300));
+  }
+  return all;
+}
+
+function healthFlags(item) {
+  const flags = [];
+  if (!item.feature_image) flags.push('no feature image');
+  if (!item.custom_excerpt) flags.push('no excerpt');
+  if (!item.meta_description) flags.push('no meta description');
+  if (!item.tags || item.tags.length === 0) flags.push('no tags');
+  return flags;
+}
+
+(async () => {
+  // --- Audience snapshot ---
+  const allMembers = await apiGet('/ghost/api/admin/members/?limit=1');
+  const activeMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true');
+  const freeMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true,status:free');
+  const paidMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true,status:paid');
+  const totalSubs = activeMembers?.meta?.pagination?.total ?? '?';
+  const freeSubs = freeMembers?.meta?.pagination?.total ?? '?';
+  const paidSubs = paidMembers?.meta?.pagination?.total ?? '?';
+
+  // --- Posts ---
+  const allPosts = await fetchAll('posts/', 'email,tags');
+  const emailed = allPosts.filter(p => p.email && p.email.email_count > 0);
+  const webOnly = allPosts.filter(p => !p.email || p.email.email_count === 0);
+
+  // --- Pages ---
+  const allPages = await fetchAll('pages/', 'tags');
+
+  // --- Email performance ---
+  const withRates = emailed.map(p => {
+    const sent = p.email.email_count || 0;
+    const opened = p.email.opened_count || 0;
+    const clicked = p.email.clicked_count || 0;
+    const openRate = sent > 0 ? ((opened / sent) * 100).toFixed(1) : null;
+    const clickRate = sent > 0 ? ((clicked / sent) * 100).toFixed(1) : null;
+    const cto = opened > 0 ? ((clicked / opened) * 100).toFixed(1) : null;
+    return { ...p, sent, opened, clicked, openRate, clickRate, cto };
+  }).filter(p => p.openRate !== null);
+
+  const byOpen = [...withRates].sort((a, b) => parseFloat(b.openRate) - parseFloat(a.openRate));
+  const byClick = [...withRates].sort((a, b) => parseFloat(b.clickRate) - parseFloat(a.clickRate));
+  const divergent = withRates
+    .filter(p => parseFloat(p.openRate) > 40 && parseFloat(p.clickRate) < 3)
+    .sort((a, b) => parseFloat(b.openRate) - parseFloat(a.openRate));
+
+  const fmtEmail = p =>
+    `  • ${p.title}\n    Sent: ${p.sent} | Open: ${p.openRate}% | Click: ${p.clickRate}% | CTO: ${p.cto}% | Segment: ${p.email_recipient_filter || 'all'}`;
+
+  // --- Output ---
+  console.log('=== GHOST CONTENT PERFORMANCE REPORT ===');
+  console.log('Run at:', new Date().toISOString());
+  console.log('');
+  console.log('AUDIENCE');
+  console.log(`  Active subscribers: ${totalSubs} (free: ${freeSubs} / paid: ${paidSubs})`);
+  console.log(`  Total published posts: ${allPosts.length} | Emailed: ${emailed.length} | Web-only: ${webOnly.length}`);
+  console.log(`  Total published pages: ${allPages.length}`);
+  console.log('');
+
+  console.log('--- SECTION 1: EMAIL PERFORMANCE ---');
+  console.log('');
+  console.log('Top 5 by open rate:');
+  byOpen.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+  console.log('Top 5 by click rate:');
+  byClick.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+  console.log('High open / low click — weak CTA candidates (opens >40%, clicks <3%):');
+  if (divergent.length === 0) console.log('  None — CTAs are converting well.');
+  divergent.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+
+  console.log('--- SECTION 2: WEB-ONLY POSTS (never emailed) ---');
+  console.log('Note: per-post view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  console.log('');
+  if (webOnly.length === 0) {
+    console.log('  All published posts have been emailed.');
+  } else {
+    webOnly.forEach(p => {
+      const flags = healthFlags(p);
+      const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
+      console.log(`  • ${p.title}`);
+      console.log(`    Published: ${p.published_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+    });
+  }
+  console.log('');
+
+  console.log('--- SECTION 3: PAGES ---');
+  console.log('Note: page view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  console.log('');
+  if (allPages.length === 0) {
+    console.log('  No published pages found.');
+  } else {
+    allPages.forEach(p => {
+      const flags = healthFlags(p);
+      const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
+      console.log(`  • ${p.title}`);
+      console.log(`    Updated: ${p.updated_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+    });
+  }
+  console.log('');
+  console.log('=== END REPORT ===');
+})();
+```
+
+### Reading the report
+
+**Open rate benchmarks:**
+| Rate | Signal |
+|---|---|
+| Under 20% | Below average — subject line or sender reputation issue |
+| 20–40% | Solid — typical for engaged lists |
+| 40–60% | Strong — highly engaged audience |
+| 60%+ | Exceptional — or MPP inflation (see pitfalls) |
+
+**Click rate benchmarks:**
+| Rate | Signal |
+|---|---|
+| Under 1% | Low — CTA buried or missing |
+| 1–3% | Average |
+| 3–5% | Strong |
+| 5%+ | Exceptional |
+
+**Click-to-open (CTO)** — the most honest signal. Of everyone who opened, how many clicked? High CTO means the content delivered on the subject line's promise. Low CTO means a curiosity open, not a real read.
+
+**High open / low click (divergent posts):** Hidden wins. The subject line worked — people opened. But nothing inside drove a click. Add a CTA, a relevant link, or a "continue reading" anchor. A small edit can unlock latent engagement from an already-warm audience.
+
+**Web-only posts:** Invisible to your subscriber list. Ghost doesn't allow retroactive API email sends — duplicate the post and publish fresh, or use Ghost Admin to manually resend if that option is available.
+
+**Pages:** Evergreen content (about, landing pages, tools). Health flags catch SEO gaps — missing meta descriptions and excerpts on pages hurt search visibility just as much as on posts.
+
+### Saving the report
+
+```bash
+node ghost-performance.js > ghost-performance-$(date +%Y-%m-%d).md
+```
+
+Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA decay.
+
+### Pitfalls
+
+- `email.opened_count` and `email.clicked_count` only return data with `&include=email` — omitting it returns null even for emailed posts.
+- **Apple Mail Privacy Protection (MPP)** pre-loads email pixels on iOS/macOS, inflating open rates. Open rates above 70% on small lists are often MPP artifacts. Click rate and CTO are more reliable signals.
+- The `email_recipient_filter` field shows segment (`all`, `free`, `paid`) — compare like-for-like when benchmarking rates across posts.
+- Token expires in 5 minutes — the script regenerates before every paginated fetch so long archives won't expire mid-run.
+- Pages use the `/pages/` endpoint, not `/posts/` — they won't appear in post queries even though they share most fields.
+

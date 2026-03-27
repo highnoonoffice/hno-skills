@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.4.0
+version: 1.5.1
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -213,6 +213,7 @@ See `references/workflows.md` for full migration playbooks:
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
 - Theme management (JWT upload where supported; Ghost Admin fallback)
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
+- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with free/paid subscriber split. (Workflow 15)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
