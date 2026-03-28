@@ -18,13 +18,13 @@ First click on any node reorbits the graph around it: the layout reorganizes to 
 
 The graph also surfaces Emerging Projects — recurring concepts detected across session journals that have not yet been mapped to a named Attention Pocket. These appear as a separate dimmed section with a Promote action.
 
-Works for any OpenClaw agent with a vault of markdown files and a session journal history.
+Works for any OpenClaw agent with a workspace of markdown files and a session journal history.
 
 ### What This Skill Builds
 
-A D3.js force-directed graph embedded in a React component, designed for any Next.js dashboard app or standalone React host. The skill parses session journals to extract co-access relationships between vault files, attributes those relationships to Attention Pockets, and renders them as an interactive graph.
+A D3.js force-directed graph embedded in a React component, designed for any Next.js dashboard app or standalone React host. The skill parses session journals to extract co-access relationships between workspace files, attributes those relationships to Attention Pockets, and renders them as an interactive graph.
 
-**Nodes** — every markdown file in your vault, grouped and color-coded by Attention Pocket.
+**Nodes** — every markdown file in your workspace, grouped and color-coded by Attention Pocket.
 
 **Lines** — co-access relationships between files. A line exists when two files appear in the same session journal. Line weight reflects how many sessions they were co-accessed. Session type (planning, coding, publishing, etc.) is auto-classified from journal keywords and encoded as line color.
 
@@ -138,8 +138,8 @@ Wired to the parser API endpoint. Triggers a full journal rescan and graph data 
 
 ### Prerequisites
 
-- OpenClaw agent with a vault directory containing markdown files
-- Session journals in `memory/journal/YYYY-MM-DD.md` format (each entry references vault files)
+- OpenClaw agent with a workspace directory containing markdown files
+- Session journals in `memory/journal/YYYY-MM-DD.md` format (each entry references workspace files)
 - A Next.js dashboard app or equivalent React host — or serve standalone with `npx serve`
 - Node.js 18+ for the data extraction script
 - `d3` and `@types/d3` installed in your frontend project
@@ -193,7 +193,7 @@ Run the parser script any time to refresh the graph. Add it to a cron job for we
 
 ```bash
 # Weekly brain map rebuild (Sunday midnight)
-0 0 * * 0 cd /path/to/vault && node scripts/build-brain-map.js
+0 0 * * 0 cd /path/to/workspace && node scripts/build-brain-map.js
 ```
 
 ### Graph Data Format
@@ -245,9 +245,9 @@ Session type is auto-classified from journal text keywords:
 
 ### Security
 
-**Scope:** The skill reads markdown files in your vault directory and session journals to build a graph. It writes one JSON file (`brain-map-graph.json`) as output. No network calls are made beyond fetching graph data from your own local API route. No credentials are requested, stored, or transmitted.
+**Scope:** The skill reads markdown files in your workspace directory and session journals to build a graph. It writes one JSON file (`brain-map-graph.json`) as output. No network calls are made beyond fetching graph data from your own local API route. No credentials are requested, stored, or transmitted.
 
-**Filesystem access:** The journal parser reads `.md` files recursively under your configured vault directory and writes one output file. Scope is intentional and bounded. Run the parser only from a trusted working directory.
+**Filesystem access:** The journal parser reads `.md` files recursively under your configured workspace directory and writes one output file. Scope is intentional and bounded. Run the parser only from a trusted working directory.
 
 **Tooltip rendering:** The graph component renders tooltips as structured React elements (filename, group, session counts). No `dangerouslySetInnerHTML` or raw HTML injection is used anywhere in the component.
 
