@@ -215,6 +215,30 @@ requests.put(
 
 Same pattern works for posts — replace `/pages/` with `/posts/`.
 
+**Update link preview text (OG description)**
+
+The text and image that loads when someone drops your link into Slack, iMessage, Twitter, etc. is controlled by `og_description` / `twitter_description` and `og_image` / `twitter_image`. Set them via PUT — same pattern as any post/page update:
+
+```python
+requests.put(
+    f'{GHOST_URL}/ghost/api/admin/pages/{PAGE_ID}/',
+    headers=headers,
+    json={"pages": [{
+        "id": PAGE_ID,
+        "updated_at": page['updated_at'],  # fetch first
+        "og_image": image_url,
+        "twitter_image": image_url,
+        "og_description": "One or two sentences. This is what people read before clicking.",
+        "twitter_description": "One or two sentences. This is what people read before clicking."
+    }]}
+)
+```
+
+- `og_description` / `og_image` → Facebook, iMessage, Slack, LinkedIn, most link unfurlers
+- `twitter_description` / `twitter_image` → X/Twitter card
+- If neither is set, Ghost falls back to the post `custom_excerpt` for description and `feature_image` for image
+- `custom_excerpt` is also worth setting — it's the fallback for both link previews and Ghost's own search/RSS
+
 **Schedule a post**
 
 Add `"status": "scheduled"` and `"published_at": "2026-03-20T18:00:00.000Z"` (UTC).
