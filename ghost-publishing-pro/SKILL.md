@@ -158,13 +158,62 @@ curl -s "{url}/ghost/api/admin/posts/?limit=15&filter=status:draft&fields=id,tit
 
 **Upload image**
 
-```bash
-curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
-  -H "Authorization: Ghost {token}" \
-  -F "file=@/path/to/image.jpg" \
-  -F "purpose=image"
-# Returns URL — use as feature_image value
+Use Python `requests` — curl multipart can silently fail on macOS zsh with certain file paths:
+
+```python
+import requests, json, time, hashlib, hmac, base64
+
+creds = json.load(open('/Users/you/.openclaw/credentials/ghost-admin.json'))
+API_KEY = creds['key']
+GHOST_URL = creds['url']  # e.g. https://your-site.ghost.io
+
+def get_token():
+    id_, secret = API_KEY.split(':')
+    header = base64.urlsafe_b64encode(json.dumps({"alg":"HS256","typ":"JWT","kid":id_}).encode()).rstrip(b'=').decode()
+    now = int(time.time())
+    payload = base64.urlsafe_b64encode(json.dumps({"iat":now,"exp":now+300,"aud":"/admin/"}).encode()).rstrip(b'=').decode()
+    sig_input = f"{header}.{payload}".encode()
+    sig = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), sig_input, hashlib.sha256).digest()).rstrip(b'=').decode()
+    return f"{header}.{payload}.{sig}"
+
+headers = {'Authorization': f'Ghost {get_token()}', 'Accept-Version': 'v5.0'}
+
+with open('/path/to/image.jpg', 'rb') as f:
+    r = requests.post(
+        f'{GHOST_URL}/ghost/api/admin/images/upload/',
+        headers=headers,
+        files={'file': ('image.jpg', f, 'image/jpeg')},
+        data={'purpose': 'image'}
+    )
+image_url = r.json()['images'][0]['url']
+print(image_url)  # use as feature_image value
 ```
+
+**Set feature image + OG image on a post or page**
+
+After uploading, apply to a post/page via PUT. Always fetch `updated_at` first:
+
+```python
+# Fetch current updated_at
+page = requests.get(f'{GHOST_URL}/ghost/api/admin/pages/{PAGE_ID}/', headers=headers).json()['pages'][0]
+
+# Update feature + social images in one call
+requests.put(
+    f'{GHOST_URL}/ghost/api/admin/pages/{PAGE_ID}/',
+    headers=headers,
+    json={"pages": [{
+        "id": PAGE_ID,
+        "updated_at": page['updated_at'],
+        "feature_image": image_url,
+        "og_image": image_url,
+        "twitter_image": image_url,
+        "og_description": "Your link preview text here.",
+        "twitter_description": "Your link preview text here."
+    }]}
+)
+```
+
+Same pattern works for posts — replace `/pages/` with `/posts/`.
 
 **Schedule a post**
 
