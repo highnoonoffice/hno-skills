@@ -234,6 +234,22 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
 - **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
 
+### Webhook Bridge (iPaaS-Style Triggers)
+
+Ghost fires webhooks when things happen — post published, member added, post updated. The webhook bridge catches those events and dispatches them to actions you define, without Zapier, Make, or any third-party service.
+
+**Supported trigger events:** `post.published`, `post.unpublished`, `post.updated`, `post.deleted`, `page.published`, `member.added`, `member.updated`, `member.deleted`
+
+**What you can do with them:** Notification when a post goes live (Telegram, Slack, Discord, SMS, WhatsApp, Email, ntfy.sh, or any HTTP endpoint — your choice), auto-tag newly published posts, create Ghost drafts from an RSS feed, ping your channel on new member signup — anything you can write in Python.
+
+**How it works:** A lightweight Python listener (stdlib only, no dependencies) runs locally and receives Ghost's webhook POST requests. HMAC-SHA256 signature validation is built in. Each event maps to a handler function you define.
+
+Full implementation, example handlers, and launchd service config: `references/webhook-bridge.md`
+
+To register a webhook: Ghost Admin → Settings → Integrations → Add custom integration → Webhooks → Add webhook → point to `http://your-machine.local:8765/ghost-webhook`.
+
+> **Security:** Always set a webhook secret in Ghost Admin — the bridge validates HMAC signatures before executing any handler. Never expose the listener port publicly without HTTPS.
+
 ### Tag Management
 
 Ghost's Admin API supports full tag CRUD. These endpoints require an **Admin-level token** (owner or staff with Admin role). Integration tokens return `403` — if that happens, see the safe-mode note below.
