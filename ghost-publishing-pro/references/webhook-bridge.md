@@ -164,23 +164,60 @@ Keep it running as a background process or wire it to launchd for persistence.
 
 Each handler receives the full Ghost webhook payload. Common patterns:
 
-**Send a Telegram message when a post is published:**
+**Send a notification when a post is published (Telegram / Slack / SMS / WhatsApp):**
+
+Configure whichever channel you use — pick one block below and drop it into `on_post_published`.
 
 ```python
-import urllib.request
-
 def on_post_published(payload):
     post = payload.get("post", {}).get("current", {})
     title = post.get("title", "")
     url = post.get("url", "")
     msg = f"New post published: {title}\n{url}"
+    notify(msg)
 
-    bot_token = "YOUR_BOT_TOKEN"
-    chat_id = "YOUR_CHAT_ID"
+# ── Option A: Telegram ────────────────────────────────────────────────────────
+import urllib.request, urllib.parse
+
+def notify(msg):
+    bot_token = "YOUR_TELEGRAM_BOT_TOKEN"
+    chat_id = "YOUR_TELEGRAM_CHAT_ID"
     urllib.request.urlopen(
         f"https://api.telegram.org/bot{bot_token}/sendMessage"
         f"?chat_id={chat_id}&text={urllib.parse.quote(msg)}"
     )
+
+# ── Option B: Slack (incoming webhook) ───────────────────────────────────────
+import urllib.request, json as _json
+
+def notify(msg):
+    slack_webhook_url = "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    data = _json.dumps({"text": msg}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        slack_webhook_url, data=data,
+        headers={"Content-Type": "application/json"}
+    ))
+
+# ── Option C: SMS via Twilio ──────────────────────────────────────────────────
+import urllib.request, urllib.parse
+
+def notify(msg):
+    account_sid = "YOUR_TWILIO_ACCOUNT_SID"
+    auth_token  = "YOUR_TWILIO_AUTH_TOKEN"
+    from_number = "+1XXXXXXXXXX"
+    to_number   = "+1XXXXXXXXXX"
+    data = urllib.parse.urlencode({"From": from_number, "To": to_number, "Body": msg}).encode()
+    req = urllib.request.Request(
+        f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json",
+        data=data,
+        headers={"Authorization": "Basic " + __import__("base64").b64encode(
+            f"{account_sid}:{auth_token}".encode()).decode()}
+    )
+    urllib.request.urlopen(req)
+
+# ── Option D: WhatsApp via Twilio (WhatsApp sandbox) ─────────────────────────
+# Same as SMS above — change from_number to "whatsapp:+14155238886"
+# and to_number to "whatsapp:+1XXXXXXXXXX"
 ```
 
 **Add a tag to every newly published post via Ghost Admin API:**

@@ -240,7 +240,7 @@ Ghost fires webhooks when things happen — post published, member added, post u
 
 **Supported trigger events:** `post.published`, `post.unpublished`, `post.updated`, `post.deleted`, `page.published`, `member.added`, `member.updated`, `member.deleted`
 
-**What you can do with them:** Telegram notification when a post goes live, auto-tag newly published posts, create Ghost drafts from an RSS feed, Slack ping on new member signup — anything you can write in Python.
+**What you can do with them:** Notification when a post goes live (Telegram, Slack, SMS, WhatsApp — your choice), auto-tag newly published posts, create Ghost drafts from an RSS feed, ping your channel of choice on new member signup — anything you can write in Python.
 
 **How it works:** A lightweight Python listener (stdlib only, no dependencies) runs locally and receives Ghost's webhook POST requests. HMAC-SHA256 signature validation is built in. Each event maps to a handler function you define.
 
