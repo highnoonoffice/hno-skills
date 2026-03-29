@@ -91,19 +91,49 @@ PUT /posts/{id}/ with updated_at from fetched post
 
 ## Workflow 4: Upload Image and Set as Feature Image
 
-```bash
-# 1. Upload image
-curl -X POST "{url}/ghost/api/admin/images/upload/" \
-  -H "Authorization: Ghost {token}" \
-  -F "file=@/path/to/image.jpg" \
-  -F "purpose=image"
-# Returns image URL
+**Use Python requests — not curl.** Curl multipart uploads silently fail on macOS zsh with certain file paths. Python requests is the reliable path.
 
-# 2. Set on post
-curl -X PUT "{url}/ghost/api/admin/posts/{id}/?source=html" \
-  -H "Authorization: Ghost {token}" \
-  -H "Content-Type: application/json" \
-  -d '{"posts":[{"feature_image":"https://returned-url","updated_at":"..."}]}'
+```python
+import requests, json, time, hashlib, hmac, base64
+
+creds = json.load(open('/Users/you/.openclaw/credentials/ghost-admin.json'))
+GHOST_URL = creds['url']
+API_KEY   = creds['key']
+
+def get_token():
+    id_, secret = API_KEY.split(':')
+    header  = base64.urlsafe_b64encode(json.dumps({"alg":"HS256","typ":"JWT","kid":id_}).encode()).rstrip(b'=').decode()
+    now     = int(time.time())
+    payload = base64.urlsafe_b64encode(json.dumps({"iat":now,"exp":now+300,"aud":"/admin/"}).encode()).rstrip(b'=').decode()
+    sig     = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), f"{header}.{payload}".encode(), hashlib.sha256).digest()).rstrip(b'=').decode()
+    return f"{header}.{payload}.{sig}"
+
+headers = {'Authorization': f'Ghost {get_token()}', 'Accept-Version': 'v5.0'}
+
+# 1. Upload image
+with open('/path/to/image.jpg', 'rb') as f:
+    r = requests.post(
+        f'{GHOST_URL}/ghost/api/admin/images/upload/',
+        headers=headers,
+        files={'file': ('image.jpg', f, 'image/jpeg')},
+        data={'purpose': 'image'}
+    )
+image_url = r.json()['images'][0]['url']
+
+# 2. Set as feature image + OG image on a post (fetch updated_at first)
+post = requests.get(f'{GHOST_URL}/ghost/api/admin/posts/{POST_ID}/', headers=headers).json()['posts'][0]
+requests.put(
+    f'{GHOST_URL}/ghost/api/admin/posts/{POST_ID}/',
+    headers=headers,
+    json={"posts": [{
+        "id": POST_ID,
+        "updated_at": post['updated_at'],
+        "feature_image": image_url,
+        "og_image": image_url,
+        "twitter_image": image_url,
+    }]}
+)
+# Replace /posts/ with /pages/ for page resources
 ```
 
 ---
@@ -954,3 +984,73 @@ Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA
 - Token expires in 5 minutes — the script regenerates before every paginated fetch so long archives won't expire mid-run.
 - Pages use the `/pages/` endpoint, not `/posts/` — they won't appear in post queries even though they share most fields.
 
+
+---
+
+## Workflow 16: Tag Management
+
+Full tag CRUD via the Ghost Admin API. Requires an **owner-level token** for write operations — integration tokens return `403` on create/update/delete. List is readable with any token.
+
+```python
+import requests, json, time, hashlib, hmac, base64
+
+creds     = json.load(open('/Users/you/.openclaw/credentials/ghost-admin.json'))
+GHOST_URL = creds['url']
+API_KEY   = creds['key']
+
+def get_token():
+    id_, secret = API_KEY.split(':')
+    header  = base64.urlsafe_b64encode(json.dumps({"alg":"HS256","typ":"JWT","kid":id_}).encode()).rstrip(b'=').decode()
+    now     = int(time.time())
+    payload = base64.urlsafe_b64encode(json.dumps({"iat":now,"exp":now+300,"aud":"/admin/"}).encode()).rstrip(b'=').decode()
+    sig     = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), f"{header}.{payload}".encode(), hashlib.sha256).digest()).rstrip(b'=').decode()
+    return f"{header}.{payload}.{sig}"
+
+headers = {'Authorization': f'Ghost {get_token()}', 'Accept-Version': 'v5.0'}
+
+def safe_check(r, action):
+    if r.status_code == 403:
+        print(f"[tag-mgmt] {action} requires owner-level token — manage tags manually in Ghost Admin or use an owner token.")
+        return False
+    return True
+
+# List all tags
+tags = requests.get(f'{GHOST_URL}/ghost/api/admin/tags/?limit=all', headers=headers).json().get('tags', [])
+for t in tags:
+    print(t['id'], t['name'], t['slug'])
+
+# Create a tag
+r = requests.post(f'{GHOST_URL}/ghost/api/admin/tags/', headers=headers,
+    json={"tags": [{"name": "Your Tag", "slug": "your-tag"}]})
+if safe_check(r, "Create"):
+    print(r.json()['tags'][0]['id'])
+
+# Update a tag
+TAG_ID = "tag-id-from-list"
+r = requests.put(f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/', headers=headers,
+    json={"tags": [{"id": TAG_ID, "name": "Updated Name", "slug": "updated-slug"}]})
+safe_check(r, "Update")
+
+# Delete a tag
+r = requests.delete(f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/', headers=headers)
+if safe_check(r, "Delete") and r.status_code == 204:
+    print("Deleted.")
+
+# Bulk assign a tag to all posts missing it
+posts = requests.get(f'{GHOST_URL}/ghost/api/admin/posts/?limit=all&include=tags', headers=headers).json()['posts']
+for post in posts:
+    existing = [{"id": t["id"]} for t in post.get("tags", [])]
+    if not any(t["id"] == TAG_ID for t in existing):
+        existing.append({"id": TAG_ID})
+        requests.put(
+            f'{GHOST_URL}/ghost/api/admin/posts/{post["id"]}/',
+            headers=headers,
+            json={"posts": [{"id": post["id"], "updated_at": post["updated_at"], "tags": existing}]}
+        )
+        print(f"Tagged: {post['title']}")
+```
+
+### Pitfalls
+- `GET /tags/` works with integration tokens. All write operations require owner-level credentials.
+- Tag slugs must be unique — `POST` returns `422` if a slug already exists.
+- Deleting a tag removes it from all posts — it does not delete the posts.
