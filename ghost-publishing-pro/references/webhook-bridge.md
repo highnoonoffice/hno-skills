@@ -2,7 +2,26 @@
 
 An OpenClaw-native webhook bridge that listens for Ghost events and translates them into actions — without Zapier, Make, or any third-party service.
 
-Ghost fires webhooks when things happen on your site. This bridge catches those events and maps them to whatever you want: post to Telegram, create a draft from RSS, tag a post, ping Slack, trigger another API.
+---
+
+## Quick Start
+
+Three steps to get running:
+
+**1. Register a webhook in Ghost**
+Ghost Admin → Settings → Integrations → Add custom integration → Webhooks → Add webhook
+- Event: pick from the table below (e.g. `post.published`)
+- Target URL: `http://your-machine.local:8765/ghost-webhook`
+- Secret: set any string — copy it for the next step
+
+**2. Run the listener**
+```bash
+# Set your secret at the top of webhook-bridge.py, then:
+python3 references/webhook-bridge.py
+```
+
+**3. Pick a notification channel**
+Scroll to "Action Handlers" below. Drop in one of the eight `notify()` options (Telegram, Slack, Discord, SMS, WhatsApp, Email, ntfy.sh, or generic HTTP). Done.
 
 ---
 
@@ -73,12 +92,12 @@ def on_post_published(payload):
 
 def on_member_added(payload):
     member = payload.get("member", {}).get("current", {})
-    email = member.get("email", "unknown")
-    print(f"[ghost-bridge] New member: {email}")
-    # Add your action here:
-    # - Send welcome Telegram ping
-    # - Log to spreadsheet
-    # - Add to external CRM
+    email  = member.get("email", "unknown")
+    name   = member.get("name") or "New subscriber"
+    status = member.get("status", "free")
+    msg = f"New {status} member: {name} ({email})"
+    print(f"[ghost-bridge] {msg}")
+    notify(msg)  # uses whichever notify() option you configure below
 
 HANDLERS = {
     "post.published": on_post_published,
