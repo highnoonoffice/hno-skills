@@ -218,6 +218,63 @@ def notify(msg):
 # ── Option D: WhatsApp via Twilio (WhatsApp sandbox) ─────────────────────────
 # Same as SMS above — change from_number to "whatsapp:+14155238886"
 # and to_number to "whatsapp:+1XXXXXXXXXX"
+
+# ── Option E: Discord (incoming webhook) ─────────────────────────────────────
+import urllib.request, json as _json
+
+def notify(msg):
+    discord_webhook_url = "https://discord.com/api/webhooks/YOUR/WEBHOOK"
+    data = _json.dumps({"content": msg}).encode()
+    urllib.request.urlopen(urllib.request.Request(
+        discord_webhook_url, data=data,
+        headers={"Content-Type": "application/json"}
+    ))
+
+# ── Option F: Email via SMTP (Gmail / Proton / any SMTP server) ───────────────
+import smtplib
+from email.mime.text import MIMEText
+
+def notify(msg):
+    smtp_host   = "smtp.gmail.com"   # or smtp.protonmail.ch, mail.your-server.com, etc.
+    smtp_port   = 587
+    smtp_user   = "you@example.com"
+    smtp_pass   = "YOUR_APP_PASSWORD"  # use an app-specific password, not your main password
+    to_address  = "you@example.com"
+
+    email = MIMEText(msg)
+    email["Subject"] = "Ghost notification"
+    email["From"]    = smtp_user
+    email["To"]      = to_address
+
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.sendmail(smtp_user, to_address, email.as_string())
+
+# ── Option G: ntfy.sh (free, open-source push notifications, no account needed) ──
+import urllib.request
+
+def notify(msg):
+    topic = "your-unique-topic-name"  # pick any name — subscribe to it in the ntfy app
+    urllib.request.urlopen(urllib.request.Request(
+        f"https://ntfy.sh/{topic}",
+        data=msg.encode(),
+        method="POST"
+    ))
+    # Subscribe: install ntfy app (iOS/Android) → add topic → done
+
+# ── Option H: Generic HTTP POST (catch-all — n8n, PagerDuty, custom endpoints) ──
+import urllib.request, json as _json
+
+def notify(msg):
+    url = "https://your-endpoint.com/webhook"   # any URL that accepts POST
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_TOKEN",    # remove if not needed
+    }
+    data = _json.dumps({"text": msg, "source": "ghost-bridge"}).encode()
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    urllib.request.urlopen(req)
 ```
 
 **Add a tag to every newly published post via Ghost Admin API:**
