@@ -234,6 +234,86 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
 - **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
 
+### Tag Management
+
+Ghost's Admin API supports full tag CRUD. These endpoints require an **Admin-level token** (owner or staff with Admin role). Integration tokens return `403` — if that happens, see the safe-mode note below.
+
+**List all tags**
+
+```python
+r = requests.get(
+    f'{GHOST_URL}/ghost/api/admin/tags/?limit=all',
+    headers=headers
+)
+tags = r.json().get('tags', [])
+for tag in tags:
+    print(tag['id'], tag['name'], tag['slug'])
+```
+
+**Create a tag**
+
+```python
+r = requests.post(
+    f'{GHOST_URL}/ghost/api/admin/tags/',
+    headers=headers,
+    json={"tags": [{"name": "Your Tag", "slug": "your-tag"}]}
+)
+if r.status_code == 403:
+    print("Safe-mode: Admin token requires owner-level permissions for tag endpoints. Add tags manually in Ghost Admin or use an owner token.")
+else:
+    tag = r.json()['tags'][0]
+    print(tag['id'], tag['name'])
+```
+
+**Update a tag**
+
+```python
+# Fetch tag id first via list, then:
+r = requests.put(
+    f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/',
+    headers=headers,
+    json={"tags": [{"id": TAG_ID, "name": "Updated Name", "slug": "updated-slug"}]}
+)
+if r.status_code == 403:
+    print("Safe-mode: owner-level token required for tag updates.")
+```
+
+**Delete a tag**
+
+```python
+r = requests.delete(
+    f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/',
+    headers=headers
+)
+if r.status_code == 403:
+    print("Safe-mode: owner-level token required for tag deletion.")
+elif r.status_code == 204:
+    print("Tag deleted.")
+```
+
+**Bulk assign a tag to multiple posts**
+
+```python
+# Fetch posts, then PATCH each with the tag added
+posts = requests.get(
+    f'{GHOST_URL}/ghost/api/admin/posts/?limit=all&include=tags',
+    headers=headers
+).json()['posts']
+
+for post in posts:
+    existing_tags = [{"id": t["id"]} for t in post.get("tags", [])]
+    if not any(t["id"] == TAG_ID for t in existing_tags):
+        existing_tags.append({"id": TAG_ID})
+        requests.put(
+            f'{GHOST_URL}/ghost/api/admin/posts/{post["id"]}/',
+            headers=headers,
+            json={"posts": [{"id": post["id"], "updated_at": post["updated_at"], "tags": existing_tags}]}
+        )
+        print(f"Tagged: {post['title']}")
+```
+
+> **Safe-mode note:** All tag write endpoints (`POST`, `PUT`, `DELETE`) require owner-level Admin API credentials. If you get a `403`, either switch to an owner token or manage tags manually in Ghost Admin → Settings → Tags. The list endpoint (`GET`) works with standard integration tokens.
+
 ### License
 
 MIT. Copyright (c) 2026 @highnoonoffice. Retain this notice in any distributed version.
