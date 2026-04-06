@@ -28,7 +28,7 @@ Run it through the parser to generate `second-brain-atoms.json`, then cluster to
 ### ts: 1735776000
 
 - **date:** 2026-01-02T08:00:00 UTC
-- **raw:** speed is your moat when you're small. not scale, not funding, not distribution. just being faster than the people who could beat you
+- **raw:** the gap between a good idea and a shipped product is almost entirely a project management problem not a creativity problem
 - **type:** strategy
 - **tags:** [competition, execution, HNO]
 - **signal:** hot
@@ -124,7 +124,7 @@ Run it through the parser to generate `second-brain-atoms.json`, then cluster to
 ### ts: 1736726400
 
 - **date:** 2026-01-13T08:00:00 UTC
-- **raw:** attention is the only resource that matters right now because it can't be manufactured
+- **raw:** the best interfaces don't ask you to learn anything new they just make the right thing obvious
 - **type:** thought
 - **tags:** [attention, economics, scarcity]
 - **signal:** hot
@@ -172,7 +172,7 @@ Run it through the parser to generate `second-brain-atoms.json`, then cluster to
 ### ts: 1737158400
 
 - **date:** 2026-01-18T08:00:00 UTC
-- **raw:** friction is information. when something is hard to do it's telling you something about the system
+- **raw:** a deadline is not a creative constraint it's a forcing function and those are different things with different results
 - **type:** thought
 - **tags:** [systems, design, friction]
 - **signal:** hot
@@ -280,7 +280,7 @@ Run it through the parser to generate `second-brain-atoms.json`, then cluster to
 ### ts: 1738195200
 
 - **date:** 2026-01-30T08:00:00 UTC
-- **raw:** the hardest part of building something new isn't the building. it's staying convinced it matters long enough to finish
+- **raw:** most meeting summaries are longer than the meeting should have been
 - **type:** thought
 - **tags:** [creativity, endurance, belief]
 - **signal:** hot

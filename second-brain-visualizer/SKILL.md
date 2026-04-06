@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 1.1.1
+version: 1.1.2
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
