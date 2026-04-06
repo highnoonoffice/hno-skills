@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 1.1.2
+version: 1.1.3
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
@@ -9,7 +9,7 @@ metadata:
   config:
     - OPENCLAW_VAULT: "Path to your vault directory containing memory/second-brain.md"
     - OPENCLAW_GATEWAY: "OpenClaw gateway URL (default: http://127.0.0.1:18789)"
-    - OPENCLAW_GATEWAY_TOKEN: "Gateway auth token — read from ~/.openclaw/openclaw.json at runtime"
+    - OPENCLAW_GATEWAY_TOKEN: "Gateway auth token for the OpenClaw local gateway"
     - SBV_MODEL: "LLM model for clustering and insight generation (default: openclaw:main)"
     - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
@@ -129,9 +129,9 @@ Each atom in your markdown ledger:
 
 | Cluster | Status | Atoms | Spread |
 |---|---|---|---|
-| The Permanently Awake Librarian | ESTABLISHED | 7 | 2w |
+| Systems Over Shortcuts | ESTABLISHED | 7 | 2w |
 | Language as Load-Bearing Structure | ESTABLISHED | 8 | 3w |
-| The Legitimacy Project | ESTABLISHED | 8 | 3w |
+| The Speed Paradox | ESTABLISHED | 8 | 3w |
 | Agent Failure as Intelligence | ESTABLISHED | 7 | 4w |
 | Friction as Design Oracle | FORMING | 5 | 4w |
 | Craft as Moral Position | ESTABLISHED | 7 | 3w |

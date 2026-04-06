@@ -12,7 +12,7 @@ Before you start, confirm you have:
 - **OpenClaw** installed and running (`openclaw status` returns ok)
 - **Node.js 18+** (`node --version`)
 - **An LLM configured** in OpenClaw — any model works, but one with a 32k+ context window handles large atom corpora better. Maple, GPT-4o, Claude Sonnet, or Gemini 2.5 Pro all work.
-- **A vault directory** — wherever OpenClaw stores your markdown files (`echo $OPENCLAW_VAULT` or check `~/.openclaw/openclaw.json`)
+- **A vault directory** — wherever OpenClaw stores your markdown files (`echo $OPENCLAW_VAULT` or check `~/.openclaw/` directory for your configured vault path)
 
 ---
 

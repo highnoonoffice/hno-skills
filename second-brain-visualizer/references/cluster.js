@@ -10,7 +10,6 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const crypto = require('crypto');
 
 const ATOMS_FILE = process.env.SBV_ATOMS_FILE || path.join(__dirname, '../data/second-brain-atoms.json');
 const OUT_FILE   = process.env.SBV_CLUSTERS_FILE || path.join(__dirname, '../data/second-brain-clusters.json');
@@ -19,13 +18,6 @@ const GATEWAY_PORT = parseInt(process.env.OPENCLAW_GATEWAY_PORT || '18789', 10);
 const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
 function getGatewayToken() {
-  const configPath = path.join(process.env.HOME, '.openclaw/openclaw.json');
-  if (fs.existsSync(configPath)) {
-    try {
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      return config?.gateway?.auth?.token ?? null;
-    } catch {}
-  }
   return process.env.OPENCLAW_GATEWAY_TOKEN ?? null;
 }
 
