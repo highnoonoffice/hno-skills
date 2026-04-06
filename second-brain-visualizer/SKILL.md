@@ -1,7 +1,7 @@
 ---
 name: second-brain-visualizer
 version: 1.0.0
-description: "Your brain wasn't designed to hold data. It was designed to produce it. Second Brain Visualizer turns your raw thought stream into emergent clusters — and reads what they mean."
+description: "Unload your cognitive baggage. Drop ideas anywhere — Slack, Telegram, WhatsApp, Gmail. Second Brain Visualizer finds the signal as your ideas accrete, surfaces emergent clusters, and shows you how you actually think."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
 license: MIT-0
@@ -10,53 +10,79 @@ metadata: ~
 
 # Second Brain Visualizer
 
-Your brain wasn't designed to hold data. It was designed to produce it. We create ideas but we don't have to carry them.
+Unload your cognitive baggage.
 
-Connect it to wherever you already dump your thoughts — Slack, Telegram, WhatsApp, a private channel you've had open for years. No new habit. No new app. The skill meets you where you are.
+Ideas come fast and leave faster. The one that felt obvious in the shower is gone by lunch. Most people try to hold it all in their head — and pay for it with scattered energy, repeated thinking, and the slow erosion of creative momentum.
 
-The input doesn't have to be clean. Voice to text, half a sentence, a joke you almost forgot, a project name with no context. Your agent reads through the noise. The signal is in there — it just needed someone to look.
+The fix is simple: find a channel. Slack, Telegram, WhatsApp, Gmail, a private Discord — it doesn't matter. Every time something interesting moves through your mind, drop it. A line. A fragment. A half-formed joke. Voice to text at a red light. You don't have to carry it anymore.
 
-That's where the value compounds. One note is a note. Fifty notes are a habit. A year of notes is a portrait. The Second Brain Visualizer clusters your atoms over time and when you click one of those clusters, it doesn't show you a list — it tells you what it found.
+Second Brain Visualizer reads what accumulates.
 
-A note-taking app stores what you put in. This reads what it means and generates insights.
+Not to categorize it. Not to tag it or sort it into folders. To find the signal underneath the noise — the questions you keep returning to in different disguises, the tensions you're working out across dozens of unconnected notes, the creative territories you're actively exploring without realizing it.
 
-**Status:** v0.1.0 — working prototype. Not yet published to ClawHub. Core pipeline proven, iterations ahead before public release.
+One note is just a note. Fifty notes across three weeks is a pattern. A year of notes is a portrait of how you think.
 
-### What It Builds
+---
 
-**Parser** (`references/parser.js`) — reads your second brain markdown ledger, extracts atoms into a structured JSON file.
+### What It Does
 
-**Clustering engine** (`references/cluster.js`) — passes the full atom corpus to an LLM with an intent-based clustering prompt. Groups atoms by affinity of intent, not keyword overlap. Outputs emergent clusters with status (ESTABLISHED / FORMING / FADING), confidence scores, time spread, emerging signals, tensions, and notable absences.
+Your raw idea stream gets parsed into **atoms** — the smallest units of intent. Atoms are clustered by **affinity of meaning**, not keyword overlap. A joke about AI billing models and a note about Simone Weil may belong in the same cluster if they're both probing the same underlying question about attention and value.
 
-**React component** (`references/component.tsx`) — D3 force-directed graph on top. Nodes sized by atom count × time spread. Click any node to expand: base insight, LLM-generated insight in gold, full atom list below. Tensions, emerging signals, and absences below that.
+Each cluster gets:
+- A sharp name capturing the underlying drive (not a generic domain label)
+- A one-sentence insight: what does this pattern reveal about how you think?
+- A status: ESTABLISHED, FORMING, or FADING
+- A confidence score and time spread across your corpus
 
-### The Clustering Prompt
+The visualizer also surfaces:
+- **Emerging signals** — atoms with distinct intent that haven't massed into clusters yet
+- **Tensions** — places where your idea stream is arguing with itself across multiple notes
+- **Notable absences** — creative and intellectual domains conspicuously missing from the stream
 
-The core IP. Intent-based, not keyword-based. Full prompt in `references/cluster.js`.
+---
 
-Key principles:
-- Read for intent, not literal content. A joke about LLMs may be a probe into AI agency.
-- Group atoms by affinity of intent — two atoms belong together if they reach toward the same underlying question, even if they use completely different language.
-- Let the corpus determine cluster count (min 3, max 10). A cluster must earn its existence.
-- Name clusters by underlying drive, not domain. Not "Technology." Something like "The Legitimacy Project."
-- Track tensions — where the person is arguing with themselves across notes.
-- Track absences — what they used to think about and stopped.
-- time_spread is the anti-recency-bias mechanic. Wide spread = load-bearing belief. Narrow = situational.
+### How It Works
+
+**1. Drop ideas anywhere**
+You already have a channel you use. Voice to text, half a sentence, a project name with no context. Raw is fine. The roughness is the point — it's what unguarded thinking looks like.
+
+**2. Parser extracts atoms**
+`references/parser.js` reads your second brain markdown ledger and extracts structured atoms with timestamp, raw text, type, signal, and optional next action.
+
+**3. Clustering engine reads for intent**
+`references/cluster.js` passes your full atom corpus to an LLM with a custom intent-based prompt. The prompt reads for what you're actually working out, not what words you used. Outputs clusters, tensions, emerging signals, and absences as structured JSON.
+
+**4. Visualizer shows you the map**
+`references/component.tsx` renders a D3 force-directed graph where nodes are sized by atom count × time spread. Click any node to expand: the base insight, an LLM-generated deeper read in gold, and the full list of atoms that make up the cluster. Tensions, signals, and absences scroll below.
+
+---
+
+### The Core Insight
+
+Most note-taking tools are mirrors — they show you what you put in. This reads what it means.
+
+The clustering prompt is the IP. Intent-based, not keyword-based. A joke reads as a probe. A fragment reads as a question. Two atoms belong together if they reach toward the same underlying question, even if they use completely different language.
+
+Full prompt in `references/cluster.js`.
+
+---
 
 ### Atom Schema
 
-Each atom in the ledger:
+Each atom in your markdown ledger:
 
 ```
 ### ts: <unix_timestamp>
 - **date:** YYYY-MM-DDTHH:MM:SS UTC
 - **raw:** verbatim text (voice to text, misspelled, incomplete — all valid)
-- **type:** thought | task | strategy | creative | life | meta | idea-jar | visual | link
+- **type:** thought | task | strategy | creative | meta | idea-jar | visual | link
 - **tags:** freeform, comma-separated
 - **signal:** hot | warm | cool
 - **actionable:** yes | no
 - **nextAction:** optional single-sentence move
 ```
+
+---
 
 ### Cluster Output Schema
 
@@ -65,12 +91,13 @@ Each atom in the ledger:
   "clusters": [
     {
       "id": "stable-kebab-id",
-      "name": "Sharp specific name capturing underlying drive",
+      "name": "Sharp name capturing underlying drive",
       "insight": "One sentence: what does this pattern reveal?",
       "atom_ids": ["sb-1234", "sb-5678"],
       "confidence": 0.87,
       "status": "ESTABLISHED",
-      "time_spread": 4
+      "time_spread": 4,
+      "category": "CRAFT"
     }
   ],
   "emerging_signals": ["sb-9999"],
@@ -81,13 +108,13 @@ Each atom in the ledger:
       "description": "What the person is working out"
     }
   ],
-  "absences": ["Theme that went quiet"]
+  "absences": ["Creative territory missing from the stream"]
 }
 ```
 
-### First Run Results (2026-03-24)
+---
 
-85 atoms, 8 clusters, 8 emerging signals, 4 tensions:
+### Example Output (85 atoms, 8 clusters)
 
 | Cluster | Status | Atoms | Spread |
 |---|---|---|---|
@@ -100,21 +127,27 @@ Each atom in the ledger:
 | The Protagonist Problem | ESTABLISHED | 7 | 4w |
 | Deliberate Presence as Counterculture | FORMING | 6 | 2w |
 
+---
+
 ### Prerequisites
 
-- OpenClaw agent with a vault markdown ledger (second brain atoms in the format above)
+- OpenClaw agent with a vault markdown ledger (atoms in the schema above)
 - Node.js 18+
-- A Next.js dashboard or equivalent React host
+- A Next.js dashboard or equivalent React host for the visualizer
 - `d3` and `@types/d3` installed
-- OpenClaw gateway running locally (for insight generation calls)
+- An LLM API configured in OpenClaw (for clustering and insight generation)
+
+---
 
 ### Roadmap
 
-- [ ] Full-graph view with all atoms as sub-nodes per cluster
+- [ ] Setup guide for new users building their first atom ledger
+- [ ] Configurable ingestion from Slack, Telegram, WhatsApp, Gmail
 - [ ] Cluster diff across runs (what emerged, merged, faded)
-- [ ] Configurable ingestion sources beyond Slack
+- [ ] Full-graph view with atoms as sub-nodes
 - [ ] Cluster history timeline
-- [ ] ClawHub publish (targeting v1.0.0 after 5+ iterations)
+
+---
 
 ### License
 
