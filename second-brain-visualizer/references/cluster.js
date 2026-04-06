@@ -12,9 +12,11 @@ const path = require('path');
 const https = require('https');
 const crypto = require('crypto');
 
-const ATOMS_FILE = path.join(__dirname, '../data/second-brain-atoms.json');
-const OUT_FILE = path.join(__dirname, '../data/second-brain-clusters.json');
-const CREDS_FILE = path.join(process.env.HOME, '.openclaw/credentials/anthropic.json');
+const ATOMS_FILE = process.env.SBV_ATOMS_FILE || path.join(__dirname, '../data/second-brain-atoms.json');
+const OUT_FILE   = process.env.SBV_CLUSTERS_FILE || path.join(__dirname, '../data/second-brain-clusters.json');
+const GATEWAY_HOST = process.env.OPENCLAW_GATEWAY_HOST || '127.0.0.1';
+const GATEWAY_PORT = parseInt(process.env.OPENCLAW_GATEWAY_PORT || '18789', 10);
+const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
 function getGatewayToken() {
   const configPath = path.join(process.env.HOME, '.openclaw/openclaw.json');
@@ -30,15 +32,15 @@ function getGatewayToken() {
 function callLLM(token, prompt) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      model: 'openclaw:main',
+      model: MODEL,
       max_tokens: 4096,
       temperature: 0.3,
       messages: [{ role: 'user', content: prompt }],
     });
 
     const req = require('http').request({
-      hostname: '127.0.0.1',
-      port: 18789,
+      hostname: GATEWAY_HOST,
+      port: GATEWAY_PORT,
       path: '/v1/chat/completions',
       method: 'POST',
       headers: {

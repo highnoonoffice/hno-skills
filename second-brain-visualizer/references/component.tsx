@@ -52,7 +52,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 const NODE_RADIUS = (c: Cluster) => Math.max(28, Math.min(52, 18 + c.atom_ids.length * 3 + c.time_spread * 2));
 
-export default function SecondBrain() {
+interface SecondBrainProps {
+  /** Base path for API routes. Defaults to '/api/second-brain'. Override if your dashboard uses a different prefix. */
+  apiBase?: string;
+}
+
+export default function SecondBrain({ apiBase = '/api/second-brain' }: SecondBrainProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [clusters, setClusters] = useState<ClustersData | null>(null);
   const [atoms, setAtoms] = useState<Atom[]>([]);
@@ -65,8 +70,8 @@ export default function SecondBrain() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/mission-control/api/second-brain/atoms').then(r => r.json()),
-      fetch('/mission-control/api/second-brain/clusters').then(r => r.json()),
+      fetch(`${apiBase}/atoms`).then(r => r.json()),
+      fetch(`${apiBase}/clusters`).then(r => r.json()),
     ]).then(([atomsData, clustersData]) => {
       setAtoms(atomsData.atoms ?? []);
       if (clustersData.clusters?.length) setClusters(clustersData);
@@ -244,7 +249,7 @@ export default function SecondBrain() {
       .filter(Boolean)
       .map(a => a.raw);
 
-    fetch('/mission-control/api/second-brain/insight', {
+    fetch(`${apiBase}/insight`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ atom_texts, cluster_name: selected.name }),
@@ -260,7 +265,7 @@ export default function SecondBrain() {
     setError(null);
     setSelected(null);
     try {
-      const res = await fetch('/mission-control/api/second-brain/clusters', { method: 'POST' });
+      const res = await fetch(`${apiBase}/clusters`, { method: 'POST' });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setClusters(data);

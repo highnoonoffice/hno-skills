@@ -8,9 +8,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const VAULT = process.env.VAULT_DIR || path.join(process.env.HOME, '.openclaw/vault');
-const SB_FILE = path.join(VAULT, 'memory/second-brain.md');
-const OUT_FILE = path.join(__dirname, '../data/second-brain-atoms.json');
+// Configure via environment variables — see references/install.md
+const VAULT   = process.env.OPENCLAW_VAULT || process.env.VAULT_DIR || path.join(process.env.HOME, 'vault');
+const SB_FILE = process.env.SBV_LEDGER_FILE || path.join(VAULT, 'memory/second-brain.md');
+const OUT_FILE = process.env.SBV_ATOMS_FILE || path.join(__dirname, '../data/second-brain-atoms.json');
 
 function parseAtoms(md) {
   const atoms = [];
