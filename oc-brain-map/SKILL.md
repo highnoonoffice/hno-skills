@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 3.1.7
+version: 3.2.0
 description: "Visualize how attention moves across your agent's projects. Markdown files become nodes grouped by Attention Pockets."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -249,7 +249,7 @@ Session type is auto-classified from journal text keywords:
 
 **Filesystem access:** The journal parser reads `.md` files recursively under your configured vault directory and writes one output file. Scope is intentional and bounded. Run the parser only from a trusted working directory.
 
-**Tooltip rendering:** The graph component renders tooltips as structured React elements (filename, group, session counts). No `dangerouslySetInnerHTML` or raw HTML injection is used anywhere in the component.
+**Tooltip rendering:** The graph component renders tooltips as structured React elements (filename, group, session counts). Tooltips use structured React elements only — no raw HTML injection.
 
 **Emerging Projects scan:** The journal parser reads existing session journal summaries to detect recurring phrases. This is the same local read scope as the existing co-access scan. No new file system paths are accessed. No writes occur beyond the single output JSON.
 

@@ -401,7 +401,7 @@ export default function BrainMapGraph() {
 
 - The component fetches `/api/brain-map/graph` on mount. Ensure the API route is wired (see `references/graph-schema.md`).
 - The `brain-map:open-file` custom event fires on second-click. Wire a listener in your host page to handle file reading if you have a reader panel.
-- Tooltip renders structured data (title, label/value rows, optional hint) as discrete React elements — no `dangerouslySetInnerHTML`, no raw HTML injection.
+- Tooltip renders structured data (title, label/value rows, optional hint) as discrete React elements — no raw HTML injection.
 - Flow dot animation uses `requestAnimationFrame` and cleans up on unmount via the returned function from `useEffect`.
 - The component is fully self-contained — no external state, no context dependencies.
 
