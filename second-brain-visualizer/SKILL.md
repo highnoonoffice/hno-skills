@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 1.1.3
+version: 1.1.4
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
@@ -8,15 +8,24 @@ license: MIT-0
 metadata:
   config:
     - OPENCLAW_VAULT: "Path to your vault directory containing memory/second-brain.md"
-    - OPENCLAW_GATEWAY: "OpenClaw gateway URL (default: http://127.0.0.1:18789)"
+    - OPENCLAW_GATEWAY_HOST: "OpenClaw gateway host (default: 127.0.0.1)"
+    - OPENCLAW_GATEWAY_PORT: "OpenClaw gateway port (default: 18789)"
     - OPENCLAW_GATEWAY_TOKEN: "Gateway auth token for the OpenClaw local gateway"
     - SBV_MODEL: "LLM model for clustering and insight generation (default: openclaw:main)"
     - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
+  credentials:
+    - name: "slack-sb.json"
+      description: "Optional. Slack bot token for automated ingestion from a private Slack channel. Format: { token: string }"
+      required: false
+    - name: "telegram-sb.json"
+      description: "Optional. Telegram bot token for automated ingestion from a private Telegram channel. Format: { token: string, chat_id: string }"
+      required: false
   dataFlow:
     - "Reads local markdown ledger from OPENCLAW_VAULT/memory/second-brain.md"
     - "POSTs atom corpus to LLM via OpenClaw gateway for clustering and insight generation"
     - "No data leaves your local OpenClaw gateway — LLM routing is controlled by your OpenClaw config"
+    - "Optional ingestion credentials (Slack, Telegram) stored locally in ~/.openclaw/credentials/ — never sent externally"
 ---
 
 # Second Brain Visualizer

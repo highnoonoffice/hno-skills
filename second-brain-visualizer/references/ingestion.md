@@ -128,35 +128,7 @@ A sample parser for WhatsApp export format is included as an extension in this r
 
 ## Gmail
 
-Forward ideas to a dedicated Gmail label. Works well if you're already in email flow during your day.
-
-**Setup:**
-1. Create a Gmail label: `second-brain`
-2. Emails you want to capture: forward them to yourself with label applied, or use a filter on a specific address (e.g. `brain@yourdomain.com`)
-
-**Reading via Gmail API:**
-
-```javascript
-// Requires Google OAuth — see Gmail API docs for setup
-// Reads unread messages in the 'second-brain' label
-// Extracts subject + body as atom raw text
-// Marks as read after ingestion
-
-const gmail = google.gmail({ version: 'v1', auth });
-const res = await gmail.users.messages.list({
-  userId: 'me',
-  q: 'label:second-brain is:unread',
-});
-
-for (const msg of res.data.messages) {
-  const full = await gmail.users.messages.get({ userId: 'me', id: msg.id });
-  const subject = full.data.payload.headers.find(h => h.name === 'Subject')?.value ?? '';
-  const body = extractBody(full.data.payload);
-  // append subject + body as atom raw text
-}
-```
-
-**Note:** Gmail OAuth requires a Google Cloud project with Gmail API enabled. Credentials stored at `~/.openclaw/credentials/gmail.json`.
+Gmail ingestion is supported but requires advanced setup (Google Cloud project + Gmail API credentials). See the Gmail API documentation for the authorization flow. Once configured, forward ideas to a dedicated `second-brain` label and ingest unread messages on your cron schedule.
 
 ---
 
