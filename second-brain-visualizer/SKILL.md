@@ -149,6 +149,12 @@ Each atom in your markdown ledger:
 
 ---
 
+### Credit
+
+The original idea to build a second brain capture system came from a conversation with **Nate B. Jones**. The architecture, clustering engine, and visualizer are original work — but the seed was his.
+
+---
+
 ### License
 
 MIT-0. Copyright (c) 2026 @highnoonoffice. No attribution required.
