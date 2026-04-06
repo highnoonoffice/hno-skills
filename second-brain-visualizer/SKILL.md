@@ -1,11 +1,22 @@
 ---
 name: second-brain-visualizer
-version: 1.1.0
+version: 1.1.1
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
 license: MIT-0
-metadata: ~
+metadata:
+  config:
+    - OPENCLAW_VAULT: "Path to your vault directory containing memory/second-brain.md"
+    - OPENCLAW_GATEWAY: "OpenClaw gateway URL (default: http://127.0.0.1:18789)"
+    - OPENCLAW_GATEWAY_TOKEN: "Gateway auth token — read from ~/.openclaw/openclaw.json at runtime"
+    - SBV_MODEL: "LLM model for clustering and insight generation (default: openclaw:main)"
+    - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
+    - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
+  dataFlow:
+    - "Reads local markdown ledger from OPENCLAW_VAULT/memory/second-brain.md"
+    - "POSTs atom corpus to LLM via OpenClaw gateway for clustering and insight generation"
+    - "No data leaves your local OpenClaw gateway — LLM routing is controlled by your OpenClaw config"
 ---
 
 # Second Brain Visualizer

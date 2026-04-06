@@ -124,7 +124,7 @@ Run it through the parser to generate `second-brain-atoms.json`, then cluster to
 ### ts: 1736726400
 
 - **date:** 2026-01-13T08:00:00 UTC
-- **raw:** attention is the only currency that matters right now because it can't be printed
+- **raw:** attention is the only resource that matters right now because it can't be manufactured
 - **type:** thought
 - **tags:** [attention, economics, scarcity]
 - **signal:** hot
