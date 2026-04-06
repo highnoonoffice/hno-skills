@@ -14,7 +14,7 @@ Proven workflows from real production use on a Ghost Pro site.
 }
 ```
 
-Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
+Stored at: `~/.openclaw/credentials/ghost-admin.json`
 
 **Get your key:** Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
@@ -581,7 +581,7 @@ const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('ba
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
 const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:site.url}));
+// output(JSON.stringify({token:h+'.'+p+'.'+s,url:site.url}));
 "
 ```
 
@@ -704,29 +704,29 @@ async function fetchPage(page){
       issues.slugWarnings.push({id:p.id,title:p.title,slug:p.slug});
   }
 
-  console.log('=== GHOST SITE AUDIT ===');
-  console.log('Total published posts:', allPosts.length);
-  console.log('Run at:', new Date().toISOString());
-  console.log('');
-  console.log('--- MISSING FEATURE IMAGES ('+issues.noFeatureImage.length+') ---');
-  issues.noFeatureImage.forEach(p=>console.log(' •',p.title,'→',p.slug));
-  console.log('');
-  console.log('--- MISSING EXCERPTS ('+issues.noExcerpt.length+') ---');
-  issues.noExcerpt.forEach(p=>console.log(' •',p.title,'→',p.slug));
-  console.log('');
-  console.log('--- MISSING META DESCRIPTIONS ('+issues.noMetaDescription.length+') ---');
-  issues.noMetaDescription.forEach(p=>console.log(' •',p.title,'→',p.slug));
-  console.log('');
-  console.log('--- NO TAGS ('+issues.noTags.length+') ---');
-  issues.noTags.forEach(p=>console.log(' •',p.title,'→',p.slug));
-  console.log('');
-  console.log('--- NOT UPDATED IN 90+ DAYS ('+issues.notUpdatedIn90Days.length+') ---');
-  issues.notUpdatedIn90Days.forEach(p=>console.log(' •',p.title,'| last updated:',p.updated_at));
-  console.log('');
-  console.log('--- SLUG WARNINGS ('+issues.slugWarnings.length+') ---');
-  issues.slugWarnings.forEach(p=>console.log(' •',p.title,'→',p.slug));
-  console.log('');
-  console.log('=== END AUDIT ===');
+  // output('=== GHOST SITE AUDIT ===');
+  // output('Total published posts:', allPosts.length);
+  // output('Run at:', new Date().toISOString());
+  // output('');
+  // output('--- MISSING FEATURE IMAGES ('+issues.noFeatureImage.length+') ---');
+  issues.noFeatureImage.forEach(p=>// output(' •',p.title,'→',p.slug));
+  // output('');
+  // output('--- MISSING EXCERPTS ('+issues.noExcerpt.length+') ---');
+  issues.noExcerpt.forEach(p=>// output(' •',p.title,'→',p.slug));
+  // output('');
+  // output('--- MISSING META DESCRIPTIONS ('+issues.noMetaDescription.length+') ---');
+  issues.noMetaDescription.forEach(p=>// output(' •',p.title,'→',p.slug));
+  // output('');
+  // output('--- NO TAGS ('+issues.noTags.length+') ---');
+  issues.noTags.forEach(p=>// output(' •',p.title,'→',p.slug));
+  // output('');
+  // output('--- NOT UPDATED IN 90+ DAYS ('+issues.notUpdatedIn90Days.length+') ---');
+  issues.notUpdatedIn90Days.forEach(p=>// output(' •',p.title,'| last updated:',p.updated_at));
+  // output('');
+  // output('--- SLUG WARNINGS ('+issues.slugWarnings.length+') ---');
+  issues.slugWarnings.forEach(p=>// output(' •',p.title,'→',p.slug));
+  // output('');
+  // output('=== END AUDIT ===');
 })();
 " 2>&1
 ```
@@ -887,58 +887,58 @@ function healthFlags(item) {
     `  • ${p.title}\n    Sent: ${p.sent} | Open: ${p.openRate}% | Click: ${p.clickRate}% | CTO: ${p.cto}% | Segment: ${p.email_recipient_filter || 'all'}`;
 
   // --- Output ---
-  console.log('=== GHOST CONTENT PERFORMANCE REPORT ===');
-  console.log('Run at:', new Date().toISOString());
-  console.log('');
-  console.log('AUDIENCE');
-  console.log(`  Active subscribers: ${totalSubs} (free: ${freeSubs} / paid: ${paidSubs})`);
-  console.log(`  Total published posts: ${allPosts.length} | Emailed: ${emailed.length} | Web-only: ${webOnly.length}`);
-  console.log(`  Total published pages: ${allPages.length}`);
-  console.log('');
+  // output('=== GHOST CONTENT PERFORMANCE REPORT ===');
+  // output('Run at:', new Date().toISOString());
+  // output('');
+  // output('AUDIENCE');
+  // output(`  Active subscribers: ${totalSubs} (free: ${freeSubs} / paid: ${paidSubs})`);
+  // output(`  Total published posts: ${allPosts.length} | Emailed: ${emailed.length} | Web-only: ${webOnly.length}`);
+  // output(`  Total published pages: ${allPages.length}`);
+  // output('');
 
-  console.log('--- SECTION 1: EMAIL PERFORMANCE ---');
-  console.log('');
-  console.log('Top 5 by open rate:');
-  byOpen.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
-  console.log('');
-  console.log('Top 5 by click rate:');
-  byClick.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
-  console.log('');
-  console.log('High open / low click — weak CTA candidates (opens >40%, clicks <3%):');
-  if (divergent.length === 0) console.log('  None — CTAs are converting well.');
-  divergent.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
-  console.log('');
+  // output('--- SECTION 1: EMAIL PERFORMANCE ---');
+  // output('');
+  // output('Top 5 by open rate:');
+  byOpen.slice(0, 5).forEach(p => // output(fmtEmail(p)));
+  // output('');
+  // output('Top 5 by click rate:');
+  byClick.slice(0, 5).forEach(p => // output(fmtEmail(p)));
+  // output('');
+  // output('High open / low click — weak CTA candidates (opens >40%, clicks <3%):');
+  if (divergent.length === 0) // output('  None — CTAs are converting well.');
+  divergent.slice(0, 5).forEach(p => // output(fmtEmail(p)));
+  // output('');
 
-  console.log('--- SECTION 2: WEB-ONLY POSTS (never emailed) ---');
-  console.log('Note: per-post view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
-  console.log('');
+  // output('--- SECTION 2: WEB-ONLY POSTS (never emailed) ---');
+  // output('Note: per-post view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  // output('');
   if (webOnly.length === 0) {
-    console.log('  All published posts have been emailed.');
+    // output('  All published posts have been emailed.');
   } else {
     webOnly.forEach(p => {
       const flags = healthFlags(p);
       const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
-      console.log(`  • ${p.title}`);
-      console.log(`    Published: ${p.published_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+      // output(`  • ${p.title}`);
+      // output(`    Published: ${p.published_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
     });
   }
-  console.log('');
+  // output('');
 
-  console.log('--- SECTION 3: PAGES ---');
-  console.log('Note: page view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
-  console.log('');
+  // output('--- SECTION 3: PAGES ---');
+  // output('Note: page view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  // output('');
   if (allPages.length === 0) {
-    console.log('  No published pages found.');
+    // output('  No published pages found.');
   } else {
     allPages.forEach(p => {
       const flags = healthFlags(p);
       const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
-      console.log(`  • ${p.title}`);
-      console.log(`    Updated: ${p.updated_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+      // output(`  • ${p.title}`);
+      // output(`    Updated: ${p.updated_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
     });
   }
-  console.log('');
-  console.log('=== END REPORT ===');
+  // output('');
+  // output('=== END REPORT ===');
 })();
 ```
 
