@@ -1,7 +1,7 @@
 ---
 name: second-brain-visualizer
-version: 1.0.0
-description: "Unload your cognitive baggage. Drop ideas anywhere — Slack, Telegram, WhatsApp, Gmail. Second Brain Visualizer finds the signal as your ideas accrete, surfaces emergent clusters, and shows you how you actually think."
+version: 1.1.0
+description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
 license: MIT-0
@@ -10,17 +10,17 @@ metadata: ~
 
 # Second Brain Visualizer
 
-Unload your cognitive baggage.
+Your brain wasn't designed to hold data. It was designed to produce it.
 
-Ideas come fast and leave faster. The one that felt obvious in the shower is gone by lunch. Most people try to hold it all in their head — and pay for it with scattered energy, repeated thinking, and the slow erosion of creative momentum.
+Pick a channel — Slack, Telegram, WhatsApp, Gmail, a private Discord. Every time something interesting moves through your mind, drop it. A line. A fragment. A joke that might be a product idea. Voice to text at a red light. You don't have to carry it anymore.
 
-The fix is simple: find a channel. Slack, Telegram, WhatsApp, Gmail, a private Discord — it doesn't matter. Every time something interesting moves through your mind, drop it. A line. A fragment. A half-formed joke. Voice to text at a red light. You don't have to carry it anymore.
-
-Second Brain Visualizer reads what accumulates.
-
-Not to categorize it. Not to tag it or sort it into folders. To find the signal underneath the noise — the questions you keep returning to in different disguises, the tensions you're working out across dozens of unconnected notes, the creative territories you're actively exploring without realizing it.
+Second Brain Visualizer reads what accumulates. Not to categorize it. To find the signal underneath the noise — the questions you keep returning to in different disguises, the tensions you're working out across dozens of unrelated notes, the creative territory you're actively mapping without realizing it.
 
 One note is just a note. Fifty notes across three weeks is a pattern. A year of notes is a portrait of how you think.
+
+The clustering engine reads for intent, not keywords. A joke about AI billing and a note about Simone Weil may belong in the same cluster if they're reaching toward the same underlying question. Clusters surface with a name, a one-sentence insight, and a status: ESTABLISHED, FORMING, or FADING. Tensions show you where you're arguing with yourself. Notable absences show you what your idea stream isn't touching yet.
+
+This is not a note-taking app. Most note-taking tools are mirrors — they show you what you put in. This reads what it means.
 
 ---
 
