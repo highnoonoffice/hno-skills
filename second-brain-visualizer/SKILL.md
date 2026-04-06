@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 1.1.4
+version: 1.1.5
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
@@ -10,11 +10,13 @@ metadata:
     - OPENCLAW_VAULT: "Path to your vault directory containing memory/second-brain.md"
     - OPENCLAW_GATEWAY_HOST: "OpenClaw gateway host (default: 127.0.0.1)"
     - OPENCLAW_GATEWAY_PORT: "OpenClaw gateway port (default: 18789)"
-    - OPENCLAW_GATEWAY_TOKEN: "Gateway auth token for the OpenClaw local gateway"
     - SBV_MODEL: "LLM model for clustering and insight generation (default: openclaw:main)"
     - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
   credentials:
+    - name: "OPENCLAW_GATEWAY_TOKEN"
+      description: "Required. Gateway auth token for your local OpenClaw gateway. Set as environment variable."
+      required: true
     - name: "slack-sb.json"
       description: "Optional. Slack bot token for automated ingestion from a private Slack channel. Format: { token: string }"
       required: false
