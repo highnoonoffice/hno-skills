@@ -73,7 +73,7 @@ function main() {
 
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
   fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2));
-  console.log(`Parsed ${atoms.length} atoms → ${OUT_FILE}`);
+  // log(`Parsed ${atoms.length} atoms → ${OUT_FILE}`);
 }
 
 main();

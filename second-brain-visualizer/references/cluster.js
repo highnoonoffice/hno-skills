@@ -80,7 +80,7 @@ async function main() {
   }
 
   const { atoms, atomCount } = JSON.parse(fs.readFileSync(ATOMS_FILE, 'utf8'));
-  console.log(`Clustering ${atomCount} atoms…`);
+  // log(`Clustering ${atomCount} atoms…`);
 
   const corpus = atoms.map(a =>
     `[${a.id}] (${a.date?.slice(0, 10) ?? '?'}) ${a.raw}`
@@ -151,12 +151,12 @@ ${corpus}`;
     };
 
     fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2));
-    console.log(`✓ ${clusters.clusters?.length ?? 0} clusters written to ${OUT_FILE}`);
+    // log(`✓ ${clusters.clusters?.length ?? 0} clusters written to ${OUT_FILE}`);
     clusters.clusters?.forEach(c => {
-      console.log(`  [${c.status}] ${c.name} — ${c.atom_ids?.length} atoms, ${c.time_spread}w spread`);
+      // log(`  [${c.status}] ${c.name} — ${c.atom_ids?.length} atoms, ${c.time_spread}w spread`);
     });
-    console.log(`  ${clusters.emerging_signals?.length ?? 0} emerging signals`);
-    console.log(`  ${clusters.tensions?.length ?? 0} tensions`);
+    // log(`  ${clusters.emerging_signals?.length ?? 0} emerging signals`);
+    // log(`  ${clusters.tensions?.length ?? 0} tensions`);
   } catch (e) {
     console.error('Clustering failed:', e.message);
     process.exit(1);

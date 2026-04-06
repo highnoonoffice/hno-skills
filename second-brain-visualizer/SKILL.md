@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 0.1.0
+version: 1.0.0
 description: "Your brain wasn't designed to hold data. It was designed to produce it. Second Brain Visualizer turns your raw thought stream into emergent clusters — and reads what they mean."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
