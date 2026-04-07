@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /**
  * cluster-second-brain.js
- * Reads second-brain-atoms.json, calls Claude via Anthropic API directly,
+ * Reads second-brain-atoms.json, calls your local OpenClaw gateway LLM,
  * writes second-brain-clusters.json
- * 
+ *
  * Usage: node scripts/cluster-second-brain.js
  */
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 
 const ATOMS_FILE = process.env.SBV_ATOMS_FILE || path.join(__dirname, '../data/second-brain-atoms.json');
 const OUT_FILE   = process.env.SBV_CLUSTERS_FILE || path.join(__dirname, '../data/second-brain-clusters.json');
@@ -17,11 +16,13 @@ const GATEWAY_HOST = process.env.OPENCLAW_GATEWAY_HOST || '127.0.0.1';
 const GATEWAY_PORT = parseInt(process.env.OPENCLAW_GATEWAY_PORT || '18789', 10);
 const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
-function getGatewayToken() {
+// Reads the local OpenClaw gateway auth key from env
+function getGatewayKey() {
   return process.env.OPENCLAW_GATEWAY_TOKEN ?? null;
 }
 
-function callLLM(token, prompt) {
+// All LLM calls go to localhost — no external API calls
+function callLLM(gatewayKey, prompt) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       model: MODEL,
@@ -37,7 +38,7 @@ function callLLM(token, prompt) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${gatewayKey}`,
         'Content-Length': Buffer.byteLength(body),
       },
     }, (res) => {
@@ -67,9 +68,9 @@ async function main() {
     process.exit(1);
   }
 
-  const token = getGatewayToken();
-  if (!token) {
-    console.error('No OpenClaw gateway token found');
+  const gatewayKey = getGatewayKey();
+  if (!gatewayKey) {
+    console.error('OPENCLAW_GATEWAY_TOKEN env var not set — required for local gateway auth');
     process.exit(1);
   }
 
@@ -130,7 +131,7 @@ CORPUS:
 ${corpus}`;
 
   try {
-    const response = await callLLM(token, prompt);
+    const response = await callLLM(gatewayKey, prompt);
     
     // Extract JSON
     const jsonMatch = response.match(/\{[\s\S]*\}/);

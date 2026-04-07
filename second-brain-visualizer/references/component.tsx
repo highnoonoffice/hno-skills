@@ -110,7 +110,7 @@ export default function SecondBrain({ apiBase = '/api/second-brain' }: SecondBra
 
     const sim = d3.forceSimulation(nodes as any)
       .force('link', d3.forceLink(links as any).id((d: any) => d.id).distance(140).strength(0.3))
-      .force('charge', d3.forceManyBody().strength(-320))
+      .force('repulsion', d3.forceManyBody().strength(-320))
       .force('center', d3.forceCenter(W / 2, H / 2))
       .force('collide', d3.forceCollide().radius((d: any) => d.r + 18))
       .force('x', d3.forceX(W / 2).strength(0.04))
