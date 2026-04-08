@@ -1,12 +1,6 @@
 ---
 name: library-of-babel
-description: >
-  Bidirectional mathematical engine for Borges' Library of Babel. Finds the permanent hexagon address
-  of any text, reads any page at any coordinate, and scores pages by Shannon entropy. No database,
-  no randomness — same input always produces identical output. Use when asked to locate text in the
-  Library of Babel, generate a page at given coordinates, explore Borges' infinite library concept,
-  or analyze page entropy. Triggers on: "find this in the Library of Babel", "what's the address of",
-  "read a page at coordinates", "entropy heatmap", "Borges library".
+description: "Bidirectional mathematical engine for Borges' Library of Babel. Finds the permanent hexagon address of any text, reads any page at any coordinate, and scores pages by Shannon entropy. No database, no randomness — same input always produces identical output. Use when asked to locate text in the Library of Babel, generate a page at given coordinates, explore Borges' infinite library concept, or analyze page entropy. Triggers on: find this in the Library of Babel, what is the address of, read a page at coordinates, entropy heatmap, Borges library."
 ---
 
 # Library of Babel
