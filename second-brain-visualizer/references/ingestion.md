@@ -88,14 +88,14 @@ If you use a Telegram bot or private channel as your drop point.
 **Setup:**
 1. Create a Telegram bot via @BotFather
 2. Add it to your private channel or send messages directly to the bot
-3. Store the bot token in `~/.openclaw/credentials/telegram-sb.json`
+3. Store the bot API key in `~/.openclaw/credentials/telegram-sb.json`
 
 **Reading messages:**
 
 ```javascript
 // Read recent messages from your Telegram bot
-const botToken = 'YOUR_BOT_TOKEN';
-const res = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastOffset}`);
+const apiKey = 'YOUR_BOT_API_KEY';
+const res = await fetch(`https://api.telegram.org/bot${apiKey}/getUpdates?offset=${lastOffset}`);
 const updates = await res.json();
 
 for (const update of updates.result) {

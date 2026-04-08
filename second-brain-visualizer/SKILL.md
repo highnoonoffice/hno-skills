@@ -1,6 +1,6 @@
 ---
 name: second-brain-visualizer
-version: 1.2.0
+version: 1.3.0
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
@@ -15,13 +15,13 @@ metadata:
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
   credentials:
     - name: "OPENCLAW_GATEWAY_TOKEN"
-      description: "Required. Gateway auth token for your local OpenClaw gateway. Set as environment variable."
+      description: "Required. Gateway auth key for your local OpenClaw gateway. Set as environment variable."
       required: true
     - name: "slack-sb.json"
-      description: "Optional. Slack bot token for automated ingestion from a private Slack channel. Format: { token: string }"
+      description: "Optional. Slack bot API key for automated ingestion from a private Slack channel. Format: { apiKey: string }"
       required: false
     - name: "telegram-sb.json"
-      description: "Optional. Telegram bot token for automated ingestion from a private Telegram channel. Format: { token: string, chat_id: string }"
+      description: "Optional. Telegram bot API key for automated ingestion from a private Telegram channel. Format: { apiKey: string, chat_id: string }"
       required: false
   dataFlow:
     - "Reads local markdown ledger from OPENCLAW_VAULT/memory/second-brain.md"
