@@ -15,7 +15,7 @@ import time
 from babel_core import (
     format_locate,
     format_read_page,
-    locate,
+    locate as babel_locate,
     read_page,
     shannon_entropy,
     space_frequency,
@@ -151,7 +151,7 @@ def add_to_codex(text: str, source: str):
     Compute coordinates for new text and append to codex.json.
     Prints confirmation with full coordinates.
     """
-    result = locate(text)
+    result = babel_locate(text)
     hex_fmt = f"{result['hexagon']:,}"
 
     with open(_CODEX_PATH, "r") as f:
@@ -160,6 +160,8 @@ def add_to_codex(text: str, source: str):
     # Avoid duplicate entries for the same text
     existing_texts = [e["text"] for e in data["codex"]]
     if text.lower() in existing_texts:
+        result = babel_locate(text)
+        hex_fmt = f"{result['hexagon']:,}"
         print(f'  Already in codex: "{text}"')
         print(f'  Hexagon {hex_fmt} · Wall {result["wall"]} · Shelf {result["shelf"]} · Volume {result["volume"]}')
         return

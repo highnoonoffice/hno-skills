@@ -67,42 +67,30 @@ Same text always produces the same address. The Library does not generate — it
 ## Reverse Direction: Coordinates → Page Text
 
 1. Reconstruct Global Index from coordinates: `GI = Hex * 640 + (Wall-1) * 160 + (Shelf-1) * 32 + (Volume-1)`
-2. Apply LCG scramble: maps GI to a chaotic-looking but deterministic offset in [0, 29^3200)
-3. Decode that offset as a base-29 number into ALPHABET characters (PAGE_SIZE digits)
+2. Apply SHA-256 counter-mode hash expansion to produce PAGE_SIZE pseudo-random bytes
+3. Map each byte to ALPHABET via `byte % BASE`
 
-## LCG Scramble
+## SHA-256 Hash Expansion
 
-Without scrambling, low Global Indices map to pages like `aaaa...` (boring). The LCG makes
-even index=0 look like random content while remaining fully reversible.
+Page generation uses SHA-256 in counter mode. No LCG, no BigInt arithmetic.
 
 ```
-m = BASE^PAGE_SIZE       # full permutation space for one page
-a = BASE + 1             # Hull-Dobell: a-1 divisible by all prime factors of m
-c = 1                    # coprime to m
-
-scramble(x)   = (a * x + c) % m
-unscramble(y) = (a_inv * (y - c)) % m   where a_inv = pow(a, -1, m)
+gi_bytes = global_index.to_bytes(...)
+output   = SHA256(gi_bytes || chunk_0) + SHA256(gi_bytes || chunk_1) + ...
+page     = [ALPHABET[b % BASE] for b in output[:PAGE_SIZE]]
 ```
 
-For BASE=29, PAGE_SIZE=3200:
-- m ≈ 10^4,671 (a number with 4,671 digits)
-- a = 30
-- The LCG has full period (every index maps to a unique scrambled value)
+Properties:
+- **Deterministic** — same GI always produces the same page
+- **Chaotic** — adjacent GI values produce completely different pages
+- **Fast** — sub-millisecond, no 4,700-digit modular arithmetic
+- **One-directional** — coordinates → page (no need to invert)
 
 ## Performance
 
-BigInt arithmetic on numbers ~4,700 digits long takes 2-10 seconds per page generation
-on modern hardware. This is acceptable for a demo skill. Production use would require
-chunked generation or index-based fast seeking.
+Sub-millisecond per page on any modern hardware. No BigInt operations required.
 
 ## Math Notes
-
-### Why BASE=29 works for LCG
-
-Hull-Dobell theorem conditions for full-period LCG:
-1. gcd(c, m) = 1 — satisfied: c=1 is always coprime
-2. a-1 divisible by all prime factors of m — m=29^3200, prime factor is 29; a-1=29 ✓
-3. if 4|m, then 4|(a-1) — m is odd (odd^anything = odd), so this condition is vacuous ✓
 
 ### Coordinate Recovery
 

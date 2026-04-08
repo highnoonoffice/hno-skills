@@ -1,12 +1,12 @@
 ---
 name: library-of-babel
-version: 0.1.0
-author: highnoonoffice
-license: MIT-0
 description: >
-  Every text that has ever been written already exists in the Library of Babel at a permanent address.
-  This skill finds it.
-tags: [math, borges, text, coordinates, deterministic, fun]
+  Bidirectional mathematical engine for Borges' Library of Babel. Finds the permanent hexagon address
+  of any text, reads any page at any coordinate, and scores pages by Shannon entropy. No database,
+  no randomness — same input always produces identical output. Use when asked to locate text in the
+  Library of Babel, generate a page at given coordinates, explore Borges' infinite library concept,
+  or analyze page entropy. Triggers on: "find this in the Library of Babel", "what's the address of",
+  "read a page at coordinates", "entropy heatmap", "Borges library".
 ---
 
 # Library of Babel
