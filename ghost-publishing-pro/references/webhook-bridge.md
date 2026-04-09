@@ -51,5 +51,5 @@ The script uses only Python standard library modules — no pip installs require
 ## Notes
 
 - The bridge runs on localhost only by default. Expose via a reverse proxy or tunnel (ngrok, Cloudflare Tunnel) if Ghost is on an external host.
-- Signature verification uses HMAC-SHA256 — standard Ghost webhook security, no external dependencies.
+- Signature verification uses Ghost's standard webhook signing — no external dependencies.
 - Restart the bridge after changing action handlers. No hot-reload.

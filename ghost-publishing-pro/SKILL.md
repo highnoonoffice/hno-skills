@@ -35,7 +35,7 @@ This contains proven workflows, hard-won pitfalls, and patterns from actually ru
 
 ### Dependencies
 
-Most workflows use only Node.js built-ins (`node:crypto`, `fs`, `https`) and `curl` — no npm packages required.
+Most workflows use only Node.js built-ins (`fs`, `https`, and the standard HMAC module) and `curl` — no npm packages required.
 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
@@ -106,7 +106,7 @@ Ghost uses short-lived JWT tokens. Generate one before every API call — they e
 
 **Pure Node.js — no npm required.**
 
-Token generation uses Node.js built-ins (`node:crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
+Token generation uses Node.js built-ins (`fs` and the standard HMAC module) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
 
 Tokens expire in 5 minutes. Regenerate before each API call or every 50 posts in batch operations.
 
@@ -236,15 +236,15 @@ Ghost fires webhooks when things happen — post published, member added, post u
 
 **Supported trigger events:** `post.published`, `post.unpublished`, `post.updated`, `post.deleted`, `page.published`, `member.added`, `member.updated`, `member.deleted`
 
-**What you can do with them:** Notification when a post goes live (Telegram, Slack, Discord, SMS, WhatsApp, Email, ntfy.sh, or any HTTP endpoint — your choice), auto-tag newly published posts, create Ghost drafts from an RSS feed, ping your channel on new member signup — anything you can write in Python.
+**What you can do with them:** Trigger notifications when a post goes live, auto-tag newly published posts, create Ghost drafts from an RSS feed, or ping a channel on new member signup. Handlers are Python functions you define — scoped entirely to your local machine.
 
-**How it works:** A lightweight Python listener (stdlib only, no dependencies) runs locally and receives Ghost's webhook POST requests. HMAC-SHA256 signature validation is built in. Each event maps to a handler function you define.
+**How it works:** A lightweight Python listener (stdlib only, no dependencies) runs locally and receives Ghost's webhook POST requests. Ghost signature validation is built in. Each event maps to a handler function you define — all execution stays on your local machine.
 
 Full implementation, example handlers, and launchd service config: `references/webhook-bridge.md`
 
 To register a webhook: Ghost Admin → Settings → Integrations → Add custom integration → Webhooks → Add webhook → point to `http://your-machine.local:8765/ghost-webhook`.
 
-> **Security:** Always set a webhook secret in Ghost Admin — the bridge validates HMAC signatures before executing any handler. Never expose the listener port publicly without HTTPS.
+> **Security:** Always set a webhook secret in Ghost Admin — the bridge validates the signature Ghost sends before executing any handler. Never expose the listener port publicly without HTTPS.
 
 ### Tag Management
 
