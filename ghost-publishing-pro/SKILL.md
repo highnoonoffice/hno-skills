@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
 version: 1.7.1
-description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 16 workflows covering article publishing, batch imports, site health audits, email performance analysis, tag management, and iPaaS webhook automation. Admin API only. No browser, no dashboard, no context switching."
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 16 workflows covering article publishing, batch imports, site health audits, email performance analysis, and tag management. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -230,21 +230,6 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
 - **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
 
-### Webhook Bridge (iPaaS-Style Triggers)
-
-Ghost fires webhooks when things happen — post published, member added, post updated. The webhook bridge catches those events and dispatches them to actions you define, without Zapier, Make, or any third-party service.
-
-**Supported trigger events:** `post.published`, `post.unpublished`, `post.updated`, `post.deleted`, `page.published`, `member.added`, `member.updated`, `member.deleted`
-
-**What you can do with them:** Trigger notifications when a post goes live, auto-tag newly published posts, create Ghost drafts from an RSS feed, or ping a channel on new member signup. Handlers are Python functions you define — scoped entirely to your local machine.
-
-**How it works:** A lightweight Python listener (stdlib only, no dependencies) runs locally and receives Ghost's webhook POST requests. Ghost signature validation is built in. Each event maps to a handler function you define — all execution stays on your local machine.
-
-Full implementation, example handlers, and launchd service config: `references/webhook-bridge.md`
-
-To register a webhook: Ghost Admin → Settings → Integrations → Add custom integration → Webhooks → Add webhook → point to `http://your-machine.local:8765/ghost-webhook`.
-
-> **Security:** Always set a webhook secret in Ghost Admin — the bridge validates the signature Ghost sends before executing any handler. Never expose the listener port publicly without HTTPS.
 
 ### Tag Management
 
