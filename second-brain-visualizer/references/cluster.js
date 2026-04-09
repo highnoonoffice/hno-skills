@@ -12,26 +12,40 @@ const path = require('path');
 
 const ATOMS_FILE = process.env.SBV_ATOMS_FILE || path.join(__dirname, '../data/second-brain-atoms.json');
 const OUT_FILE   = process.env.SBV_CLUSTERS_FILE || path.join(__dirname, '../data/second-brain-clusters.json');
-const GATEWAY_HOST = process.env.OPENCLAW_GATEWAY_HOST || '127.0.0.1';
-const GATEWAY_PORT = parseInt(process.env.OPENCLAW_GATEWAY_PORT || '18789', 10);
 const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
-// Safety check: warn if gateway is pointed off-machine
-if (GATEWAY_HOST !== '127.0.0.1' && GATEWAY_HOST !== 'localhost') {
-  console.warn(
-    `[SBV] Warning: OPENCLAW_GATEWAY_HOST is set to "${GATEWAY_HOST}". ` +
-    'This will send your atom corpus to a remote host. ' +
-    'Set OPENCLAW_GATEWAY_HOST=127.0.0.1 to keep data local.'
-  );
+// Reads gateway config from credentials file (mirrors Ghost Pro credential pattern)
+const CREDS_FILE = path.join(
+  process.env.HOME || process.env.USERPROFILE || '~',
+  '.openclaw', 'credentials', 'openclaw-gateway.json'
+);
+
+function loadGatewayCreds() {
+  if (!fs.existsSync(CREDS_FILE)) {
+    console.error(
+      `[SBV] Missing credentials file: ${CREDS_FILE}\n` +
+      'Create it with: { "host": "127.0.0.1", "port": 18789, "key": "<your-gateway-key>" }'
+    );
+    process.exit(1);
+  }
+  const creds = JSON.parse(fs.readFileSync(CREDS_FILE, 'utf8'));
+  if (!creds.key) {
+    console.error('[SBV] openclaw-gateway.json must include a "key" field.');
+    process.exit(1);
+  }
+  const host = creds.host || '127.0.0.1';
+  if (host !== '127.0.0.1' && host !== 'localhost') {
+    console.warn(
+      `[SBV] Warning: gateway host is "${host}". ` +
+      'This will send your atom corpus to a remote host. ' +
+      'Set host to 127.0.0.1 in openclaw-gateway.json to keep data local.'
+    );
+  }
+  return { host, port: creds.port || 18789, key: creds.key };
 }
 
-// Reads the local OpenClaw gateway auth key from env
-function getGatewayKey() {
-  return process.env.OPENCLAW_GATEWAY_KEY ?? null;
-}
-
-// All LLM calls go to localhost — no external API calls
-function callLLM(gatewayKey, prompt) {
+// All LLM calls go to the configured local gateway — no external API calls
+function callLLM(gatewayKey, gatewayHost, gatewayPort, prompt) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       model: MODEL,
@@ -41,8 +55,8 @@ function callLLM(gatewayKey, prompt) {
     });
 
     const req = require('http').request({
-      hostname: GATEWAY_HOST,
-      port: GATEWAY_PORT,
+      hostname: gatewayHost,
+      port: gatewayPort,
       path: '/v1/chat/completions',
       method: 'POST',
       headers: {
@@ -77,11 +91,7 @@ async function main() {
     process.exit(1);
   }
 
-  const gatewayKey = getGatewayKey();
-  if (!gatewayKey) {
-    console.error('OPENCLAW_GATEWAY_KEY env var not set — required for local gateway auth');
-    process.exit(1);
-  }
+  const { host: GATEWAY_HOST, port: GATEWAY_PORT, key: gatewayKey } = loadGatewayCreds();
 
   const { atoms, atomCount } = JSON.parse(fs.readFileSync(ATOMS_FILE, 'utf8'));
   // log(`Clustering ${atomCount} atoms…`);
@@ -140,7 +150,7 @@ CORPUS:
 ${corpus}`;
 
   try {
-    const response = await callLLM(gatewayKey, prompt);
+    const response = await callLLM(gatewayKey, GATEWAY_HOST, GATEWAY_PORT, prompt);
     
     // Extract JSON
     const jsonMatch = response.match(/\{[\s\S]*\}/);
