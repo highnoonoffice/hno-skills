@@ -6,33 +6,35 @@ Ghost Admin API keys have the format `{id}:{secret}` (split on first `:`).
 
 Tokens expire in 5 minutes. Regenerate before every API call.
 
-**Generate token — pure Node.js (no npm required):**
-Save this as `scripts/ghost-token.js` in your workspace:
+**Generate token — pure bash + openssl (no npm, no Node.js crypto):**
+Save this as `scripts/ghost-token.sh` in your workspace:
 
-```js
-// ghost-token.js — Generate a Ghost Admin JWT from credentials file
-// Usage: node scripts/ghost-token.js
-// Output: prints token only (capture to TOKEN variable)
-const { createHmac } = require('node:crypto');
-const fs = require('fs');
-const path = require('path');
+```bash
+#!/bin/bash
+# ghost-token.sh — Generate a Ghost Admin JWT from credentials file
+# Usage: source scripts/ghost-token.sh
+# Sets TOKEN and GHOST_URL shell variables
 
-const credsPath = path.join(process.env.HOME, '.openclaw/credentials/ghost-admin.json');
-const creds = JSON.parse(fs.readFileSync(credsPath, 'utf8'));
-const [id, secret] = creds.key.split(':');
+CREDS="$HOME/.openclaw/credentials/ghost-admin.json"
+KEY=$(node -e "const c=JSON.parse(require('fs').readFileSync('$CREDS','utf8'));process.stdout.write(c.key)")
+GHOST_URL=$(node -e "const c=JSON.parse(require('fs').readFileSync('$CREDS','utf8'));process.stdout.write(c.url)")
 
-const now = Math.floor(Date.now() / 1000);
-const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
-const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
-const sig = createHmac('sha256', Buffer.from(secret, 'hex')).update(header + '.' + payload).digest('base64url');
+ID="${KEY%%:*}"
+SECRET="${KEY#*:}"
+NOW=$(date +%s)
+EXP=$((NOW + 300))
 
-process.stdout.write(header + '.' + payload + '.' + sig);
+HEADER=$(printf '{"alg":"HS256","typ":"JWT","kid":"%s"}' "$ID" | openssl base64 -A | tr '+/' '-_' | tr -d '=')
+PAYLOAD=$(printf '{"iat":%d,"exp":%d,"aud":"/admin/"}' "$NOW" "$EXP" | openssl base64 -A | tr '+/' '-_' | tr -d '=')
+SIG=$(printf '%s.%s' "$HEADER" "$PAYLOAD" | openssl dgst -sha256 -mac HMAC -macopt "hexkey:$SECRET" -binary | openssl base64 -A | tr '+/' '-_' | tr -d '=')
+
+TOKEN="$HEADER.$PAYLOAD.$SIG"
 ```
 
 Capture in shell:
 ```bash
-TOKEN=$(node scripts/ghost-token.js)
-GHOST_URL=$(node -e "const c=require(process.env.HOME+'/.openclaw/credentials/ghost-admin.json');process.stdout.write(c.url)")
+source scripts/ghost-token.sh
+# TOKEN and GHOST_URL are now set
 ```
 
 **Request header:** `Authorization: Ghost {token}`
