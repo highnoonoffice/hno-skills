@@ -255,21 +255,7 @@ Session type is auto-classified from journal text keywords:
 
 **Promotion writes:** When a user promotes an Emerging concept to a named Attention Pocket, the result is a local configuration write within the parser's existing output scope. No external calls.
 
-**API access control:** The route serving graph data supports optional token-based access control:
-
-```bash
-BRAIN_MAP_SECRET=your-secret-key-here
-```
-
-Pass the key in component requests:
-
-```typescript
-fetch('/api/brain-map/graph', {
-  headers: { 'x-brain-map-key': process.env.NEXT_PUBLIC_BRAIN_MAP_SECRET }
-})
-```
-
-If `BRAIN_MAP_SECRET` is not set, the route is open — suitable for localhost development only. Set the secret for any networked deployment.
+**API route access:** The route serving graph data is open by default, suitable for localhost development. For networked deployments, add your own middleware-level access control in your Next.js app (e.g., session-based auth or a reverse-proxy layer). No API keys or credentials are required by this skill.
 
 ### Known Limitations
 

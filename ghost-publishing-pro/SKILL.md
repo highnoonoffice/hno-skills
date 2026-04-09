@@ -35,7 +35,7 @@ This contains proven workflows, hard-won pitfalls, and patterns from actually ru
 
 ### Dependencies
 
-Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
+Most workflows use only Node.js built-ins (`node:crypto`, `fs`, `https`) and `curl` — no npm packages required.
 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
@@ -106,7 +106,7 @@ Ghost uses short-lived JWT tokens. Generate one before every API call — they e
 
 **Pure Node.js — no npm required.**
 
-Token generation uses Node.js built-ins (`crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
+Token generation uses Node.js built-ins (`node:crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
 
 Tokens expire in 5 minutes. Regenerate before each API call or every 50 posts in batch operations.
 

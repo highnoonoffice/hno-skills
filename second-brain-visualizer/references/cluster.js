@@ -18,7 +18,7 @@ const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
 // Reads the local OpenClaw gateway auth key from env
 function getGatewayKey() {
-  return process.env.OPENCLAW_GATEWAY_TOKEN ?? null;
+  return process.env.OPENCLAW_GATEWAY_KEY ?? null;
 }
 
 // All LLM calls go to localhost — no external API calls
@@ -70,7 +70,7 @@ async function main() {
 
   const gatewayKey = getGatewayKey();
   if (!gatewayKey) {
-    console.error('OPENCLAW_GATEWAY_TOKEN env var not set — required for local gateway auth');
+    console.error('OPENCLAW_GATEWAY_KEY env var not set — required for local gateway auth');
     process.exit(1);
   }
 
@@ -87,7 +87,7 @@ Your job is not to categorize what was said. It is to identify what the person i
 
 WHAT YOU ARE LOOKING FOR
 
-Beneath every note is a layer of intent. A joke about AI models billing by the token is not a joke about billing — it is a probe into the transactional nature of machine intelligence. Read the joke. Then ask: what is the person actually working out?
+Beneath every note is a layer of intent. A joke about AI models and computational overhead is not a joke about billing — it is a probe into the transactional nature of machine intelligence. Read the joke. Then ask: what is the person actually working out?
 
 Look for:
 - Strategic direction: what is this person building toward, even when they don't say it directly?

@@ -401,7 +401,7 @@ Ghost pages (not posts) work well as persistent content stores — about pages, 
 Keep a `memory/ghost-queue.md` with pending posts in structured format:
 ```markdown
 ## Queue
-- [ ] Title: "Post Title" | Tags: Bitcoin, Essay | Status: draft | Notes: needs intro
+- [ ] Title: "Post Title" | Tags: Essay, AI | Status: draft | Notes: needs intro
 - [x] Title: "Published Post" | Published: 2026-03-10
 ```
 
@@ -573,14 +573,14 @@ Store at `~/.openclaw/credentials/ghost-sites.json`
 **Token generation per site:**
 ```bash
 node -e "
-const crypto=require('crypto');
+const {createHmac}=require('node:crypto');
 const sites=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-sites.json','utf8'));
 const site=sites.sites['primary']; // change to 'secondary' as needed
 const [id,secret]=site.key.split(':');
 const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
+const s=createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
 // output(JSON.stringify({token:h+'.'+p+'.'+s,url:site.url}));
 "
 ```
@@ -624,13 +624,13 @@ Run this periodically (monthly or before major site pushes). It requires no npm 
 
 ```bash
 TOKEN=$(node -e "
-const crypto=require('crypto');
+const {createHmac}=require('node:crypto');
 const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
 const [id,secret]=creds.key.split(':');
 const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
+const s=createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
 process.stdout.write(h+'.'+p+'.'+s);
 ")
 URL=$(node -e "const c=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));process.stdout.write(c.url);")
@@ -641,7 +641,7 @@ URL=$(node -e "const c=JSON.parse(require('fs').readFileSync(process.env.HOME+'/
 ```bash
 node -e "
 const https=require('https');
-const crypto=require('crypto');
+const {createHmac}=require('node:crypto');
 const fs=require('fs');
 
 const creds=JSON.parse(fs.readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
@@ -651,7 +651,7 @@ function makeToken(){
   const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
   const n=Math.floor(Date.now()/1000);
   const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
-  const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
+  const s=createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
   return h+'.'+p+'.'+s;
 }
 
@@ -791,7 +791,7 @@ Save as `ghost-performance.js` and run with `node ghost-performance.js`.
 
 ```js
 const https = require('https');
-const crypto = require('crypto');
+const { createHmac } = require('node:crypto');
 const fs = require('fs');
 
 const creds = JSON.parse(fs.readFileSync(process.env.HOME + '/.openclaw/credentials/ghost-admin.json', 'utf8'));
@@ -801,7 +801,7 @@ function makeToken() {
   const h = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
   const n = Math.floor(Date.now() / 1000);
   const p = Buffer.from(JSON.stringify({ iat: n, exp: n + 300, aud: '/admin/' })).toString('base64url');
-  const s = crypto.createHmac('sha256', Buffer.from(secret, 'hex')).update(h + '.' + p).digest('base64url');
+  const s = createHmac('sha256', Buffer.from(secret, 'hex')).update(h + '.' + p).digest('base64url');
   return h + '.' + p + '.' + s;
 }
 

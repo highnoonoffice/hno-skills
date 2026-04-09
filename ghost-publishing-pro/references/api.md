@@ -13,7 +13,7 @@ Save this as `scripts/ghost-token.js` in your workspace:
 // ghost-token.js — Generate a Ghost Admin JWT from credentials file
 // Usage: node scripts/ghost-token.js
 // Output: prints token only (capture to TOKEN variable)
-const crypto = require('crypto');
+const { createHmac } = require('node:crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -24,7 +24,7 @@ const [id, secret] = creds.key.split(':');
 const now = Math.floor(Date.now() / 1000);
 const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
 const payload = Buffer.from(JSON.stringify({ iat: now, exp: now + 300, aud: '/admin/' })).toString('base64url');
-const sig = crypto.createHmac('sha256', Buffer.from(secret, 'hex')).update(header + '.' + payload).digest('base64url');
+const sig = createHmac('sha256', Buffer.from(secret, 'hex')).update(header + '.' + payload).digest('base64url');
 
 process.stdout.write(header + '.' + payload + '.' + sig);
 ```

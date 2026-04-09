@@ -14,7 +14,7 @@ metadata:
     - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
   credentials:
-    - name: "OPENCLAW_GATEWAY_TOKEN"
+    - name: "OPENCLAW_GATEWAY_KEY"
       description: "Required. Gateway auth key for your local OpenClaw gateway. Set as environment variable."
       required: true
     - name: "slack-sb.json"
