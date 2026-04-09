@@ -16,6 +16,15 @@ const GATEWAY_HOST = process.env.OPENCLAW_GATEWAY_HOST || '127.0.0.1';
 const GATEWAY_PORT = parseInt(process.env.OPENCLAW_GATEWAY_PORT || '18789', 10);
 const MODEL = process.env.SBV_MODEL || 'openclaw:main';
 
+// Safety check: warn if gateway is pointed off-machine
+if (GATEWAY_HOST !== '127.0.0.1' && GATEWAY_HOST !== 'localhost') {
+  console.warn(
+    `[SBV] Warning: OPENCLAW_GATEWAY_HOST is set to "${GATEWAY_HOST}". ` +
+    'This will send your atom corpus to a remote host. ' +
+    'Set OPENCLAW_GATEWAY_HOST=127.0.0.1 to keep data local.'
+  );
+}
+
 // Reads the local OpenClaw gateway auth key from env
 function getGatewayKey() {
   return process.env.OPENCLAW_GATEWAY_KEY ?? null;

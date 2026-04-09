@@ -1,31 +1,31 @@
 ---
 name: second-brain-visualizer
-version: 1.3.0
+version: 1.4.0
 description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
 license: MIT-0
+credentials:
+  - name: "OPENCLAW_GATEWAY_KEY"
+    description: "Required. Gateway auth key for your local OpenClaw gateway. Set as environment variable OPENCLAW_GATEWAY_KEY."
+    required: true
+  - name: "slack-sb.json"
+    description: "Optional. Slack bot API key for automated ingestion from a private Slack channel. Format: { apiKey: string }"
+    required: false
+  - name: "telegram-sb.json"
+    description: "Optional. Telegram bot API key for automated ingestion from a private Telegram channel. Format: { apiKey: string, chat_id: string }"
+    required: false
 metadata:
   config:
     - OPENCLAW_VAULT: "Path to your vault directory containing memory/second-brain.md"
-    - OPENCLAW_GATEWAY_HOST: "OpenClaw gateway host (default: 127.0.0.1)"
+    - OPENCLAW_GATEWAY_HOST: "OpenClaw gateway host — must be 127.0.0.1 or localhost for local-only operation (default: 127.0.0.1)"
     - OPENCLAW_GATEWAY_PORT: "OpenClaw gateway port (default: 18789)"
     - SBV_MODEL: "LLM model for clustering and insight generation (default: openclaw:main)"
     - SBV_ATOMS_FILE: "Output path for parsed atoms JSON"
     - SBV_CLUSTERS_FILE: "Output path for cluster JSON"
-  credentials:
-    - name: "OPENCLAW_GATEWAY_KEY"
-      description: "Required. Gateway auth key for your local OpenClaw gateway. Set as environment variable."
-      required: true
-    - name: "slack-sb.json"
-      description: "Optional. Slack bot API key for automated ingestion from a private Slack channel. Format: { apiKey: string }"
-      required: false
-    - name: "telegram-sb.json"
-      description: "Optional. Telegram bot API key for automated ingestion from a private Telegram channel. Format: { apiKey: string, chat_id: string }"
-      required: false
   dataFlow:
     - "Reads local markdown ledger from OPENCLAW_VAULT/memory/second-brain.md"
-    - "POSTs atom corpus to LLM via OpenClaw gateway for clustering and insight generation"
+    - "POSTs atom corpus to LLM via OpenClaw gateway at OPENCLAW_GATEWAY_HOST (default: 127.0.0.1) — keep this set to localhost to ensure data stays on-machine"
     - "No data leaves your local OpenClaw gateway — LLM routing is controlled by your OpenClaw config"
     - "Optional ingestion credentials (Slack, Telegram) stored locally in ~/.openclaw/credentials/ — never sent externally"
 ---
