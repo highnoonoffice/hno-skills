@@ -94,19 +94,14 @@ PUT /posts/{id}/ with updated_at from fetched post
 **Use Python requests — not curl.** Curl multipart uploads silently fail on macOS zsh with certain file paths. Python requests is the reliable path.
 
 ```python
-import requests, json, time, hashlib, hmac, base64
+import requests, json, subprocess
 
 creds = json.load(open('/Users/you/.openclaw/credentials/ghost-admin.json'))
 GHOST_URL = creds['url']
-API_KEY   = creds['key']
 
 def get_token():
-    id_, secret = API_KEY.split(':')
-    header  = base64.urlsafe_b64encode(json.dumps({"alg":"HS256","typ":"JWT","kid":id_}).encode()).rstrip(b'=').decode()
-    now     = int(time.time())
-    payload = base64.urlsafe_b64encode(json.dumps({"iat":now,"exp":now+300,"aud":"/admin/"}).encode()).rstrip(b'=').decode()
-    sig     = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), f"{header}.{payload}".encode(), hashlib.sha256).digest()).rstrip(b'=').decode()
-    return f"{header}.{payload}.{sig}"
+    # Uses the Node.js ghost-token.js script from references/api.md
+    return subprocess.check_output(['node', 'scripts/ghost-token.js']).decode().strip()
 
 headers = {'Authorization': f'Ghost {get_token()}', 'Accept-Version': 'v5.0'}
 
@@ -992,19 +987,14 @@ Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA
 Full tag CRUD via the Ghost Admin API. Requires an **owner-level token** for write operations — integration tokens return `403` on create/update/delete. List is readable with any token.
 
 ```python
-import requests, json, time, hashlib, hmac, base64
+import requests, json, subprocess
 
 creds     = json.load(open('/Users/you/.openclaw/credentials/ghost-admin.json'))
 GHOST_URL = creds['url']
-API_KEY   = creds['key']
 
 def get_token():
-    id_, secret = API_KEY.split(':')
-    header  = base64.urlsafe_b64encode(json.dumps({"alg":"HS256","typ":"JWT","kid":id_}).encode()).rstrip(b'=').decode()
-    now     = int(time.time())
-    payload = base64.urlsafe_b64encode(json.dumps({"iat":now,"exp":now+300,"aud":"/admin/"}).encode()).rstrip(b'=').decode()
-    sig     = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), f"{header}.{payload}".encode(), hashlib.sha256).digest()).rstrip(b'=').decode()
-    return f"{header}.{payload}.{sig}"
+    # Uses the Node.js ghost-token.js script from references/api.md
+    return subprocess.check_output(['node', 'scripts/ghost-token.js']).decode().strip()
 
 headers = {'Authorization': f'Ghost {get_token()}', 'Accept-Version': 'v5.0'}
 

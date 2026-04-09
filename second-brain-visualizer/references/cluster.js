@@ -87,7 +87,7 @@ Your job is not to categorize what was said. It is to identify what the person i
 
 WHAT YOU ARE LOOKING FOR
 
-Beneath every note is a layer of intent. A joke about AI models and computational overhead is not a joke about billing — it is a probe into the transactional nature of machine intelligence. Read the joke. Then ask: what is the person actually working out?
+Beneath every note is a layer of intent. A joke about AI models and computational overhead is not about overhead — it is a probe into the transactional nature of machine intelligence. Read the joke. Then ask: what is the person actually working out?
 
 Look for:
 - Strategic direction: what is this person building toward, even when they don't say it directly?

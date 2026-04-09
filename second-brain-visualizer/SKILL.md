@@ -40,7 +40,7 @@ Second Brain Visualizer reads what accumulates. Not to categorize it. To find th
 
 One note is just a note. Fifty notes across three weeks is a pattern. A year of notes is a portrait of how you think.
 
-The clustering engine reads for intent, not keywords. A joke about AI billing and a note about Simone Weil may belong in the same cluster if they're reaching toward the same underlying question. Clusters surface with a name, a one-sentence insight, and a status: ESTABLISHED, FORMING, or FADING. Tensions show you where you're arguing with yourself. Notable absences show you what your idea stream isn't touching yet.
+The clustering engine reads for intent, not keywords. A note about LLM inference costs and a quote from Simone Weil may belong in the same cluster if they're reaching toward the same underlying question. Clusters surface with a name, a one-sentence insight, and a status: ESTABLISHED, FORMING, or FADING. Tensions show you where you're arguing with yourself. Notable absences show you what your idea stream isn't touching yet.
 
 This is not a note-taking app. Most note-taking tools are mirrors — they show you what you put in. This reads what it means.
 
@@ -48,7 +48,7 @@ This is not a note-taking app. Most note-taking tools are mirrors — they show 
 
 ### What It Does
 
-Your raw idea stream gets parsed into **atoms** — the smallest units of intent. Atoms are clustered by **affinity of meaning**, not keyword overlap. A joke about AI billing models and a note about Simone Weil may belong in the same cluster if they're both probing the same underlying question about attention and value.
+Your raw idea stream gets parsed into **atoms** — the smallest units of intent. Atoms are clustered by **affinity of meaning**, not keyword overlap. A note about LLM inference costs and a quote from Simone Weil may belong in the same cluster if they're both probing the same underlying question about attention and value.
 
 Each cluster gets:
 - A sharp name capturing the underlying drive (not a generic domain label)

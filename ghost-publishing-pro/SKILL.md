@@ -75,7 +75,7 @@ Keep the credentials file out of shared folders and version control. Restrict ac
 
 Ghost's Admin API integration tokens cannot access certain owner-level operations:
 
-- **Staff management and billing** — owner-only, no API path
+- **Staff management** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
 - **Redirects and routes files** — `GET/POST /ghost/api/admin/redirects/` returns `403` with integration tokens. Must upload via Ghost Admin → Settings → Labs → Beta features → Redirects upload button
 
@@ -209,7 +209,7 @@ See `references/workflows.md` for full migration playbooks:
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
 - Theme management (JWT upload where supported; Ghost Admin fallback)
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
-- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with free/paid subscriber split. (Workflow 15)
+- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
