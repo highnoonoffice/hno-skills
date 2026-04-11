@@ -255,6 +255,38 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
 - **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
 
+### Read-Next / Related Articles Pattern
+
+When building a "Continue Reading" block at the bottom of a post, always pull real feature image URLs from the Ghost API first — never use placeholder divs or icon blocks.
+
+**Correct pattern:**
+```python
+# Fetch feature images before building the block
+for slug in related_slugs:
+    resp = requests.get(f'{BASE}/posts/slug/{slug}/', params={'fields': 'title,slug,feature_image'}, headers=...)
+    img_url = resp.json()['posts'][0]['feature_image']
+```
+
+**HTML structure — use `align-items:center` not `align-items:flex-start`:**
+```html
+<div class="jv-read-next" style="margin:40px 0 0;padding:24px 0 0;border-top:1px solid rgba(0,0,0,0.15);">
+  <div style="font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(0,0,0,0.35);margin-bottom:4px;">Continue Reading</div>
+  <a href="{URL}" style="display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.07);transition:opacity 0.15s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+    <img src="{FEATURE_IMAGE_URL}" alt="{TITLE}" style="width:68px;height:52px;object-fit:cover;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,0.08);">
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:0.72rem;font-weight:600;color:#111;margin-bottom:4px;line-height:1.35;letter-spacing:0.01em;">{TITLE}</div>
+      <div style="font-size:0.68rem;color:rgba(0,0,0,0.45);line-height:1.45;font-weight:300;">{EXCERPT}</div>
+    </div>
+  </a>
+</div>
+```
+
+Key rules:
+- `align-items:center` — keeps text vertically centered against the thumbnail
+- `align-items:flex-start` causes text to float at top, looks broken
+- Always use real Ghost feature images — never placeholder divs or colored icon blocks
+- Pull image URLs from the API immediately before building the block
+
 ### License
 
 MIT. Copyright (c) 2026 @highnoonoffice. Retain this notice in any distributed version.
