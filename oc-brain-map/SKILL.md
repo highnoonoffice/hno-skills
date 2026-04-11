@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 3.1.6
-description: "Visualize how attention moves across your agent's projects. Markdown files become nodes grouped by Attention Pockets — active focus areas shaped by session history. First click reorbits the graph around that file's cognitive neighborhood. Second click opens the file. Third click closes it. Fourth click reorbits around that node. Built on D3.js + React. Local only."
+version: 3.1.7
+description: "Visualize how attention moves across your agent's projects. Markdown files become nodes grouped by Attention Pockets."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT

@@ -16,16 +16,9 @@ Proven workflows from real production use on a Ghost Pro site.
 
 Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
 
-**Two access paths:**
-1. **API (primary)** — Admin API key for all programmatic operations
-2. **Browser (fallback)** — Ghost admin UI at `{url}/ghost` when API is insufficient (e.g., visual editor tweaks, Lexical card insertions the API doesn't support cleanly)
+**Get your key:** Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
-**Sub-admin setup** — Best practice for agent access:
-- Create a dedicated email for the agent (e.g., a ProtonMail address)
-- Invite that email as a Ghost admin (Settings → Staff → Invite people)
-- Agent has full admin access but owner account stays separate
-- If API key is compromised, revoke without affecting owner account
-- Browser automation uses the agent account credentials for Ghost Admin UI operations
+This single integration token covers the full publishing workflow: post creation, updates, image uploads, newsletter sends, batch operations, analytics reads.
 
 ---
 
@@ -50,6 +43,13 @@ Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
 - Node.js script to parse and batch import
 
 **The migration script pattern (Node.js):**
+
+This workflow requires one third-party npm package. Install it before running:
+
+```bash
+npm install fast-xml-parser
+```
+
 ```js
 const { XMLParser } = require('fast-xml-parser');
 // Parse items from channel.item array
@@ -404,23 +404,10 @@ GET /posts/?limit=10&fields=id,title,published_at,slug,feature_image,tags
 - Post-level view counts (these are in Ghost's native analytics dashboard only)
 - Conversion rates (free → paid)
 
-Ghost's traffic analytics are dashboard-only and not exposed via any API. They use a proprietary tracking system.
+Ghost's traffic analytics are dashboard-only and not exposed via any API.
 
-**Alternative — Browser-based analytics access:**
-Ghost's traffic data isn't exposed via API. To access it programmatically, use browser automation to authenticate to Ghost Admin and read the dashboard:
-```js
-// Rough pattern — adapt to your Ghost version
-await page.goto('https://your-site.ghost.io/ghost/#/dashboard');
-await page.waitForSelector('[data-test-dashboard-stats]');
-const stats = await page.evaluate(() => {
-  // Extract stats from DOM
-});
-```
-
-This is fragile (Ghost updates the dashboard UI periodically) but works. Cache the results to a local JSON file and refresh on demand rather than on every session.
-
-**Lightweight alternative:**
-Use a third-party analytics tool (Plausible, Fathom, or even Google Analytics) alongside Ghost. These give you real traffic data via their own APIs and are more reliable than scraping Ghost's dashboard. Ghost supports adding custom tracking scripts via Settings → Code injection.
+**Recommended alternative:**
+Use a third-party analytics tool (Plausible, Fathom, or Google Analytics) alongside Ghost. These provide real traffic data via their own APIs and are more reliable long-term. Ghost supports adding custom tracking scripts via Settings → Code injection in Ghost Admin.
 
 **Subscriber growth tracking:**
 Poll `/members/?limit=1` on a schedule and log the total to a memory file. Simple, reliable, tells you the most important metric.
@@ -595,137 +582,375 @@ Keep separate publishing logs per site in memory:
 - Last published: 2026-03-10
 ```
 
-
 ---
 
-## Workflow 14: Full Automation Setup — API Tiers & Solutions
+## Workflow 14: Site Audit — Find and Fix Content Debt
 
-This section documents real operational constraints discovered through production use. These are not theoretical — each one was hit, tested, and resolved.
+Use case: You've been publishing for a while and your archive has gaps — missing feature images, empty excerpts, orphaned tags, posts with broken internal links. This workflow pulls your full post list and produces an actionable audit report.
 
-### Ghost Permission Model (Critical to Understand)
+Run this periodically (monthly or before major site pushes). It requires no npm packages — pure Node.js built-ins.
 
-Ghost has a two-tier authentication model:
+### Step 1: Generate a JWT token
 
-**Integration tokens** (Admin API key from Settings → Integrations):
-- Can: create/update/delete posts and pages, upload images, manage tags, read members, read site info
-- Cannot: upload themes, modify site settings, access other integrations, list integrations, change code injection
-
-**Owner-level authentication** (browser session or owner password):
-- Required for: theme uploads, settings changes, code injection, staff management, billing
-
-**Implication for agents:** Integration tokens cover the full publishing workflow but cannot modify the site's structure, theme, or global settings. These operations require browser automation with an authenticated session.
-
----
-
-### Constraint 1: Theme Upload — Owner-Only
-
-**Symptom:** `LIMIT_UNEXPECTED_FILE` or `NoPermissionError` on `POST /ghost/api/admin/themes/upload/`
-
-**Root cause:** Theme uploads require owner-level auth. Integration tokens will always fail this endpoint regardless of field names, multipart encoding, or content type.
-
-**Workaround options:**
-1. Use browser automation with owner credentials to upload via Ghost Admin UI
-2. Use Code Injection as a structural workaround (see Workflow 14.4 below)
-
----
-
-### Constraint 2: Site Settings — Owner-Only
-
-**Symptom:** `NoPermissionError` on `PUT /ghost/api/admin/settings/`
-
-**Root cause:** Settings (including code injection, navigation, branding) require owner auth.
-
-**Workaround:** Use browser automation to navigate to Ghost Admin → Settings → Code Injection and type/paste content via the CM6 editor.
-
-**Browser automation pattern for Code Injection:**
-```js
-// Click the Open button for Code Injection section
-// Then target the CM6 editor
-document.querySelector('.cm-editor .cm-content').click()
-// Use keyboard: Meta+a to select all, then type replacement
-// Save with: document.querySelector('button[text="Save"]').click()
+```bash
+TOKEN=$(node -e "
+const crypto=require('crypto');
+const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
+const [id,secret]=creds.key.split(':');
+const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
+const n=Math.floor(Date.now()/1000);
+const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
+const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
+process.stdout.write(h+'.'+p+'.'+s);
+")
+URL=$(node -e "const c=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));process.stdout.write(c.url);")
 ```
 
----
+### Step 2: Fetch all published posts
 
-### Constraint 3: Ghost Admin API — Integration Listing Blocked
+```bash
+node -e "
+const https=require('https');
+const crypto=require('crypto');
+const fs=require('fs');
 
-**Symptom:** `NoPermissionError` on `GET /ghost/api/admin/integrations/`
+const creds=JSON.parse(fs.readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
+const [id,secret]=creds.key.split(':');
 
-**Root cause:** Integrations (including Content API keys) can only be listed by owners.
+function makeToken(){
+  const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('base64url');
+  const n=Math.floor(Date.now()/1000);
+  const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
+  const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
+  return h+'.'+p+'.'+s;
+}
 
-**Workaround:** Content API key can be retrieved from Ghost Admin → Settings → Integrations → your integration → Content API Key field. Store it in credentials file for use in public-facing fetch calls.
-
----
-
-### Constraint 4: Browser Session and API Key Are Separate Auth Contexts
-
-Ghost session cookies are `HttpOnly` (a standard browser security setting). This means a browser automation session and the Admin API key are independent — you cannot use one to authenticate the other.
-
-**Practical implication:** For operations that require the browser UI, use browser automation with the agent account. For API operations, use the Admin API key. Don't try to bridge the two.
-
----
-
-### Constraint 5: Ghost Dropzone Upload Widget
-
-**Symptom:** File upload via `input[type=file]` selector returns `ok: true` but file doesn't process
-
-**Root cause:** Ghost's theme upload dropzone renders the `<input type=file>` element dynamically. Standard file input targeting works when the input exists statically, but Ghost's React-managed dropzone widget may not process programmatically injected files consistently.
-
-**Workaround:** Target the file input after triggering the dropzone's click handler, or use the API endpoint directly (if permissions allow).
-
----
-
-### Workflow 14.4: Site Header Customization (Ghost Code Injection Field)
-
-**Use case:** When a Ghost page template is missing context (e.g., `page.hbs` missing `{{#page}}` wrapper) and the theme cannot be updated through Ghost Admin, the built-in Code Injection settings field can render content client-side.
-
-**Pattern:** Inject a `<script>` tag in Site Header Code Injection that:
-1. Checks `window.location.pathname` to target only the affected page
-2. Fires on `DOMContentLoaded`
-3. Locates the target element (e.g., `.post-body`)
-4. Sets `innerHTML` to the hardcoded or API-fetched content
-
-**Example:**
-```html
-<script>
-if (location.pathname === '/your-page/') {
-  document.addEventListener('DOMContentLoaded', function() {
-    var b = document.querySelector('.post-body');
-    if (b) {
-      b.innerHTML = '<p>Your content here...</p>';
-    }
+async function fetchPage(page){
+  return new Promise((resolve,reject)=>{
+    const url=new URL(creds.url);
+    const path='/ghost/api/admin/posts/?limit=15&page='+page+'&status=published&fields=id,title,slug,published_at,updated_at,feature_image,custom_excerpt,tags,meta_description&include=tags';
+    const options={hostname:url.hostname,path,method:'GET',headers:{'Authorization':'Ghost '+makeToken()}};
+    const req=https.request(options,res=>{
+      let data='';
+      res.on('data',d=>data+=d);
+      res.on('end',()=>resolve(JSON.parse(data)));
+    });
+    req.on('error',reject);
+    req.end();
   });
 }
-</script>
+
+(async()=>{
+  let page=1, allPosts=[];
+  while(true){
+    const data=await fetchPage(page);
+    if(!data.posts||data.posts.length===0) break;
+    allPosts=allPosts.concat(data.posts);
+    if(!data.meta?.pagination?.next) break;
+    page++;
+    await new Promise(r=>setTimeout(r,300));
+  }
+
+  const now=Date.now();
+  const ninetyDaysAgo=now-(90*24*60*60*1000);
+
+  const issues={
+    noFeatureImage: [],
+    noExcerpt: [],
+    noMetaDescription: [],
+    noTags: [],
+    notUpdatedIn90Days: [],
+    slugWarnings: [],
+  };
+
+  for(const p of allPosts){
+    if(!p.feature_image) issues.noFeatureImage.push({id:p.id,title:p.title,slug:p.slug});
+    if(!p.custom_excerpt) issues.noExcerpt.push({id:p.id,title:p.title,slug:p.slug});
+    if(!p.meta_description) issues.noMetaDescription.push({id:p.id,title:p.title,slug:p.slug});
+    if(!p.tags||p.tags.length===0) issues.noTags.push({id:p.id,title:p.title,slug:p.slug});
+    if(new Date(p.updated_at).getTime()<ninetyDaysAgo) issues.notUpdatedIn90Days.push({id:p.id,title:p.title,slug:p.slug,updated_at:p.updated_at});
+    // Slug warnings: numeric-only, very short, or contains underscores
+    if(/^\d+$/.test(p.slug)||p.slug.length<4||p.slug.includes('_'))
+      issues.slugWarnings.push({id:p.id,title:p.title,slug:p.slug});
+  }
+
+  console.log('=== GHOST SITE AUDIT ===');
+  console.log('Total published posts:', allPosts.length);
+  console.log('Run at:', new Date().toISOString());
+  console.log('');
+  console.log('--- MISSING FEATURE IMAGES ('+issues.noFeatureImage.length+') ---');
+  issues.noFeatureImage.forEach(p=>console.log(' •',p.title,'→',p.slug));
+  console.log('');
+  console.log('--- MISSING EXCERPTS ('+issues.noExcerpt.length+') ---');
+  issues.noExcerpt.forEach(p=>console.log(' •',p.title,'→',p.slug));
+  console.log('');
+  console.log('--- MISSING META DESCRIPTIONS ('+issues.noMetaDescription.length+') ---');
+  issues.noMetaDescription.forEach(p=>console.log(' •',p.title,'→',p.slug));
+  console.log('');
+  console.log('--- NO TAGS ('+issues.noTags.length+') ---');
+  issues.noTags.forEach(p=>console.log(' •',p.title,'→',p.slug));
+  console.log('');
+  console.log('--- NOT UPDATED IN 90+ DAYS ('+issues.notUpdatedIn90Days.length+') ---');
+  issues.notUpdatedIn90Days.forEach(p=>console.log(' •',p.title,'| last updated:',p.updated_at));
+  console.log('');
+  console.log('--- SLUG WARNINGS ('+issues.slugWarnings.length+') ---');
+  issues.slugWarnings.forEach(p=>console.log(' •',p.title,'→',p.slug));
+  console.log('');
+  console.log('=== END AUDIT ===');
+})();
+" 2>&1
 ```
 
-**Trade-offs:**
-- Content changes require updating both the Ghost page AND the Code Injection script
-- Runs on every page load (minimal performance impact for small payloads)
-- Survives theme changes — persists in Code Injection independent of theme
+### What the audit checks
 
-**When to use:** Structural template bugs, missing context blocks, or emergency content injection when theme files cannot be updated via API.
+| Check | What it flags | Why it matters |
+|---|---|---|
+| Missing feature image | Posts with no `feature_image` | Feature images are required for social sharing previews and feed cards. Posts without them look broken on Twitter/LinkedIn shares. |
+| Missing excerpt | Posts with no `custom_excerpt` | Excerpts drive Ghost's client-side search and appear in feed cards. Missing excerpts = invisible in search, weak social previews. |
+| Missing meta description | Posts with no `meta_description` | Google uses this in search results. Empty = Google writes its own, usually badly. |
+| No tags | Posts with zero tags | Tags are Ghost's primary navigation and filtering mechanism. Untagged posts are orphaned — readers can't find them via tag pages. |
+| Not updated in 90+ days | Posts with a stale `updated_at` | Useful for identifying candidates for a content refresh pass. Not always an issue — but flags the oldest untouched content. |
+| Slug warnings | Very short slugs, numeric-only, underscores | Short or auto-generated slugs hurt SEO. Numeric-only (`/123/`) are meaningless to search engines. Underscores break URL parsing in some clients. |
 
-**Long-term fix:** The correct solution remains fixing the theme template (add `{{#page}}...{{/page}}` context block to `page.hbs`) and uploading via Ghost Admin UI.
+### Step 3: Fix issues via batch update
+
+After reviewing the audit output, use Workflow 3 (Batch Update) to fix the flagged posts. Priority order:
+
+1. **Missing feature images** — highest impact on social sharing and feed aesthetics
+2. **Missing excerpts** — fixes search visibility immediately
+3. **Missing meta descriptions** — SEO fix, worth doing in bulk
+4. **No tags** — assign at least one primary tag per post
+5. **Slug warnings** — fix carefully; changing slugs breaks existing links (add redirects first via Ghost Admin → Labs)
+
+### Pitfalls
+
+- The audit script regenerates a JWT before each paginated page fetch — tokens expire in 5 minutes and large sites (100+ posts) take time to fetch.
+- `not updated in 90 days` does NOT mean the content is bad — a timeless essay published two years ago that still ranks well doesn't need touching. Use judgment.
+- Slug fixes require adding a redirect in Ghost Admin → Settings → Labs → Redirects (upload a JSON file) before changing the slug, or you'll create dead links.
 
 ---
 
-### Ghost API — Known Field Behaviors
+## Workflow 15: Content Performance Intelligence
 
-**`?source=html` parameter:**
-- Required when posting HTML content to the `html` field
-- Without it, Ghost ignores the `html` field entirely and stores empty content
-- Always append to POST/PUT URL: `/ghost/api/admin/posts/?source=html`
+Use case: You've been publishing for months. You want to know what's actually working — which posts drive email engagement, which content never reached your subscribers, and where your pages have health gaps.
 
-**Lexical vs HTML:**
-- Ghost stores content in Lexical (its own JSON format) internally
-- When you POST `html` with `?source=html`, Ghost converts it to Lexical
-- The `html` field on GET responses is Ghost's rendered output from Lexical
-- HTML cards in Lexical (`{"type":"html","html":"..."}`) are rendered differently than native content — theme must support `kg-card` classes
+Ghost's Admin API exposes email engagement data (opens, clicks) per post, member counts by tier, post and page metadata. This workflow assembles all of it into a three-section report.
 
-**`updated_at` on PUT:**
-- Always fetch the current `updated_at` before updating a post
-- Ghost uses optimistic locking — stale `updated_at` returns 409
-- Pattern: GET → extract `updated_at` → PUT with same value
+**What this covers:**
+- Audience snapshot: active subscribers, free vs paid split
+- Section 1 — Email performance: open rate, click rate, CTO, divergence analysis
+- Section 2 — Web-only posts: content published but never emailed (amplification candidates + health snapshot)
+- Section 3 — Pages: evergreen content health (AI consultant, about, landing pages etc.)
+
+**What Ghost's API cannot give you** (the ceiling):
+- Per-post or per-page view counts — dashboard-only, backed by Tinybird, no API access
+- Traffic sources / referrers — not exposed
+- Free → paid conversion per post — not exposed
+- Time-on-page — not exposed
+
+For per-post view counts, wire a third-party analytics tool alongside Ghost:
+- **Plausible** (`plausible.io/api/v1/stats/breakdown?property=event:page`) — simple, privacy-first, clean REST API
+- **Fathom** (`usefathom.com/api`) — similar to Plausible
+- **GA4** (`analyticsdata.googleapis.com`) — more complex OAuth but most widely used
+
+All three return per-URL view counts you can join to Ghost post slugs.
+
+### The script
+
+Save as `ghost-performance.js` and run with `node ghost-performance.js`.
+
+```js
+const https = require('https');
+const crypto = require('crypto');
+const fs = require('fs');
+
+const creds = JSON.parse(fs.readFileSync(process.env.HOME + '/.openclaw/credentials/ghost-admin.json', 'utf8'));
+const [id, secret] = creds.key.split(':');
+
+function makeToken() {
+  const h = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT', kid: id })).toString('base64url');
+  const n = Math.floor(Date.now() / 1000);
+  const p = Buffer.from(JSON.stringify({ iat: n, exp: n + 300, aud: '/admin/' })).toString('base64url');
+  const s = crypto.createHmac('sha256', Buffer.from(secret, 'hex')).update(h + '.' + p).digest('base64url');
+  return h + '.' + p + '.' + s;
+}
+
+function apiGet(path) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(creds.url);
+    const options = {
+      hostname: url.hostname,
+      path,
+      method: 'GET',
+      headers: { 'Authorization': 'Ghost ' + makeToken(), 'Accept-Version': 'v5.0' }
+    };
+    const req = https.request(options, res => {
+      let data = '';
+      res.on('data', d => data += d);
+      res.on('end', () => resolve(JSON.parse(data)));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+async function fetchAll(endpoint, include = '') {
+  let page = 1, all = [];
+  const type = endpoint.includes('/pages/') ? 'pages' : 'posts';
+  while (true) {
+    const inc = include ? '&include=' + include : '';
+    const data = await apiGet(`/ghost/api/admin/${endpoint}?limit=15&page=${page}&status=published${inc}`);
+    if (!data[type] || data[type].length === 0) break;
+    all = all.concat(data[type]);
+    if (!data.meta?.pagination?.next) break;
+    page++;
+    await new Promise(r => setTimeout(r, 300));
+  }
+  return all;
+}
+
+function healthFlags(item) {
+  const flags = [];
+  if (!item.feature_image) flags.push('no feature image');
+  if (!item.custom_excerpt) flags.push('no excerpt');
+  if (!item.meta_description) flags.push('no meta description');
+  if (!item.tags || item.tags.length === 0) flags.push('no tags');
+  return flags;
+}
+
+(async () => {
+  // --- Audience snapshot ---
+  const allMembers = await apiGet('/ghost/api/admin/members/?limit=1');
+  const activeMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true');
+  const freeMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true,status:free');
+  const paidMembers = await apiGet('/ghost/api/admin/members/?limit=1&filter=subscribed:true,status:paid');
+  const totalSubs = activeMembers?.meta?.pagination?.total ?? '?';
+  const freeSubs = freeMembers?.meta?.pagination?.total ?? '?';
+  const paidSubs = paidMembers?.meta?.pagination?.total ?? '?';
+
+  // --- Posts ---
+  const allPosts = await fetchAll('posts/', 'email,tags');
+  const emailed = allPosts.filter(p => p.email && p.email.email_count > 0);
+  const webOnly = allPosts.filter(p => !p.email || p.email.email_count === 0);
+
+  // --- Pages ---
+  const allPages = await fetchAll('pages/', 'tags');
+
+  // --- Email performance ---
+  const withRates = emailed.map(p => {
+    const sent = p.email.email_count || 0;
+    const opened = p.email.opened_count || 0;
+    const clicked = p.email.clicked_count || 0;
+    const openRate = sent > 0 ? ((opened / sent) * 100).toFixed(1) : null;
+    const clickRate = sent > 0 ? ((clicked / sent) * 100).toFixed(1) : null;
+    const cto = opened > 0 ? ((clicked / opened) * 100).toFixed(1) : null;
+    return { ...p, sent, opened, clicked, openRate, clickRate, cto };
+  }).filter(p => p.openRate !== null);
+
+  const byOpen = [...withRates].sort((a, b) => parseFloat(b.openRate) - parseFloat(a.openRate));
+  const byClick = [...withRates].sort((a, b) => parseFloat(b.clickRate) - parseFloat(a.clickRate));
+  const divergent = withRates
+    .filter(p => parseFloat(p.openRate) > 40 && parseFloat(p.clickRate) < 3)
+    .sort((a, b) => parseFloat(b.openRate) - parseFloat(a.openRate));
+
+  const fmtEmail = p =>
+    `  • ${p.title}\n    Sent: ${p.sent} | Open: ${p.openRate}% | Click: ${p.clickRate}% | CTO: ${p.cto}% | Segment: ${p.email_recipient_filter || 'all'}`;
+
+  // --- Output ---
+  console.log('=== GHOST CONTENT PERFORMANCE REPORT ===');
+  console.log('Run at:', new Date().toISOString());
+  console.log('');
+  console.log('AUDIENCE');
+  console.log(`  Active subscribers: ${totalSubs} (free: ${freeSubs} / paid: ${paidSubs})`);
+  console.log(`  Total published posts: ${allPosts.length} | Emailed: ${emailed.length} | Web-only: ${webOnly.length}`);
+  console.log(`  Total published pages: ${allPages.length}`);
+  console.log('');
+
+  console.log('--- SECTION 1: EMAIL PERFORMANCE ---');
+  console.log('');
+  console.log('Top 5 by open rate:');
+  byOpen.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+  console.log('Top 5 by click rate:');
+  byClick.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+  console.log('High open / low click — weak CTA candidates (opens >40%, clicks <3%):');
+  if (divergent.length === 0) console.log('  None — CTAs are converting well.');
+  divergent.slice(0, 5).forEach(p => console.log(fmtEmail(p)));
+  console.log('');
+
+  console.log('--- SECTION 2: WEB-ONLY POSTS (never emailed) ---');
+  console.log('Note: per-post view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  console.log('');
+  if (webOnly.length === 0) {
+    console.log('  All published posts have been emailed.');
+  } else {
+    webOnly.forEach(p => {
+      const flags = healthFlags(p);
+      const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
+      console.log(`  • ${p.title}`);
+      console.log(`    Published: ${p.published_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+    });
+  }
+  console.log('');
+
+  console.log('--- SECTION 3: PAGES ---');
+  console.log('Note: page view counts require a third-party analytics tool (Plausible, Fathom, GA4).');
+  console.log('');
+  if (allPages.length === 0) {
+    console.log('  No published pages found.');
+  } else {
+    allPages.forEach(p => {
+      const flags = healthFlags(p);
+      const flagStr = flags.length > 0 ? ' ⚠ ' + flags.join(', ') : ' ✓';
+      console.log(`  • ${p.title}`);
+      console.log(`    Updated: ${p.updated_at?.slice(0, 10)} | Slug: /${p.slug}/${flagStr}`);
+    });
+  }
+  console.log('');
+  console.log('=== END REPORT ===');
+})();
+```
+
+### Reading the report
+
+**Open rate benchmarks:**
+| Rate | Signal |
+|---|---|
+| Under 20% | Below average — subject line or sender reputation issue |
+| 20–40% | Solid — typical for engaged lists |
+| 40–60% | Strong — highly engaged audience |
+| 60%+ | Exceptional — or MPP inflation (see pitfalls) |
+
+**Click rate benchmarks:**
+| Rate | Signal |
+|---|---|
+| Under 1% | Low — CTA buried or missing |
+| 1–3% | Average |
+| 3–5% | Strong |
+| 5%+ | Exceptional |
+
+**Click-to-open (CTO)** — the most honest signal. Of everyone who opened, how many clicked? High CTO means the content delivered on the subject line's promise. Low CTO means a curiosity open, not a real read.
+
+**High open / low click (divergent posts):** Hidden wins. The subject line worked — people opened. But nothing inside drove a click. Add a CTA, a relevant link, or a "continue reading" anchor. A small edit can unlock latent engagement from an already-warm audience.
+
+**Web-only posts:** Invisible to your subscriber list. Ghost doesn't allow retroactive API email sends — duplicate the post and publish fresh, or use Ghost Admin to manually resend if that option is available.
+
+**Pages:** Evergreen content (about, landing pages, tools). Health flags catch SEO gaps — missing meta descriptions and excerpts on pages hurt search visibility just as much as on posts.
+
+### Saving the report
+
+```bash
+node ghost-performance.js > ghost-performance-$(date +%Y-%m-%d).md
+```
+
+Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA decay.
+
+### Pitfalls
+
+- `email.opened_count` and `email.clicked_count` only return data with `&include=email` — omitting it returns null even for emailed posts.
+- **Apple Mail Privacy Protection (MPP)** pre-loads email pixels on iOS/macOS, inflating open rates. Open rates above 70% on small lists are often MPP artifacts. Click rate and CTO are more reliable signals.
+- The `email_recipient_filter` field shows segment (`all`, `free`, `paid`) — compare like-for-like when benchmarking rates across posts.
+- Token expires in 5 minutes — the script regenerates before every paginated fetch so long archives won't expire mid-run.
+- Pages use the `/pages/` endpoint, not `/posts/` — they won't appear in post queries even though they share most fields.
 

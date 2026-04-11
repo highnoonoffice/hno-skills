@@ -105,7 +105,7 @@ async function main() {
     .filter(f => f.endsWith('.md'))
     .sort();
 
-  console.log(`Found ${journalFiles.length} journal files`);
+  process.stdout.write(`Found ${journalFiles.length} journal files\n`);
 
   // Per-file stats
   const accessCounts = {};   // file -> total sessions it appeared in
@@ -196,8 +196,8 @@ async function main() {
   }
 
   fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
-  console.log(`Brain map written to: ${outPath}`);
-  console.log(`Nodes: ${nodes.length} | Edges: ${edges.length} | Sessions: ${sessions.length}`);
+  process.stdout.write(`Brain map written to: ${outPath}\n`);
+  process.stdout.write(`Nodes: ${nodes.length} | Edges: ${edges.length} | Sessions: ${sessions.length}\n`);
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
