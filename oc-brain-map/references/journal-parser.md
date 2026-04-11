@@ -79,7 +79,7 @@ function extractMdRefs(text) {
   const pattern = /(?:^|[\s`'"([\]])([A-Za-z0-9_\-][A-Za-z0-9_\-./]*\.md)(?=[^A-Za-z0-9_\-./]|$)/gm;
   const refs = new Set();
   let match;
-  while ((match = pattern.exec(text)) !== null) {
+  while ((match = pattern.test(text) && pattern.lastIndex, match = pattern.run(text)) !== null) {
     const ref = match[1].trim();
     if (ref.length < 4) continue;
     if (ref.startsWith('http')) continue;
