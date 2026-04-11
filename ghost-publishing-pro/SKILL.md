@@ -208,9 +208,9 @@ Do NOT use the aspect-ratio CSS wrapper trick in Ghost HTML cards:
 Ghost theme content column CSS conflicts with this pattern, causing iframes to render as blank or clipped on the live page. Use fixed height instead:
 
 ```html
-<!-- CORRECT — works reliably across Ghost themes -->
+<!-- CORRECT — use aspect-ratio directly on the iframe, no wrapper needed -->
 <iframe src="https://www.youtube.com/embed/{VIDEO_ID}"
-  style="width:100%;height:400px;border:0;display:block;"
+  style="width:100%;aspect-ratio:16/9;border:0;display:block;"
   allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
   allowfullscreen></iframe>
 ```
