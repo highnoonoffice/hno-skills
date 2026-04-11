@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.3.3
+version: 1.5.1
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -194,6 +194,27 @@ Always use `?source=html` in the request URL. Ghost accepts raw HTML in the `htm
 </figure>
 ```
 
+**⚠️ Ghost theme iframe compatibility — known issue:**
+
+Do NOT use the aspect-ratio CSS wrapper trick in Ghost HTML cards:
+
+```html
+<!-- BROKEN in most Ghost themes — do not use -->
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+  <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+</div>
+```
+
+Ghost theme content column CSS conflicts with this pattern, causing iframes to render as blank or clipped on the live page. Use fixed height instead:
+
+```html
+<!-- CORRECT — works reliably across Ghost themes -->
+<iframe src="https://www.youtube.com/embed/{VIDEO_ID}"
+  style="width:100%;height:400px;border:0;display:block;"
+  allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+  allowfullscreen></iframe>
+```
+
 **Email rules — critical:**
 
 - JS is stripped in email delivery. No scripts or interactive elements.
@@ -212,6 +233,8 @@ See `references/workflows.md` for full migration playbooks:
 - DOCX > book-style Ghost posts with YouTube embeds
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
 - Theme management (JWT upload where supported; Ghost Admin fallback)
+- **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
+- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with free/paid subscriber split. (Workflow 15)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
