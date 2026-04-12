@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.5.1
+version: 1.6.0
 description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -286,6 +286,91 @@ Key rules:
 - `align-items:flex-start` causes text to float at top, looks broken
 - Always use real Ghost feature images — never placeholder divs or colored icon blocks
 - Pull image URLs from the API immediately before building the block
+
+### Headless Body Patching — Production Lessons
+
+Learned from a full inline link injection operation across 84 posts (2026-04-11). Every item here hit in production.
+
+**Detect content structure before patching**
+
+Ghost stores post bodies two ways. Check before you operate:
+
+```python
+lex = json.loads(post['lexical'])
+node_type = lex['root']['children'][0]['type']
+# 'html'       → entire body is one raw HTML string. Patch with string replace / regex.
+# 'paragraph'  → structured Lexical nodes. Traverse the tree.
+```
+
+Most published posts (especially older or migrated ones) are HTML blobs. Don't assume Lexical tree structure.
+
+**Find internal links in HTML-blob posts**
+
+The correct way to count or find internal links in HTML-blob posts:
+
+```python
+import re, json
+
+lex = json.loads(post['lexical'])
+html_block = ""
+for child in lex['root']['children']:
+    if child.get('type') == 'html':
+        html_block += child.get('html', '')
+
+# All <a href> tags pointing to your domain
+all_hrefs = re.findall(r'<a\s[^>]*href=["\']([^"\']+)["\']', html_block)
+internal = [h for h in all_hrefs if 'josephvoelbel.com' in h]
+```
+
+Do NOT search the raw lexical JSON string for `href` — the links are inside HTML string values and won't be found by `re.findall(r'href...', lex_str)`.
+
+**Avoid double-nested anchors on injection**
+
+Ghost themes inject their own `<a>` tags (read-next strips, related posts). If your target phrase already appears inside an `<a>`, you'll create `<a><a>text</a></a>` — invalid HTML that renders broken.
+
+Before injecting, check:
+
+```python
+# Skip if phrase already inside an anchor
+if not re.search(r'<a[^>]*>[^<]*' + re.escape(phrase) + r'[^<]*</a>', html):
+    html = html.replace(phrase, f'<a href="{url}">{phrase}</a>', 1)
+```
+
+**Skip non-body nodes**
+
+Node 0 is not always the post body. Some posts have subscribe blocks or read-next strips as Node 0.
+
+Safe body detection:
+
+```python
+for child in lex['root']['children']:
+    if child.get('type') == 'html' and len(child.get('html','')) > 500:
+        if 'jv-subscribe' not in child['html'] and 'jv-read-next' not in child['html']:
+            # This is the body
+            break
+```
+
+**Re-fetch `updated_at` immediately before PUT**
+
+Ghost uses `updated_at` as an optimistic concurrency lock. If anything touches the post between your GET and your PUT (Ghost editor autosave, another process), the PUT fails with `409`.
+
+```python
+# Wrong: use updated_at from a cached batch fetch done earlier
+# Correct: re-fetch immediately before PUT
+fresh = requests.get(f'{BASE}/posts/{post_id}/', headers=headers).json()['posts'][0]
+updated_at = fresh['updated_at']
+# Now PUT
+```
+
+**OpsQ: tick each step inline, not at the end**
+
+For any multi-step operation watched live in an Ops Queue — PATCH the step done immediately after it completes, before moving to the next step. Batching all ticks at the end makes the queue appear frozen.
+
+```python
+for post in cluster:
+    result = patch_post(post)           # do the work
+    tick_opsq_step(task_id, step_id)    # tick immediately — before next iteration
+```
 
 ### License
 
