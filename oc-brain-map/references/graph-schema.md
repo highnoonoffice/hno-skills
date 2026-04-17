@@ -140,7 +140,7 @@ import path from 'path';
 const DATA_PATH = path.join(process.cwd(), 'data/brain-map-projects.json');
 
 export async function GET(request: Request) {
-  const secret = process.env.BRAIN_MAP_SECRET;
+  const secret = process.env.BRAIN_MAP_ACCESS_KEY;
   if (secret && request.headers.get('x-brain-map-key') !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -165,21 +165,22 @@ Triggers a parser run from the UI Rebuild button:
 
 ```typescript
 import { NextResponse } from 'next/server';
-import { execSync } from 'child_process';
+import { fork } from 'child_process';
 import path from 'path';
 
 export async function POST(request: Request) {
-  const secret = process.env.BRAIN_MAP_SECRET;
+  const secret = process.env.BRAIN_MAP_ACCESS_KEY;
   if (secret && request.headers.get('x-brain-map-key') !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  try {
+  return new Promise((resolve) => {
     const scriptPath = path.join(process.cwd(), 'scripts/build-brain-map-projects.js');
-    execSync(`node ${scriptPath}`, { timeout: 30000 });
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    return NextResponse.json({ error: 'Rebuild failed', detail: String(err) }, { status: 500 });
-  }
+    const child = fork(scriptPath, [], { silent: true, timeout: 30000 });
+    child.on('close', (code) => {
+      if (code === 0) resolve(NextResponse.json({ ok: true }));
+      else resolve(NextResponse.json({ error: 'Rebuild failed', code }, { status: 500 }));
+    });
+  });
 }
 ```
 
@@ -188,5 +189,5 @@ export async function POST(request: Request) {
 ## Notes
 
 - The API routes do not cache (`Cache-Control: no-store`) — rebuilds are infrequent and the JSON is small.
-- Set `BRAIN_MAP_SECRET` env var to restrict API access for any networked deployment. Leave unset for localhost-only use.
+- Set `BRAIN_MAP_ACCESS_KEY` env var to restrict API access for any networked deployment. Leave unset for localhost-only use.
 - Projects are sorted by `coAccessScore` descending in the output — highest attention projects first.
