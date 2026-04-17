@@ -1,7 +1,7 @@
 ---
 title: "OC Brain Map — Graph Schema & API Route"
 created: 2026-03-17
-modified: 2026-04-16
+modified: 2026-04-17
 tags: [brain-map, schema, api, nextjs]
 status: active
 ---
@@ -161,11 +161,10 @@ export async function GET(request: Request) {
 
 ### `app/api/brain-map/rebuild/route.ts`
 
-Triggers a parser run from the UI Rebuild button:
+Triggers a parser run from the UI Rebuild button by importing and calling the parser directly — no shell execution:
 
 ```typescript
 import { NextResponse } from 'next/server';
-import { execSync } from 'child_process';
 import path from 'path';
 
 export async function POST(request: Request) {
@@ -174,8 +173,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
-    const scriptPath = path.join(process.cwd(), 'scripts/build-brain-map-projects.js');
-    execSync(`node ${scriptPath}`, { timeout: 30000 });
+    // Import the parser module directly — no shell execution.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { buildBrainMap } = require(
+      path.join(process.cwd(), 'scripts/build-brain-map-projects.js')
+    );
+    buildBrainMap();
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: 'Rebuild failed', detail: String(err) }, { status: 500 });

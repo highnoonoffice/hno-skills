@@ -1,7 +1,7 @@
 ---
 title: "OC Brain Map — Journal Parser Script"
 created: 2026-03-17
-modified: 2026-04-16
+modified: 2026-04-17
 tags: [brain-map, journal, parser, node-script]
 status: active
 ---
@@ -108,6 +108,8 @@ For each project, edges are built from file co-access within sessions:
 
 ## Script
 
+The parser exports a `buildBrainMap(options)` function so it can be called directly from API routes or other scripts without shell execution. It also runs as a standalone CLI script when invoked directly via `node`.
+
 ```javascript
 #!/usr/bin/env node
 /**
@@ -118,7 +120,8 @@ For each project, edges are built from file co-access within sessions:
  * via keyword matching. Extracts files from explicit Files Accessed blocks
  * where available; falls back to regex extraction from transcript text.
  *
- * Output: brain-map-projects.json
+ * Exports: buildBrainMap(options?) — call directly from API routes.
+ * Output:  brain-map-projects.json (or options.outputPath)
  */
 
 const fs   = require('fs');
@@ -461,4 +464,111 @@ process.stdout.write(`  ${projects.length} projects, sorted by attention:\n`);
 projects.forEach((p, i) =>
   process.stdout.write(`  ${String(i+1).padStart(2)}. [${p.coAccessScore.toString().padStart(5)} co-access] ${p.label}: ${p.sessionCount} sessions, ${p.fileCount} files`)
 );
+
+// ── Exported API ──────────────────────────────────────────────────────────────
+// Call buildBrainMap() directly from API routes — no shell execution needed.
+
+function buildBrainMap(options = {}) {
+  const workspaceDir = options.workspaceDir || process.env.WORKSPACE_DIR || path.join(process.env.HOME, '.openclaw/vault');
+  const journalDir   = path.join(workspaceDir, 'memory/journal');
+  const outputPath   = options.outputPath   || process.env.OUTPUT_PATH   || path.join(__dirname, '../data/brain-map-projects.json');
+
+  if (!fs.existsSync(journalDir)) throw new Error('Journal dir not found: ' + journalDir);
+
+  const journalFiles = fs.readdirSync(journalDir)
+    .filter(f => f.match(/^\d{4}-\d{2}-\d{2}\.md$/))
+    .sort();
+
+  const projMap = {};
+  for (const def of PROJECT_DEFS) {
+    projMap[def.id] = { ...def, sessions: [], fileSet: new Set() };
+  }
+
+  let count = 0;
+  for (const jf of journalFiles) {
+    const content = fs.readFileSync(path.join(journalDir, jf), 'utf8');
+    const date    = jf.replace('.md', '');
+    const summary = extractSummary(content);
+    if (!summary) continue;
+    count++;
+
+    let files = extractFilesFromAccessedBlock(content);
+    if (files.length < 3) {
+      const extra = extractFilesFromTranscript(content);
+      files = [...new Set([...files, ...extra])];
+    }
+    files = [...new Set(files.map(f => f.replace(/^\.?\//,'')))].filter(f => f.endsWith('.md'));
+
+    const projIds = extractExplicitProject(content) || matchProjects(summary + ' ' + content.slice(0, 3000));
+    for (const pid of projIds) {
+      if (!projMap[pid]) continue;
+      projMap[pid].sessions.push({ date, summary: summary.slice(0, 200), files });
+      files.forEach(f => projMap[pid].fileSet.add(f));
+    }
+  }
+
+  const ago30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const built = [];
+
+  for (const def of PROJECT_DEFS) {
+    const proj = projMap[def.id];
+    if (proj.sessions.length === 0) continue;
+
+    const files = [...proj.fileSet];
+    const nodes = files.map(f => ({
+      id: f, group: classifyGroup(f),
+      accessCount: proj.sessions.filter(s => s.files.includes(f)).length,
+    }));
+
+    const edgeMap = {};
+    for (const session of proj.sessions) {
+      const sf = session.files;
+      for (let i = 0; i < sf.length; i++) {
+        for (let j = i + 1; j < sf.length; j++) {
+          const sorted = [sf[i], sf[j]].sort();
+          const k = sorted.join('|||');
+          if (!edgeMap[k]) edgeMap[k] = { source: sorted[0], target: sorted[1], weight: 0, sessions: [], votes: { forward: 0, backward: 0 } };
+          edgeMap[k].weight++;
+          if (!edgeMap[k].sessions.includes(session.date)) edgeMap[k].sessions.push(session.date);
+          if (sf[i] === sorted[0]) edgeMap[k].votes.forward++;
+          else edgeMap[k].votes.backward++;
+        }
+      }
+    }
+
+    const allDates = proj.sessions.map(s => s.date).sort();
+    const spanDays = allDates.length >= 2
+      ? (new Date(allDates[allDates.length-1]).getTime() - new Date(allDates[0]).getTime()) / 86400000
+      : 1;
+
+    const edges = Object.values(edgeMap).map(edge => {
+      const recentCount   = edge.sessions.filter(d => d >= ago30).length;
+      const lifetimeCount = edge.sessions.length;
+      const fromId = edge.votes.forward >= edge.votes.backward ? edge.source : edge.target;
+      const toId   = edge.votes.forward >= edge.votes.backward ? edge.target : edge.source;
+      return { source: edge.source, target: edge.target, fromId, toId, weight: edge.weight, recentCount, lifetimeCount, spanDays };
+    });
+
+    const coAccessScore = edges.reduce((sum, e) => sum + e.weight, 0);
+    built.push({
+      id: def.id, label: def.label, color: def.color,
+      sessionCount: proj.sessions.length, fileCount: nodes.length, coAccessScore,
+      dateFirst: proj.sessions[0]?.date, dateLast: proj.sessions[proj.sessions.length - 1]?.date,
+      sessions: proj.sessions.map(s => ({ date: s.date, summary: s.summary })),
+      nodes, edges,
+    });
+  }
+
+  built.sort((a, b) => b.coAccessScore - a.coAccessScore);
+  const result = { projects: built, generated: new Date().toISOString(), journalCount: count };
+  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
+  return result;
+}
+
+module.exports = { buildBrainMap };
+
+// Run as CLI if called directly
+if (require.main === module) {
+  buildBrainMap();
+}
 ```

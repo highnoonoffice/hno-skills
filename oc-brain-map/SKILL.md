@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 3.3.3
-description: "Visualize how attention moves across your agent's projects. Every session leaves a trace. Over time, those traces form a map — not of what your agent was told to do, but of what it actually cared about. Where it kept returning. What it let go. This is that map. 13 attention categories. Momentum edges. The recent rises. The forgotten fades. It has no utility beyond insight. That's the point."
+version: 3.3.4
+description: "Visualize how attention moves across your agent's projects. 13 named attention categories. Momentum-ready edges (recentCount/lifetimeCount). Directional flow encoding. Sorted by co-access score."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -278,18 +278,18 @@ Every edge carries `recentCount` (co-access sessions in the last 30 days) and `l
 **API access control:** The route serving graph data supports optional token-based access control:
 
 ```bash
-BRAIN_MAP_ACCESS_KEY=your-access-key-here
+BRAIN_MAP_SECRET=your-secret-key-here
 ```
 
 Pass the key in component requests:
 
 ```typescript
 fetch('/api/brain-map/graph', {
-  headers: { 'x-brain-map-key': process.env.NEXT_PUBLIC_BRAIN_MAP_ACCESS_KEY }
+  headers: { 'x-brain-map-key': process.env.NEXT_PUBLIC_BRAIN_MAP_SECRET }
 })
 ```
 
-If `BRAIN_MAP_ACCESS_KEY` is not set, the route is open — suitable for localhost development only. Set the key for any networked deployment.
+If `BRAIN_MAP_SECRET` is not set, the route is open — suitable for localhost development only. Set the secret for any networked deployment.
 
 ### Known Limitations
 
