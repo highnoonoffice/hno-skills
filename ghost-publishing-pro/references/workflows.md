@@ -954,3 +954,165 @@ Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA
 - Token expires in 5 minutes — the script regenerates before every paginated fetch so long archives won't expire mid-run.
 - Pages use the `/pages/` endpoint, not `/posts/` — they won't appear in post queries even though they share most fields.
 
+---
+
+## Workflow 16: Batch Custom Excerpt Push
+
+Use case: Your Workflow 14 audit returned a long list of posts with no custom excerpt. This workflow writes excerpts to all of them in a single batch operation — no browser, no copy-paste, no per-post editing.
+
+Proven in production: 65 posts updated in one run on josephvoelbel.ghost.io. Required no npm packages — pure Node.js built-ins and Python.
+
+### Why excerpts matter
+
+Ghost's `custom_excerpt` field controls three surfaces simultaneously:
+- **Feed cards** — the preview text below the post title on your homepage and tag pages
+- **Social sharing previews** — og:description when the post is shared on Twitter/LinkedIn/iMessage
+- **Client-side search** — Ghost's search indexes `custom_excerpt`, not the full post body. If a keyword only lives in the body, the post won't surface in search. The excerpt is the search surface.
+
+Empty excerpts mean weak social previews and invisible posts in your own site search.
+
+### Hard limit: 300 characters
+
+Ghost's `custom_excerpt` field has a hard cap of **300 characters**. The API will silently accept longer strings in some versions but the field is truncated on save. Any excerpt over 300 characters will fail with a validation error or be cut off mid-sentence.
+
+Build your excerpts to fit. Target 200–280 characters for clean previews across all surfaces.
+
+### Step 1: Build your excerpt map
+
+Prepare a JSON file mapping post slugs to excerpts. Slugs are the source of truth — not titles, not IDs. If a slug doesn't match exactly, the update silently skips it.
+
+```json
+[
+  { "slug": "your-post-slug", "excerpt": "Your excerpt text here — under 300 characters." },
+  { "slug": "another-post-slug", "excerpt": "Another excerpt." }
+]
+```
+
+Save as `excerpts.json`. Run a character count check before proceeding:
+
+```python
+import json
+
+with open('excerpts.json') as f:
+    entries = json.load(f)
+
+over_limit = [(e['slug'], len(e['excerpt'])) for e in entries if len(e['excerpt']) > 300]
+if over_limit:
+    print(f"{len(over_limit)} entries over 300 chars:")
+    for slug, length in over_limit:
+        print(f"  {slug}: {length} chars")
+else:
+    print("All excerpts within 300-char limit.")
+```
+
+Fix any over-limit entries before running the push. Truncating mid-sentence is better than a failed API call — end at a clause boundary.
+
+### Step 2: Fetch post IDs by slug
+
+Ghost's PUT endpoint requires the post ID, not the slug. Fetch the full post list first and build a slug → ID map.
+
+```python
+import json, time, urllib.request
+from pathlib import Path
+
+creds = json.loads(Path.home().joinpath('.openclaw/credentials/ghost-admin.json').read_text())
+BASE = creds['url'].rstrip('/')
+
+import hmac, hashlib, base64, struct
+from datetime import datetime, timezone
+
+def make_token(key):
+    key_id, secret = key.split(':')
+    header = base64.urlsafe_b64encode(json.dumps({'alg':'HS256','typ':'JWT','kid':key_id}).encode()).rstrip(b'=').decode()
+    now = int(datetime.now(timezone.utc).timestamp())
+    payload = base64.urlsafe_b64encode(json.dumps({'iat':now,'exp':now+300,'aud':'/admin/'}).encode()).rstrip(b'=').decode()
+    sig_input = f'{header}.{payload}'.encode()
+    sig = base64.urlsafe_b64encode(hmac.new(bytes.fromhex(secret), sig_input, hashlib.sha256).digest()).rstrip(b'=').decode()
+    return f'{header}.{payload}.{sig}'
+
+def api_get(path):
+    req = urllib.request.Request(f'{BASE}{path}', headers={'Authorization': f'Ghost {make_token(creds["key"])}'})
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())
+
+# Fetch all published posts — paginate until done
+slug_to_post = {}
+page = 1
+while True:
+    data = api_get(f'/ghost/api/admin/posts/?limit=15&page={page}&status=published&fields=id,slug,updated_at')
+    for post in data.get('posts', []):
+        slug_to_post[post['slug']] = post
+    if not data.get('meta', {}).get('pagination', {}).get('next'):
+        break
+    page += 1
+    time.sleep(0.3)
+
+print(f'Fetched {len(slug_to_post)} published posts.')
+```
+
+### Step 3: Push excerpts
+
+```python
+import urllib.error
+
+excerpts = json.loads(Path('excerpts.json').read_text())
+
+updated = 0
+skipped = 0
+failed = []
+
+for entry in excerpts:
+    slug = entry['slug']
+    excerpt = entry['excerpt']
+
+    if slug not in slug_to_post:
+        print(f'  SKIP (not found): {slug}')
+        skipped += 1
+        continue
+
+    post = slug_to_post[slug]
+    post_id = post['id']
+    updated_at = post['updated_at']
+
+    payload = json.dumps({'posts': [{'custom_excerpt': excerpt, 'updated_at': updated_at}]}).encode()
+    req = urllib.request.Request(
+        f'{BASE}/ghost/api/admin/posts/{post_id}/',
+        data=payload,
+        method='PUT',
+        headers={
+            'Authorization': f'Ghost {make_token(creds["key"])}',
+            'Content-Type': 'application/json'
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as r:
+            r.read()
+        print(f'  OK: {slug}')
+        updated += 1
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f'  FAIL ({e.code}): {slug} — {body[:120]}')
+        failed.append(slug)
+
+    time.sleep(0.5)  # 500ms between calls — stay under rate limit
+
+print(f'\nDone. Updated: {updated} | Skipped (slug not found): {skipped} | Failed: {len(failed)}')
+if failed:
+    print('Failed slugs:', failed)
+```
+
+### Reading the output
+
+- **OK** — excerpt written successfully
+- **SKIP (not found)** — the slug in your JSON doesn't match any published post. Common causes: post is a draft, post was deleted, slug changed since your audit. These are safe to ignore or investigate separately.
+- **FAIL (422)** — usually a character count violation. Check the excerpt length for that slug.
+- **FAIL (409)** — `updated_at` conflict. Another process touched the post between your fetch and your PUT. Re-fetch and retry.
+
+### Pitfalls
+
+- **300-character hard cap** — validate before you run. A batch of 79 where 19 fail on character count wastes the run and leaves your site in a half-updated state. Run the character count check in Step 1. Fix everything first, then push.
+- **Slug mismatches are silent** — the script reports them as SKIP, not ERROR. Skipped slugs need a manual slug lookup — fetch the post by title search or browse Ghost Admin to confirm the real slug.
+- **Don't use post IDs from a cached fetch** — if there's any gap between when you fetched post metadata and when you run the push, some `updated_at` values may be stale. For large batches (50+ posts), re-fetch immediately before the PUT loop or regenerate `updated_at` per post inline.
+- **500ms delay is not optional** — Ghost will 429 on rapid successive PUTs. The delay keeps you under the rate limit on Ghost Pro hosting.
+- **Custom excerpts drive client-side search** — if you're writing excerpts to fix search gaps, include the keywords you want to rank for. Ghost's search indexes this field verbatim. An excerpt that doesn't contain the keyword still won't surface the post in search for that term.
+

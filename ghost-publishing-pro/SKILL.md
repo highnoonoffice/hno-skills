@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.7.7
-description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 16 workflows covering article publishing, batch imports, site health audits, email performance analysis, and tag management. Admin API only. No browser, no dashboard, no context switching."
+version: 1.8.0
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 16 workflows covering article publishing, batch imports, site health audits, email performance analysis, and bulk excerpt push. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -210,6 +210,7 @@ See `references/workflows.md` for full migration playbooks:
 - Theme management (JWT upload where supported; Ghost Admin fallback)
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
 - **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
+- **Batch excerpt push** — write custom excerpts to all posts in a single run. 300-char hard cap, slug-based targeting, skip/fail reporting. Proven on 65 posts in production. (Workflow 16)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
