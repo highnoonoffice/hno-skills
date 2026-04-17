@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 3.3.1
+version: 3.3.2
 description: "Visualize how attention moves across your agent's projects. 13 named attention categories. Momentum-ready edges (recentCount/lifetimeCount). Directional flow encoding. Sorted by co-access score."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
