@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 1.6.0
-description: "Skip the CMS. Write, format, and publish Ghost posts directly from your AI workflow using the Admin API — no browser, no copy/paste, no context switching."
+version: 1.7.7
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 16 workflows covering article publishing, batch imports, site health audits, email performance analysis, and tag management. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -35,7 +35,7 @@ This contains proven workflows, hard-won pitfalls, and patterns from actually ru
 
 ### Dependencies
 
-Most workflows use only Node.js built-ins (`crypto`, `fs`, `https`) and `curl` — no npm packages required.
+Most workflows use only Node.js built-ins (`fs`, `https`, and the standard HMAC module) and `curl` — no npm packages required.
 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
@@ -75,7 +75,7 @@ Keep the credentials file out of shared folders and version control. Restrict ac
 
 Ghost's Admin API integration tokens cannot access certain owner-level operations:
 
-- **Staff management and billing** — owner-only, no API path
+- **Staff management** — owner-only, no API path
 - **Site settings / code injection** — API token returns `403 NoPermissionError` by design
 - **Redirects and routes files** — `GET/POST /ghost/api/admin/redirects/` returns `403` with integration tokens. Must upload via Ghost Admin → Settings → Labs → Beta features → Redirects upload button
 
@@ -94,11 +94,7 @@ Create a credentials file at `~/.openclaw/credentials/ghost-admin.json`:
 }
 ```
 
-Read it in any operation with:
-
-```bash
-cat ~/.openclaw/credentials/ghost-admin.json
-```
+Stored at: `~/.openclaw/credentials/ghost-admin.json` (fields: `url`, `key`)
 
 Get your key: Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
@@ -110,7 +106,7 @@ Ghost uses short-lived JWT tokens. Generate one before every API call — they e
 
 **Pure Node.js — no npm required.**
 
-Token generation uses Node.js built-ins (`crypto`, `fs`) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
+Token generation uses Node.js built-ins (`fs` and the standard HMAC module) and the Admin API key format (`id:secret`). The full implementation is in `references/api.md` under Authentication — copy the token generation script into your workflow, capture the output to a shell variable, and pass it as `Authorization: Ghost {token}` on all requests.
 
 Tokens expire in 5 minutes. Regenerate before each API call or every 50 posts in batch operations.
 
@@ -194,27 +190,6 @@ Always use `?source=html` in the request URL. Ghost accepts raw HTML in the `htm
 </figure>
 ```
 
-**⚠️ Ghost theme iframe compatibility — known issue:**
-
-Do NOT use the aspect-ratio CSS wrapper trick in Ghost HTML cards:
-
-```html
-<!-- BROKEN in most Ghost themes — do not use -->
-<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
-  <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
-</div>
-```
-
-Ghost theme content column CSS conflicts with this pattern, causing iframes to render as blank or clipped on the live page. Use fixed height instead:
-
-```html
-<!-- CORRECT — use aspect-ratio directly on the iframe, no wrapper needed -->
-<iframe src="https://www.youtube.com/embed/{VIDEO_ID}"
-  style="width:100%;aspect-ratio:16/9;border:0;display:block;"
-  allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
-  allowfullscreen></iframe>
-```
-
 **Email rules — critical:**
 
 - JS is stripped in email delivery. No scripts or interactive elements.
@@ -234,7 +209,7 @@ See `references/workflows.md` for full migration playbooks:
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
 - Theme management (JWT upload where supported; Ghost Admin fallback)
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
-- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with free/paid subscriber split. (Workflow 15)
+- **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
@@ -255,122 +230,86 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
 - **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
 
-### Read-Next / Related Articles Pattern
 
-When building a "Continue Reading" block at the bottom of a post, always pull real feature image URLs from the Ghost API first — never use placeholder divs or icon blocks.
+### Tag Management
 
-**Correct pattern:**
-```python
-# Fetch feature images before building the block
-for slug in related_slugs:
-    resp = requests.get(f'{BASE}/posts/slug/{slug}/', params={'fields': 'title,slug,feature_image'}, headers=...)
-    img_url = resp.json()['posts'][0]['feature_image']
-```
+Ghost's Admin API supports full tag CRUD. These endpoints require an **Admin-level token** (owner or staff with Admin role). Integration tokens return `403` — if that happens, see the safe-mode note below.
 
-**HTML structure — use `align-items:center` not `align-items:flex-start`:**
-```html
-<div class="jv-read-next" style="margin:40px 0 0;padding:24px 0 0;border-top:1px solid rgba(0,0,0,0.15);">
-  <div style="font-size:0.62rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(0,0,0,0.35);margin-bottom:4px;">Continue Reading</div>
-  <a href="{URL}" style="display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.07);transition:opacity 0.15s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-    <img src="{FEATURE_IMAGE_URL}" alt="{TITLE}" style="width:68px;height:52px;object-fit:cover;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,0.08);">
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:0.72rem;font-weight:600;color:#111;margin-bottom:4px;line-height:1.35;letter-spacing:0.01em;">{TITLE}</div>
-      <div style="font-size:0.68rem;color:rgba(0,0,0,0.45);line-height:1.45;font-weight:300;">{EXCERPT}</div>
-    </div>
-  </a>
-</div>
-```
-
-Key rules:
-- `align-items:center` — keeps text vertically centered against the thumbnail
-- `align-items:flex-start` causes text to float at top, looks broken
-- Always use real Ghost feature images — never placeholder divs or colored icon blocks
-- Pull image URLs from the API immediately before building the block
-
-### Headless Body Patching — Production Lessons
-
-Learned from a full inline link injection operation across 84 posts (2026-04-11). Every item here hit in production.
-
-**Detect content structure before patching**
-
-Ghost stores post bodies two ways. Check before you operate:
+**List all tags**
 
 ```python
-lex = json.loads(post['lexical'])
-node_type = lex['root']['children'][0]['type']
-# 'html'       → entire body is one raw HTML string. Patch with string replace / regex.
-# 'paragraph'  → structured Lexical nodes. Traverse the tree.
+r = requests.get(
+    f'{GHOST_URL}/ghost/api/admin/tags/?limit=all',
+    headers=headers
+)
+tags = r.json().get('tags', [])
+for tag in tags:
+    print(tag['id'], tag['name'], tag['slug'])
 ```
 
-Most published posts (especially older or migrated ones) are HTML blobs. Don't assume Lexical tree structure.
-
-**Find internal links in HTML-blob posts**
-
-The correct way to count or find internal links in HTML-blob posts:
+**Create a tag**
 
 ```python
-import re, json
-
-lex = json.loads(post['lexical'])
-html_block = ""
-for child in lex['root']['children']:
-    if child.get('type') == 'html':
-        html_block += child.get('html', '')
-
-# All <a href> tags pointing to your domain
-all_hrefs = re.findall(r'<a\s[^>]*href=["\']([^"\']+)["\']', html_block)
-internal = [h for h in all_hrefs if 'josephvoelbel.com' in h]
+r = requests.post(
+    f'{GHOST_URL}/ghost/api/admin/tags/',
+    headers=headers,
+    json={"tags": [{"name": "Your Tag", "slug": "your-tag"}]}
+)
+if r.status_code == 403:
+    print("Safe-mode: Admin token requires owner-level permissions for tag endpoints. Add tags manually in Ghost Admin or use an owner token.")
+else:
+    tag = r.json()['tags'][0]
+    print(tag['id'], tag['name'])
 ```
 
-Do NOT search the raw lexical JSON string for `href` — the links are inside HTML string values and won't be found by `re.findall(r'href...', lex_str)`.
-
-**Avoid double-nested anchors on injection**
-
-Ghost themes inject their own `<a>` tags (read-next strips, related posts). If your target phrase already appears inside an `<a>`, you'll create `<a><a>text</a></a>` — invalid HTML that renders broken.
-
-Before injecting, check:
+**Update a tag**
 
 ```python
-# Skip if phrase already inside an anchor
-if not re.search(r'<a[^>]*>[^<]*' + re.escape(phrase) + r'[^<]*</a>', html):
-    html = html.replace(phrase, f'<a href="{url}">{phrase}</a>', 1)
+# Fetch tag id first via list, then:
+r = requests.put(
+    f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/',
+    headers=headers,
+    json={"tags": [{"id": TAG_ID, "name": "Updated Name", "slug": "updated-slug"}]}
+)
+if r.status_code == 403:
+    print("Safe-mode: owner-level token required for tag updates.")
 ```
 
-**Skip non-body nodes**
-
-Node 0 is not always the post body. Some posts have subscribe blocks or read-next strips as Node 0.
-
-Safe body detection:
+**Delete a tag**
 
 ```python
-for child in lex['root']['children']:
-    if child.get('type') == 'html' and len(child.get('html','')) > 500:
-        if 'jv-subscribe' not in child['html'] and 'jv-read-next' not in child['html']:
-            # This is the body
-            break
+r = requests.delete(
+    f'{GHOST_URL}/ghost/api/admin/tags/{TAG_ID}/',
+    headers=headers
+)
+if r.status_code == 403:
+    print("Safe-mode: owner-level token required for tag deletion.")
+elif r.status_code == 204:
+    print("Tag deleted.")
 ```
 
-**Re-fetch `updated_at` immediately before PUT**
-
-Ghost uses `updated_at` as an optimistic concurrency lock. If anything touches the post between your GET and your PUT (Ghost editor autosave, another process), the PUT fails with `409`.
+**Bulk assign a tag to multiple posts**
 
 ```python
-# Wrong: use updated_at from a cached batch fetch done earlier
-# Correct: re-fetch immediately before PUT
-fresh = requests.get(f'{BASE}/posts/{post_id}/', headers=headers).json()['posts'][0]
-updated_at = fresh['updated_at']
-# Now PUT
+# Fetch posts, then PATCH each with the tag added
+posts = requests.get(
+    f'{GHOST_URL}/ghost/api/admin/posts/?limit=all&include=tags',
+    headers=headers
+).json()['posts']
+
+for post in posts:
+    existing_tags = [{"id": t["id"]} for t in post.get("tags", [])]
+    if not any(t["id"] == TAG_ID for t in existing_tags):
+        existing_tags.append({"id": TAG_ID})
+        requests.put(
+            f'{GHOST_URL}/ghost/api/admin/posts/{post["id"]}/',
+            headers=headers,
+            json={"posts": [{"id": post["id"], "updated_at": post["updated_at"], "tags": existing_tags}]}
+        )
+        print(f"Tagged: {post['title']}")
 ```
 
-**OpsQ: tick each step inline, not at the end**
-
-For any multi-step operation watched live in an Ops Queue — PATCH the step done immediately after it completes, before moving to the next step. Batching all ticks at the end makes the queue appear frozen.
-
-```python
-for post in cluster:
-    result = patch_post(post)           # do the work
-    tick_opsq_step(task_id, step_id)    # tick immediately — before next iteration
-```
+> **Safe-mode note:** All tag write endpoints (`POST`, `PUT`, `DELETE`) require owner-level Admin API credentials. If you get a `403`, either switch to an owner token or manage tags manually in Ghost Admin → Settings → Tags. The list endpoint (`GET`) works with standard integration tokens.
 
 ### License
 
