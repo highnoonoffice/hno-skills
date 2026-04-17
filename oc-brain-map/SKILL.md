@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
-version: 3.2.0
-description: "Visualize how attention moves across your agent's projects. Markdown files become nodes grouped by Attention Pockets."
+version: 3.3.0
+description: "Visualize how attention moves across your agent's projects. 13 named attention categories. Momentum-ready edges (recentCount/lifetimeCount). Directional flow encoding. Sorted by co-access score."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -160,88 +160,108 @@ The graph builds from whatever journal history exists and gets richer over time 
 
 **Step 1 — Copy the data extraction script**
 
-Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map.js` in your workspace. Adjust `VAULT_DIR` and `OUTPUT_PATH` via environment variables if needed.
+Copy `references/journal-parser.md` into a Node.js script at `scripts/build-brain-map-projects.js` in your Mission Control or host app. Adjust `WORKSPACE_DIR` and `OUTPUT_PATH` via environment variables if needed.
 
 Run it:
 ```bash
-node scripts/build-brain-map.js
+node scripts/build-brain-map-projects.js
 ```
 
-**Step 2 — Wire the API route**
+Output is written to `data/brain-map-projects.json` by default.
 
-In your Next.js app, add the API route from `references/graph-schema.md`. It serves `brain-map-graph.json` with no caching:
+**Step 2 — Wire the API routes**
+
+In your Next.js app, add two routes from `references/graph-schema.md`:
 
 ```
-app/api/brain-map/graph/route.ts
+app/api/brain-map/projects/route.ts   — serves brain-map-projects.json
+app/api/brain-map/rebuild/route.ts    — triggers a parser run from the UI
 ```
 
 **Step 3 — Add the React component**
 
-Copy `BrainMapGraph.tsx` from `references/component.md` into your `components/` directory:
+Copy `BrainMapProjects.tsx` from `references/component.md` into your `components/` directory:
 
 ```tsx
-import BrainMapGraph from '@/components/BrainMapGraph';
+import BrainMapProjects from '@/components/BrainMapProjects';
 
 export default function BrainMapTab() {
-  return <BrainMapGraph />;
+  return <BrainMapProjects />;
 }
 ```
 
-**Step 4 — Rebuild graph data**
+**Step 4 — Schedule weekly rebuilds**
 
-Run the parser script any time to refresh the graph. Add it to a cron job for weekly updates:
+Using OpenClaw's native cron (recommended — no system crontab needed):
 
+```json
+{
+  "id": "brain-map-weekly",
+  "schedule": "0 0 * * 0",
+  "type": "systemEvent",
+  "event": "brain-map-rebuild"
+}
+```
+
+Or run manually:
 ```bash
-# Weekly brain map rebuild (Sunday midnight)
-0 0 * * 0 cd /path/to/vault && node scripts/build-brain-map.js
+node scripts/build-brain-map-projects.js
 ```
 
 ### Graph Data Format
 
-See `references/graph-schema.md` for the full spec.
+See `references/graph-schema.md` for the full spec. Output is project-centric — not a flat node/edge graph. Each project contains its own subgraph.
 
 ```json
 {
-  "nodes": [
-    { "id": "MEMORY.md", "group": "core", "accessCount": 7, "path": "MEMORY.md" }
-  ],
-  "lines": [
+  "projects": [
     {
-      "source": "MEMORY.md",
-      "target": "memory/recent.md",
-      "weight": 5,
-      "sessionType": "memory",
-      "sessions": ["2026-03-14", "2026-03-15"]
+      "id": "ghost-publishing",
+      "label": "Ghost Publishing",
+      "color": "#22c55e",
+      "sessionCount": 14,
+      "fileCount": 8,
+      "coAccessScore": 42,
+      "nodes": [ { "id": "MEMORY.md", "group": "core", "accessCount": 12 } ],
+      "edges": [
+        {
+          "source": "MEMORY.md", "target": "memory/recent.md",
+          "fromId": "MEMORY.md", "toId": "memory/recent.md",
+          "weight": 8, "recentCount": 3, "lifetimeCount": 8, "spanDays": 54
+        }
+      ]
     }
   ],
-  "generated": "2026-03-17T23:00:00Z",
-  "sessionCount": 37
+  "generated": "2026-04-16T02:00:00Z",
+  "journalCount": 52
 }
 ```
 
-### Attention Pockets — Color Mapping
+### Attention Categories — Color Mapping
 
-| Pocket | Color | Files |
-|---|---|---|
-| Core Identity | Gold `#c8a84b` | MEMORY.md, SOUL.md, USER.md, IDENTITY.md, AGENTS.md, TOOLS.md |
-| Memory | Purple `#a78bfa` | memory/*.md |
-| Publishing | Green `#22c55e` | PublishingPipeline/*, drafts/* |
-| Infrastructure | Blue `#60a5fa` | tools/*, workflows/*, prompts/*, scripts/* |
-| Skills | Orange `#f97316` | skills/* |
-| General | Gray `#6b7280` | Everything else |
+The parser maps sessions to 13 named attention categories via keyword matching. Projects are sorted by co-access score (total edge weight) in the output — highest-attention projects first.
 
-### Line Colors — Session Type
+| Category | Color |
+|---|---|
+| Memory System | Gold `#c8a84b` |
+| Ghost Publishing | Green `#22c55e` |
+| Ghost Publishing Pro Skill | Emerald `#34d399` |
+| YouTube | Red `#ef4444` |
+| Mission Control | Blue `#60a5fa` |
+| Brain Map Skill | Purple `#a78bfa` |
+| GitHub | White `#f0f6ff` |
+| Cron + Automation | Orange `#fb923c` |
+| Model Stack | Fuchsia `#e879f9` |
+| HNO Business | Pink `#ec4899` |
+| Finances + Bitcoin | Amber `#fbbf24` |
+| The Desk | Tan `#d4a373` |
+| Second Brain | Cyan `#67e8f9` |
 
-Session type is auto-classified from journal text keywords:
+Categories are fully customizable — edit `PROJECT_DEFS` in `build-brain-map-projects.js` to match your vault's actual work patterns.
 
-| Session Type | Color | Keywords |
-|---|---|---|
-| Strategy / Planning | Gold | strategy, roadmap, planning, product, business |
-| Memory / Identity | Purple | memory, identity, voice, self |
-| Publishing / Content | Green | publish, article, draft, content |
-| Infrastructure / Code | Blue | deploy, build, API, route, server, cron |
-| Research / Analysis | Orange | research, analysis, audit, skill |
-| General / Mixed | Gray | fallback |
+### Edge Momentum
+
+Every edge carries `recentCount` (co-access sessions in the last 30 days) and `lifetimeCount` (total co-access sessions). These enable momentum rendering: a relationship heating up vs. fading. The data is computed on every parser run. Momentum UI encoding (flow opacity) is on the roadmap for a future component update.
 
 ### Security
 
