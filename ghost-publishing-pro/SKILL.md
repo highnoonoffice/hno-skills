@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.9.0
+version: 1.9.2
 description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API for all standard operations. Browser fallback documented for owner-only operations the API blocks by design."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
