@@ -960,7 +960,7 @@ Run monthly. Compare rates over time to spot list fatigue, content drift, or CTA
 
 Use case: Your Workflow 14 audit returned a long list of posts with no custom excerpt. This workflow writes excerpts to all of them in a single batch operation — no browser, no copy-paste, no per-post editing.
 
-Proven in production: 65 posts updated in one run on josephvoelbel.ghost.io. Required no npm packages — pure Node.js built-ins and Python.
+Proven in production: 65 posts updated in one run on josephvoelbel.com. Required no npm packages — pure Node.js built-ins and Python.
 
 ### Why excerpts matter
 
@@ -1122,7 +1122,7 @@ if failed:
 
 Use case: Google Search Console is showing coverage gaps — pages discovered but not indexed, crawled but skipped, or redirect errors from a platform migration. This workflow walks the triage and repair process specifically for Ghost sites.
 
-Proven in production: ran this loop on josephvoelbel.ghost.io after a Squarespace migration left 18+ URLs unindexed. Traffic increased measurably in the weeks following.
+Proven in production: ran this loop on josephvoelbel.com after a Squarespace migration left 18+ URLs unindexed. Traffic increased measurably in the weeks following.
 
 This workflow assumes you have GSC access already configured for your domain. It does not cover GSC authentication setup.
 

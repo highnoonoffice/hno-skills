@@ -211,7 +211,7 @@ See `references/workflows.md` for full migration playbooks:
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
 - **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
 - **Batch excerpt push** — write custom excerpts to all posts in a single run. 300-char hard cap, slug-based targeting, skip/fail reporting. Proven on 65 posts in production. (Workflow 16)
-- **GSC → Ghost indexing & SEO repair loop** — triage GSC coverage report, classify unindexed URLs, fix Ghost-specific redirect issues (API blocks redirect writes — Labs upload only), submit real posts for indexing, accelerate discovery with internal links. Proven on josephvoelbel.ghost.io post-Squarespace migration. (Workflow 17)
+- **GSC → Ghost indexing & SEO repair loop** — triage GSC coverage report, classify unindexed URLs, fix Ghost-specific redirect issues (API blocks redirect writes — Labs upload only), submit real posts for indexing, accelerate discovery with internal links. Proven on josephvoelbel.com post-Squarespace migration. (Workflow 17)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
