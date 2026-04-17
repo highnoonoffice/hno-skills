@@ -1,127 +1,186 @@
 ---
 title: "OC Brain Map — Graph Schema & API Route"
 created: 2026-03-17
-modified: 2026-03-17
+modified: 2026-04-16
 tags: [brain-map, schema, api, nextjs]
 status: active
 ---
 
 # Graph Schema & API Route
 
-## `brain-map-graph.json` — Full Schema
+The Brain Map uses a **project-centric** data model. The parser output (`brain-map-projects.json`) groups nodes and edges by project rather than outputting a single flat graph. Each project is an independent subgraph with its own nodes, edges, session history, and metadata.
+
+## `brain-map-projects.json` — Full Schema
 
 ```typescript
-interface GraphData {
-  nodes: Node[];
-  edges: Edge[];
-  generated: string;   // ISO timestamp of last parser run
-  sessionCount: number;
+interface ProjectData {
+  projects: Project[];
+  generated: string;    // ISO timestamp of last parser run
+  journalCount: number; // number of journal files parsed
 }
 
-interface Node {
-  id: string;          // Relative path from vault root, e.g. "MEMORY.md", "memory/recent.md"
-  group: NodeGroup;
-  accessCount: number; // Number of sessions this file appeared in
-  path: string;        // Same as id (kept for component compatibility)
+interface Project {
+  id: string;           // machine id, e.g. "ghost-publishing"
+  label: string;        // display name, e.g. "Ghost Publishing"
+  color: string;        // hex color for this project's nodes and edges
+  sessionCount: number; // number of journal sessions attributed to this project
+  fileCount: number;    // number of unique files accessed in this project
+  coAccessScore: number;// total edge weight — proxy for how much attention this project absorbed
+  dateFirst: string;    // YYYY-MM-DD of earliest session
+  dateLast: string;     // YYYY-MM-DD of most recent session
+  sessions: ProjectSession[];
+  nodes: ProjectNode[];
+  edges: ProjectEdge[];
+}
+
+interface ProjectSession {
+  date: string;         // YYYY-MM-DD
+  summary: string;      // first 200 chars of journal summary
+}
+
+interface ProjectNode {
+  id: string;           // relative path from vault root, e.g. "MEMORY.md"
+  group: NodeGroup;     // color group for rendering
+  accessCount: number;  // sessions this file appeared in within this project
 }
 
 type NodeGroup =
-  | 'core'             // MEMORY.md, SOUL.md, USER.md, IDENTITY.md, AGENTS.md, TOOLS.md
-  | 'memory'           // memory/*.md
-  | 'publishing'       // PublishingPipeline/*, drafts/*
-  | 'infrastructure'   // tools/*, workflows/*, prompts/*, scripts/*
-  | 'skills'           // skills/*
-  | 'journal'          // memory/journal/*
-  | 'general';         // everything else
+  | 'core'              // MEMORY.md, SOUL.md, USER.md, IDENTITY.md, AGENTS.md, TOOLS.md, HEARTBEAT.md
+  | 'memory'            // memory/*.md
+  | 'publishing'        // PublishingPipeline/*, drafts/*, articles/*
+  | 'infrastructure'    // tools/*, workflows/*, prompts/*, scripts/*, mission-control/*, .learnings/*
+  | 'skills'            // skills/*
+  | 'general';          // everything else
 
-interface Edge {
-  source: string;      // upstream file id
-  target: string;      // downstream file id
-  weight: number;      // co-access count (number of sessions both files appeared)
-  sessionType: SessionType;
-  sessions: string[];  // date strings of sessions where co-access occurred (YYYY-MM-DD)
+interface ProjectEdge {
+  source: string;       // file id (alphabetically first of the pair)
+  target: string;       // file id (alphabetically second of the pair)
+  fromId: string;       // canonical upstream node — the file accessed first in sessions (majority vote)
+  toId: string;         // canonical downstream node — the file accessed later in sessions
+  weight: number;       // co-access count (sessions where both files appeared)
+  recentCount: number;  // co-access sessions in the last 30 days
+  lifetimeCount: number;// same as weight (sessions array length) — alias for momentum math
+  spanDays: number;     // days between first and last session in this project
 }
-
-type SessionType =
-  | 'strategy'
-  | 'memory'
-  | 'publishing'
-  | 'infrastructure'
-  | 'research'
-  | 'general';
 ```
+
+## Edge Directionality
+
+Each edge carries two direction fields in addition to `source`/`target`:
+
+- **`fromId`** — the file accessed *earlier* in the session on average across all sessions where both files appeared (majority vote from session order)
+- **`toId`** — the file accessed *later*
+
+This lets the component render directional flow if desired. The `source`/`target` fields are alphabetically sorted and stable for deduplication; `fromId`/`toId` reflect actual cognitive flow.
+
+## Momentum Fields
+
+Each edge carries `recentCount` and `lifetimeCount`:
+
+- **`recentCount`** — co-access sessions in the last 30 days
+- **`lifetimeCount`** — total co-access sessions ever
+
+These fields enable momentum rendering: an edge where `recentCount / lifetimeCount` is high is a relationship that's heating up. One where it's low is fading. The data is computed on every parser run. UI rendering of momentum (flow opacity encoding) is planned for a future component update.
 
 ## Example JSON
 
 ```json
 {
-  "nodes": [
-    { "id": "MEMORY.md", "group": "core", "accessCount": 7, "path": "MEMORY.md" },
-    { "id": "memory/recent.md", "group": "memory", "accessCount": 5, "path": "memory/recent.md" },
-    { "id": "SOUL.md", "group": "core", "accessCount": 3, "path": "SOUL.md" }
-  ],
-  "edges": [
+  "projects": [
     {
-      "source": "MEMORY.md",
-      "target": "memory/recent.md",
-      "weight": 5,
-      "sessionType": "memory",
-      "sessions": ["2026-03-14", "2026-03-15", "2026-03-16", "2026-03-17"]
-    },
-    {
-      "source": "MEMORY.md",
-      "target": "SOUL.md",
-      "weight": 3,
-      "sessionType": "memory",
-      "sessions": ["2026-03-14", "2026-03-15", "2026-03-16"]
+      "id": "ghost-publishing",
+      "label": "Ghost Publishing",
+      "color": "#22c55e",
+      "sessionCount": 14,
+      "fileCount": 8,
+      "coAccessScore": 42,
+      "dateFirst": "2026-02-20",
+      "dateLast": "2026-04-15",
+      "sessions": [
+        { "date": "2026-04-15", "summary": "Batch excerpt push to 65 posts. Updated custom_excerpt field..." }
+      ],
+      "nodes": [
+        { "id": "MEMORY.md", "group": "core", "accessCount": 12 },
+        { "id": "memory/recent.md", "group": "memory", "accessCount": 9 }
+      ],
+      "edges": [
+        {
+          "source": "MEMORY.md",
+          "target": "memory/recent.md",
+          "fromId": "MEMORY.md",
+          "toId": "memory/recent.md",
+          "weight": 8,
+          "recentCount": 3,
+          "lifetimeCount": 8,
+          "spanDays": 54
+        }
+      ]
     }
   ],
-  "generated": "2026-03-17T23:00:00.000Z",
-  "sessionCount": 37
+  "generated": "2026-04-16T02:00:00.000Z",
+  "journalCount": 52
 }
 ```
 
 ---
 
-## Next.js API Route
+## Next.js API Routes
 
-Place at `app/api/brain-map/graph/route.ts` in your Mission Control (or any Next.js 13+ app):
+Two routes are needed — one for the project graph data, one to trigger a rebuild.
+
+### `app/api/brain-map/projects/route.ts`
+
+Serves `brain-map-projects.json`:
 
 ```typescript
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const GRAPH_PATH = path.join(process.cwd(), 'data/brain-map-graph.json');
+const DATA_PATH = path.join(process.cwd(), 'data/brain-map-projects.json');
 
 export async function GET(request: Request) {
-  // Optional access control: set BRAIN_MAP_SECRET env var to restrict API access.
-  // Recommended for any deployment beyond localhost.
-  const secret = process.env.BRAIN_MAP_SECRET;
+  const secret = process.env.BRAIN_MAP_ACCESS_KEY;
   if (secret && request.headers.get('x-brain-map-key') !== secret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
   try {
-    if (!fs.existsSync(GRAPH_PATH)) {
+    if (!fs.existsSync(DATA_PATH)) {
       return NextResponse.json(
-        { error: 'Graph data not found. Run scripts/build-brain-map.js first.' },
+        { error: 'Graph data not found. Run scripts/build-brain-map-projects.js first.' },
         { status: 404 }
       );
     }
-    const raw = fs.readFileSync(GRAPH_PATH, 'utf8');
-    const data = JSON.parse(raw);
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': 'no-store',
-      },
-    });
+    const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
+    return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
-    return NextResponse.json(
-      { error: 'Failed to read graph data', detail: String(err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to read graph data', detail: String(err) }, { status: 500 });
   }
+}
+```
+
+### `app/api/brain-map/rebuild/route.ts`
+
+Triggers a parser run from the UI Rebuild button:
+
+```typescript
+import { NextResponse } from 'next/server';
+import { fork } from 'child_process';
+import path from 'path';
+
+export async function POST(request: Request) {
+  const secret = process.env.BRAIN_MAP_ACCESS_KEY;
+  if (secret && request.headers.get('x-brain-map-key') !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return new Promise((resolve) => {
+    const scriptPath = path.join(process.cwd(), 'scripts/build-brain-map-projects.js');
+    const child = fork(scriptPath, [], { silent: true, timeout: 30000 });
+    child.on('close', (code) => {
+      if (code === 0) resolve(NextResponse.json({ ok: true }));
+      else resolve(NextResponse.json({ error: 'Rebuild failed', code }, { status: 500 }));
+    });
+  });
 }
 ```
 
@@ -129,5 +188,6 @@ export async function GET(request: Request) {
 
 ## Notes
 
-- The API route does not cache (`Cache-Control: no-store`) — graph data rebuilds are infrequent and the file is small.
-- To refresh graph data, run the parser script manually or on a cron schedule. Do not expose a shell-execution endpoint in production.
+- The API routes do not cache (`Cache-Control: no-store`) — rebuilds are infrequent and the JSON is small.
+- Set `BRAIN_MAP_ACCESS_KEY` env var to restrict API access for any networked deployment. Leave unset for localhost-only use.
+- Projects are sorted by `coAccessScore` descending in the output — highest attention projects first.
