@@ -1116,3 +1116,194 @@ if failed:
 - **500ms delay is not optional** — Ghost will 429 on rapid successive PUTs. The delay keeps you under the rate limit on Ghost Pro hosting.
 - **Custom excerpts drive client-side search** — if you're writing excerpts to fix search gaps, include the keywords you want to rank for. Ghost's search indexes this field verbatim. An excerpt that doesn't contain the keyword still won't surface the post in search for that term.
 
+---
+
+## Workflow 17: GSC → Ghost Indexing & SEO Repair Loop
+
+Use case: Google Search Console is showing coverage gaps — pages discovered but not indexed, crawled but skipped, or redirect errors from a platform migration. This workflow walks the triage and repair process specifically for Ghost sites.
+
+Proven in production: ran this loop on josephvoelbel.ghost.io after a Squarespace migration left 18+ URLs unindexed. Traffic increased measurably in the weeks following.
+
+This workflow assumes you have GSC access already configured for your domain. It does not cover GSC authentication setup.
+
+---
+
+### Step 1: Pull the coverage report
+
+In Google Search Console: **Index → Pages** (or Coverage in older GSC UI).
+
+Four buckets matter:
+
+| Bucket | What it means | Priority |
+|---|---|---|
+| **Valid** | Indexed and serving | Baseline — protect these |
+| **Discovered — currently not indexed** | Google knows the URL exists but hasn't crawled it yet | Low urgency — internal links accelerate this |
+| **Crawled — currently not indexed** | Google visited and actively decided to skip | High priority — Google made a judgment call |
+| **Excluded** | Intentionally or structurally excluded | Triage: is it intentional? |
+
+Export the **Crawled — currently not indexed** list first. That's where the leverage is.
+
+---
+
+### Step 2: Classify the URL list
+
+Not every unindexed URL is a problem. Classify before acting.
+
+**Category A — System/feed URLs (ignore):**
+- `/rss/`, `/rss.xml`, `?format=rss` — feed URLs, shouldn't be indexed
+- `/favicon.ico`, `/sitemap.xml` — binaries/feeds, not pages
+- `/ghost/` — admin path, correctly blocked by robots.txt
+
+**Category B — Migration ghosts (let die):**
+If you migrated from Squarespace or WordPress, you'll likely see old platform URLs:
+- `/blog/tag/SomeTag` — Squarespace tag pages redirected to Ghost tag pages that may not exist
+- `/blog/category/Philosophy` — WordPress category pages
+- Dated paths like `/2015/11/11/slug` that redirect into the void
+
+Google will drop these naturally as it follows redirects and hits 404s. No action needed unless you want to explicitly 410 them.
+
+**Category C — Actual posts (fix these):**
+Real content Google visited and chose not to index. Common causes:
+- Post is too short or thin
+- No internal links pointing to it
+- Duplicate content (canonical issue)
+- `?format=amp` URL variant that your redirect rule doesn't handle cleanly
+
+For each Category C URL, verify the post exists and is published on Ghost:
+
+```bash
+# Quick check: fetch post by slug from Ghost API
+TOKEN=... # generate JWT
+SLUG="your-post-slug"
+curl -s "{url}/ghost/api/admin/posts/slug/${SLUG}/?fields=id,title,slug,status" \
+  -H "Authorization: Ghost ${TOKEN}" | python3 -c "import json,sys; p=json.load(sys.stdin)['posts'][0]; print(p['status'], p['title'])"
+```
+
+---
+
+### Step 3: Ghost-specific redirect issues
+
+Migrations leave redirect chains. Ghost's redirect system has two hard constraints:
+
+**The API blocks redirect writes.** `POST /ghost/api/admin/redirects/upload/` returns `403` for integration tokens. Redirect rules must be uploaded manually:
+
+> Ghost Admin → Settings → Labs → Redirects → upload a JSON file
+
+Redirects file format:
+```json
+[
+  {"from": "/blog/old-slug", "to": "/new-slug", "permanent": true},
+  {"from": "/blog/tag/(.*)", "to": "/tag/$1", "permanent": true}
+]
+```
+
+**AMP URLs survive redirect rules.** A redirect from `/blog/slug` → `/slug` will not strip `?format=amp`. If GSC shows `?format=amp` variants as unindexed, add an explicit rule:
+```json
+{"from": "/blog/(.*)\\?format=amp", "to": "/$1", "permanent": true}
+```
+
+**Redirect chains break indexing.** If A→B→C, Google may stop following at B. Audit your redirects file for chains — every rule should point directly to the final destination.
+
+---
+
+### Step 4: Fix Ghost tag page indexing
+
+Ghost includes tag pages in its sitemap by default. Tag pages are thin, low-signal content — they compete with your real posts for indexing budget and rarely rank.
+
+**Add noindex to tag pages via your theme:**
+
+In your `tag.hbs` template:
+```handlebars
+{{! In the <head> section }}
+<meta name="robots" content="noindex, follow">
+```
+
+This tells Google to ignore the tag page but still follow links from it to your real posts. Real posts keep getting discovered. Tag pages stop competing.
+
+**Remove tag pages from your sitemap** via `routes.yaml` (Ghost Admin → Labs → Routes upload):
+```yaml
+routes:
+collections:
+  /:
+    permalink: /{slug}/
+    template: index
+taxonomies:
+  # comment out or leave blank to exclude tag/author pages from sitemap
+```
+
+---
+
+### Step 5: Submit real posts for indexing
+
+For every Category C URL that represents a real post you want indexed:
+
+1. Open GSC → **URL Inspection**
+2. Paste the URL
+3. Click **Request Indexing**
+
+GSC will queue it for a Googlebot crawl, typically within days. You can submit one URL at a time — no batch submit exists in the UI.
+
+**What makes a URL worth submitting:**
+- It's a real published post with substantive content
+- It has at least one internal link pointing to it from another indexed page
+- It has a custom excerpt and meta description (Workflow 12)
+- It's not thin content (under ~300 words with no unique angle)
+
+Don't submit system URLs, tag pages, or thin placeholder posts — they'll be skipped again.
+
+---
+
+### Step 6: Accelerate indexing with internal links
+
+The fastest lever for "Discovered but not indexed" pages is internal links from pages Google already trusts.
+
+Identify your highest-traffic posts via Workflow 10 or Ghost Admin analytics. Add a "Related reading" or "Continue reading" section to those posts linking to your newer, unindexed content.
+
+The Ghost API approach (see Workflow 16 pattern):
+```python
+# Fetch your top posts by view count
+# For each: append a read-next block (see SKILL.md — Read-Next Pattern)
+# The block links to 2-3 newer posts you want indexed
+# PUT the updated post back
+```
+
+Even 2–3 internal links from high-authority pages to an unindexed post can move it from "Discovered" to "Indexed" within Google's next crawl cycle.
+
+---
+
+### Step 7: Triage "Crawled — currently not indexed" (the hard cases)
+
+These are posts Google visited and actively chose not to index. That's a content judgment, not a crawl issue. Fix at the source:
+
+| Cause | Fix |
+|---|---|
+| Thin content (under 400 words, low signal) | Expand the post or redirect it to a stronger related post |
+| No unique angle | Differentiate the content — what does this post say that no other page says? |
+| Duplicate content | Set canonical URL (Workflow 12) pointing to the definitive version |
+| Orphaned (no inbound links) | Add internal links from indexed pages (Step 6) |
+| Old placeholder from migration | 301 redirect to the closest live post, or leave it to drop naturally |
+
+For posts you care about ranking: improve them, add internal links, then Request Indexing again (Step 5).
+
+For posts that are genuinely low-value: either delete and redirect, or accept they won't rank and stop spending indexing budget on them.
+
+---
+
+### GSC → Ghost repair: the recurring loop
+
+This isn't a one-time fix. Run it quarterly:
+
+1. Pull coverage report — check for new Crawled-not-indexed entries
+2. Triage new entries by category
+3. Submit real posts for indexing after any content improvement
+4. Check redirect file for chains (anything pointing to a URL that also redirects)
+5. Confirm tag pages are still noindexed after any theme updates
+
+### Pitfalls
+
+- **Redirect uploads overwrite the entire file** — Ghost's Labs upload replaces, not appends. Always download the existing redirects JSON first, edit it, then re-upload the full file.
+- **AMP variants survive simple redirect rules** — add explicit rules for `?format=amp` and `?format=json` if GSC shows them.
+- **"Discovered but not indexed" is a waiting game** — submitting these via URL Inspection rarely helps. Internal links are faster. Don't burn GSC's submission quota on pages that just need to be crawled naturally.
+- **GSC data lags 2–3 days** — a redirect fix you deployed today won't show as resolved until Google re-crawls and GSC processes it. Check back in a week before deciding a fix didn't work.
+- **Tag page noindex requires a theme change** — this means re-uploading your Ghost theme via Admin → Design → Upload. If you're on a paid Ghost theme, test on a staging site first.
+
