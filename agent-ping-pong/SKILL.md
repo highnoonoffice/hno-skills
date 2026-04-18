@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.3.0
+version: 2.4.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -15,6 +15,14 @@ Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro �
 If you have a ChatGPT Plus subscription ($20/month), you already have access to Codex — no extra cost. Claude Code works the same way and is the preferred choice for many OpenClaw users. Pick whichever you have.
 
 **Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol.**
+
+### Why This Exists
+
+This skill started with a conversation. The idea came up — give your AI agent access to GitHub so it can ship code. A developer friend's first reaction: "What kind of access are we talking about?"
+
+That's the right question. Most people either hand over broad credentials and hope for the best, or they don't do it at all. Agent Ping Pong is the third option: a two-repo, two-token structure where each agent gets exactly what it needs and nothing else. The coding agent lives in the sandbox and never touches production. OpenClaw reviews and ports. You approve the merge.
+
+When the structure clicked, the reaction was: "I didn't know you could do that." That's what this skill is — that conversation, turned into a repeatable system.
 
 ### The Aesthetic
 
