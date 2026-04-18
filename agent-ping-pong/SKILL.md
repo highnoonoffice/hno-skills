@@ -10,11 +10,9 @@ metadata: ~
 
 # Agent Ping Pong
 
+Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while Codex does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard. The result: you ship real code to GitHub from a conversation, your agent reviews the PR, you approve the merge. Repeat.
+
 **Your OpenClaw is the brain. Codex is the hands. The clipboard is the protocol.**
-
-Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while Codex does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard.
-
-The result: you ship real code to GitHub from a conversation. Your agent reviews the PR. You approve the merge. Repeat.
 
 ### The Aesthetic
 
