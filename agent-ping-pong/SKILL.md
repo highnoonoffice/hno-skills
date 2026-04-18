@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.2.0
+version: 2.3.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -57,9 +57,10 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 - **Codex or Claude Code** — your coding agent. Codex is free with ChatGPT Plus ($20/mo). Claude Code works equally well. Either one does the build, opens PRs, and never merges without approval.
 - **GitHub account** — free. Source of truth. Where the code lives.
 - **Vercel account** — free tier. Deploy when something's ready to go public.
-- **One sandbox repo for Codex** — `your-username/codex-repo`. Codex lives here permanently. One PAT. Every build goes here first.
-- **One fine-grained PAT for Codex** — scoped to `codex-repo` only. You create this once and never touch it again.
-- **One fine-grained PAT for OpenClaw** — scoped to `codex-repo` + each target repo you want it to push to. One PAT per repo. You add repos as you add projects.
+- **One sandbox repo** (`codex-repo`) — Codex's permanent home. Every build goes here first. Never changes.
+- **One production repo** — where approved work lands. You create this once. All projects flow through it. Add more as ideas mature.
+- **One fine-grained PAT for Codex** — scoped to the sandbox only. Set once, never touched again.
+- **One fine-grained PAT for OpenClaw** — scoped to the sandbox + your production repo. Set once. Add repos to the scope as you expand — the token itself never gets replaced.
 
 ---
 
@@ -70,10 +71,10 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 
 **Claude Code:** Install via `npm install -g @anthropic-ai/claude-code`. Requires an Anthropic API key or Claude Pro/Max subscription. Works identically to Codex in this workflow — same block format, same PR protocol, same merge rules.
 
-### 2. Create the Codex sandbox repo
-Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it.
+### 2. Create your two repos
+**Sandbox repo:** Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it. This is Codex's permanent home. Every build goes here first. You never create another repo for Codex.
 
-This is Codex's permanent home. Every project Codex touches goes here first, regardless of where it ends up. You never create another repo for Codex.
+**Production repo:** Create a second repo (e.g. `your-username/projects`). This is where OpenClaw ports approved code. All your projects live here. Codex never touches it directly.
 
 ### 3. Create a fine-grained PAT for Codex
 In GitHub: Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens.
@@ -88,14 +89,14 @@ This is the key insight: Codex only gets access to what you give it. `codex-repo
 ### 4. Create a fine-grained PAT for OpenClaw
 In GitHub: Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens.
 
-Scope it to **codex-repo** to start. As you add public target repos, add each one to this token's repository access list. Permissions needed:
+Scope it to **both repos** — the sandbox and your production repo. Permissions needed:
 - Contents: Read & Write
 - Pull Requests: Read & Write
 - Metadata: Read
 
-This gives OpenClaw exactly what it needs — read PRs in the sandbox, push to approved target repos — and nothing else. Your other repos stay untouched.
+Codex has one PAT, scoped to the sandbox. OpenClaw has one PAT, scoped to the sandbox plus your production repo. That's the whole setup. If you add more production repos down the line, add them to this token's scope — the token itself never gets replaced.
 
-**What OpenClaw can do with this PAT:** read PRs in `codex-repo`, push code to any repo explicitly listed in the token's scope, create branches, commit files, open PRs on target repos.
+**What OpenClaw can do with this PAT:** read PRs in the sandbox, port approved code to the production repo, create branches, commit files, open PRs.
 
 **What neither agent can do:** create new GitHub repos. That one manual step is always yours. Takes 20 seconds at github.com/new.
 
@@ -222,24 +223,23 @@ If OpenClaw sends back findings, another round of ping pong happens before merge
 
 ## The Sandbox Pattern — How Projects Actually Ship
 
-Codex builds everything in `codex-repo`. That's the sandbox. OpenClaw reviews the PR there. When a build is approved, OpenClaw ports the clean code to the target repo — the public-facing project repo you created manually.
+Two repos. Two jobs. The sandbox is where things get built and broken. The production repo is where things live when they're ready.
+
+Codex builds everything in the sandbox. OpenClaw reviews the PR there. When a build is approved, OpenClaw ports the clean code to the production repo. Codex never touches the production repo directly — that's the whole point.
 
 The flow for any new project:
 
-    1. You create the target repo on GitHub (e.g. your-username/my-project)
-    2. You describe what you want to OpenClaw
-    3. OpenClaw writes the spec, sends it to Codex via you
-    4. Codex builds in codex-repo, opens a PR
-    5. You relay the PR to OpenClaw for review
-    6. OpenClaw reviews, sends findings back to Codex
-    7. Codex fixes, you relay, OpenClaw approves
-    8. You tell Codex to merge in codex-repo
-    9. OpenClaw ports the approved code to the target repo
-    10. Done. The target repo has clean, reviewed code. Codex never touched it directly.
+    1. You describe what you want to OpenClaw
+    2. OpenClaw writes the spec, sends it to your coding agent via you
+    3. Coding agent builds in the sandbox, opens a PR
+    4. You relay the PR to OpenClaw for review
+    5. OpenClaw reviews, sends findings back to the coding agent
+    6. Coding agent fixes, you relay, OpenClaw approves
+    7. You tell the coding agent to merge in the sandbox
+    8. OpenClaw ports the approved code to the production repo
+    9. Done. The production repo has clean, reviewed code. The coding agent never touched it.
 
-Codex stays in the sandbox forever. The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If Codex does something unexpected, it's in the sandbox, not in production.
-
-OpenClaw uses one fine-grained PAT scoped to the repos it needs. Start with `codex-repo`. When you create a new target repo, add it to the token's repository access list in GitHub settings. No new token needed — just update the scope. Codex never needs a new one.
+The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If the coding agent does something unexpected, it's in the sandbox, not in production. As ideas mature into distinct public projects, you can add dedicated repos to OpenClaw's PAT scope. The sandbox relationship never changes.
 
 ---
 
