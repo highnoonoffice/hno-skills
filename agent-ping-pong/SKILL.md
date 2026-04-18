@@ -5,7 +5,14 @@ description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. Th
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
 license: MIT
-metadata: ~
+credentials:
+  - name: GitHub PAT (Codex)
+    description: Fine-grained personal access token scoped to your sandbox repo (codex-repo). Contents + Pull Requests read/write. Set once in Codex Desktop.
+    required: true
+  - name: GitHub PAT (OpenClaw)
+    description: Fine-grained personal access token scoped to sandbox + production repos. Contents + Pull Requests read/write. Stored in OpenClaw config.
+    required: true
+binaries: []
 ---
 
 # Agent Ping Pong
@@ -60,6 +67,14 @@ status: completed | confirmed
 ```
 
 Codex uses this for build completions, status reports, and schema negotiations. OpenClaw uses this for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
+
+---
+
+## Security Notes
+
+**Clipboard handling:** The workflow passes structured blocks through your system clipboard. Do not include raw API keys or secrets inside handoff blocks — the clipboard can be read by other processes on your machine. GitHub PATs stay in your agent configs, not in block payloads.
+
+**PAT scope:** Use fine-grained tokens scoped to specific repos only. Never use classic tokens or tokens with broad org-level access for this workflow.
 
 ---
 
