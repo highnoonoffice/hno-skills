@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.1.0
+version: 2.2.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
