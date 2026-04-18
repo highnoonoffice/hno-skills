@@ -1,7 +1,7 @@
 ---
 name: agent-ping-pong
-version: 2.0.0
-description: "Your OpenClaw is the brain. Codex is the hands. The clipboard is the protocol."
+version: 2.1.0
+description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
 license: MIT
@@ -10,9 +10,11 @@ metadata: ~
 
 # Agent Ping Pong
 
-Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while Codex does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard. The result: you ship real code to GitHub from a conversation, your agent reviews the PR, you approve the merge. Repeat.
+Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while a coding agent (Codex or Claude Code) does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard. The result: you ship real code to GitHub from a conversation, your agent reviews the PR, you approve the merge. Repeat.
 
-**Your OpenClaw is the brain. Codex is the hands. The clipboard is the protocol.**
+If you have a ChatGPT Plus subscription ($20/month), you already have access to Codex — no extra cost. Claude Code works the same way and is the preferred choice for many OpenClaw users. Pick whichever you have.
+
+**Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol.**
 
 ### The Aesthetic
 
@@ -52,7 +54,7 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 ## What You Need
 
 - **OpenClaw** — your Maestro. Higher-level intelligence. Specs the work, reviews PRs, sends critique.
-- **Codex Desktop** — free with ChatGPT Plus. Does the build. Opens PRs. Never merges without approval.
+- **Codex or Claude Code** — your coding agent. Codex is free with ChatGPT Plus ($20/mo). Claude Code works equally well. Either one does the build, opens PRs, and never merges without approval.
 - **GitHub account** — free. Source of truth. Where the code lives.
 - **Vercel account** — free tier. Deploy when something's ready to go public.
 - **One sandbox repo for Codex** — `your-username/codex-repo`. Codex lives here permanently. One PAT. Every build goes here first.
@@ -63,8 +65,10 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 
 ## One-Time Setup
 
-### 1. Install Codex Desktop
-Download from [chatgpt.com](https://chatgpt.com) — Codex is available under the Tools menu with a ChatGPT Plus subscription. Install, sign in.
+### 1. Install your coding agent
+**Codex:** Download from [chatgpt.com](https://chatgpt.com) — available under the Tools menu with a ChatGPT Plus subscription. Free with your existing subscription.
+
+**Claude Code:** Install via `npm install -g @anthropic-ai/claude-code`. Requires an Anthropic API key or Claude Pro/Max subscription. Works identically to Codex in this workflow — same block format, same PR protocol, same merge rules.
 
 ### 2. Create the Codex sandbox repo
 Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it.
@@ -241,11 +245,11 @@ OpenClaw uses one fine-grained PAT scoped to the repos it needs. Start with `cod
 
 ## Why This Is Cheaper Than You Think
 
-Codex builds for free after getting a highly intelligent prompt from your premier agent.
+If you have ChatGPT Plus, Codex costs you nothing on top of what you're already paying. If you're a Claude user, Claude Code runs on your existing subscription or API credits. Either way, the coding agent carries all the build volume at flat rate — no per-token cost on the work that generates the most tokens.
 
-OpenClaw only spends tokens on judgment — which is what you want with a highly intelligent operator.
+OpenClaw only spends tokens on judgment — speccing, reviewing, architectural decisions. That's the right use of a high-intelligence model. The rest is handled by the coding agent.
 
-No longer waste tokens burning a gigabrain on pawn level tasks. Learn how to play ping pong with your agents. Download this, fork it, and improve it. If you have a ChatGPT subscription — a basic $20 a month — you can do this for free with your OpenClaw.
+Stop burning a gigabrain on pawn-level tasks. Learn to play ping pong with your agents.
 
 ---
 
