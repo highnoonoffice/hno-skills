@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.4.0
+version: 2.5.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -32,9 +32,13 @@ When Codex finishes a build, it returns a compact structured report. You copy it
 
 That's the whole design. Two agents. One clipboard. You decide when to send.
 
-**The block is the unit.** Every agent-to-agent payload lives inside a single block — one copy action, one paste. Agents can add human-readable context above or below the block. That prose is for you. The block is for the other agent. Never mix them.
+**The block is the unit.** Every agent-to-agent payload lives inside a single block — one copy action, one paste. The block is for the other agent. Everything else is for you.
 
-Both agents must hold this standard. If either agent starts responding in prose instead of blocks, the ping pong breaks down. The block format is not optional — it's the protocol.
+The standard is asymmetric by design:
+
+**OpenClaw** can contextualize above and below the block. Prose helps you understand what's happening — why a finding matters, what changed, what to watch for. You read that. You copy the block. Both things can coexist.
+
+**The coding agent** (Codex or Claude Code) must keep the block self-contained. No prose outside it. The reason is mechanical: you copy the entire response to relay it. Any context wrapped around the block gets copied too, and it pollutes the handoff. When the coding agent adds prose, the clipboard breaks. The block must be the whole thing.
 
 **Every block must request a block in return.** The last line of every `[AGENT_HANDOFF]` block — before the closing tag — must be:
 
