@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 1.9.1
+version: 2.0.0
 description: "Your OpenClaw is the brain. Codex is the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -59,7 +59,7 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 - **Vercel account** — free tier. Deploy when something's ready to go public.
 - **One sandbox repo for Codex** — `your-username/codex-repo`. Codex lives here permanently. One PAT. Every build goes here first.
 - **One fine-grained PAT for Codex** — scoped to `codex-repo` only. You create this once and never touch it again.
-- **One broader PAT for OpenClaw** — used to port approved work from the sandbox to target repos. More on this below.
+- **One fine-grained PAT for OpenClaw** — scoped to `codex-repo` + each target repo you want it to push to. One PAT per repo. You add repos as you add projects.
 
 ---
 
@@ -83,14 +83,17 @@ Scope it to **codex-repo only**. Permissions needed:
 
 This is the key insight: Codex only gets access to what you give it. `codex-repo` is the sandbox. Your other repos are untouched. You set this token once and never change it.
 
-### 4. Create a classic PAT for OpenClaw
-In GitHub: Settings → Developer Settings → Personal Access Tokens → Classic tokens.
+### 4. Create a fine-grained PAT for OpenClaw
+In GitHub: Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens.
 
-Scope: `repo` (full). This is what OpenClaw uses to read PRs in `codex-repo` and port approved code to target repos.
+Scope it to **codex-repo** to start. As you add public target repos, add each one to this token's repository access list. Permissions needed:
+- Contents: Read & Write
+- Pull Requests: Read & Write
+- Metadata: Read
 
-Two PATs. Two jobs. One never changes. The other gives OpenClaw the range it needs.
+This gives OpenClaw exactly what it needs — read PRs in the sandbox, push to approved target repos — and nothing else. Your other repos stay untouched.
 
-**What OpenClaw can do with this PAT:** push code, read PRs, create branches, commit files, open PRs on target repos.
+**What OpenClaw can do with this PAT:** read PRs in `codex-repo`, push code to any repo explicitly listed in the token's scope, create branches, commit files, open PRs on target repos.
 
 **What neither agent can do:** create new GitHub repos. That one manual step is always yours. Takes 20 seconds at github.com/new.
 
@@ -234,7 +237,7 @@ The flow for any new project:
 
 Codex stays in the sandbox forever. The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If Codex does something unexpected, it's in the sandbox, not in production.
 
-OpenClaw needs a fine-grained PAT per public target repo only if you want it to push there autonomously. For internal or personal projects, the classic PAT is enough. For projects you're shipping publicly and want strict least-privilege access, create a fine-grained PAT scoped to that repo and give it to OpenClaw. One PAT per public project. Codex never needs a new one.
+OpenClaw uses one fine-grained PAT scoped to the repos it needs. Start with `codex-repo`. When you create a new target repo, add it to the token's repository access list in GitHub settings. No new token needed — just update the scope. Codex never needs a new one.
 
 ---
 
