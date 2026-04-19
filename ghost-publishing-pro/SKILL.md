@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 2.0.0
-description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
+version: 2.1.0
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API for all standard operations. A small number of owner-only tasks (redirects upload, code injection) require manual browser steps — these are clearly marked."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -65,7 +65,7 @@ This skill uses Ghost's Admin API. Here's exactly what it does with your credent
 
 **Recommended setup:** Create a dedicated integration key (Settings > Integrations > Add custom integration > Admin API Key). This covers the full publishing workflow with minimal scope.
 
-The skill never stores credentials beyond the file you configure. No external calls outside your Ghost instance.
+The skill never stores credentials beyond the file you configure. Tokens are captured to shell variables and never logged or printed to stdout. No external calls outside your Ghost instance.
 
 ### Security Model
 
