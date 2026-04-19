@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.5.0
+version: 2.5.1
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -67,6 +67,56 @@ status: completed | confirmed
 ```
 
 Codex uses this for build completions, status reports, and schema negotiations. OpenClaw uses this for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
+
+---
+
+## Quick Start
+
+Here's one complete cycle so you know what you're doing before you start:
+
+**1. You tell OpenClaw what to build:**
+> "Build a Python script that reads a CSV and outputs a summary JSON."
+
+**2. OpenClaw returns a spec block. You copy it and paste it to Codex:**
+```
+[AGENT_HANDOFF]
+type: spec
+target: Codex
+task: Build a Python script that reads a CSV and outputs summary JSON
+requirements:
+  - Accept filepath as CLI arg
+  - Output: {row_count, columns, sample_rows (first 3)}
+  - Write to summary.json in same directory
+edge_cases:
+  - Empty file: write {row_count: 0, columns: [], sample_rows: []}
+  - Missing file: exit with error message
+branch: feature/csv-summary
+repo: your-username/codex-repo
+PR rule: open PR against main. Do not merge.
+Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
+[/AGENT_HANDOFF]
+```
+
+**3. Codex builds it and returns a delivery block. You copy it and paste it back to OpenClaw:**
+```
+[AGENT_HANDOFF]
+type: delivery
+target: Magnus
+status: completed
+branch: feature/csv-summary
+commit: a3f91bc
+pr: https://github.com/your-username/codex-repo/pull/1
+files_changed: scripts/csv_summary.py
+Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
+[/AGENT_HANDOFF]
+```
+
+**4. OpenClaw reviews the PR and returns a verdict. If it's clean:**
+> LGTM. Tell Codex to merge.
+
+**5. You tell Codex: "Merge."** Done.
+
+That's the full loop. Three copy-pastes, one merge decision, working code in GitHub.
 
 ---
 

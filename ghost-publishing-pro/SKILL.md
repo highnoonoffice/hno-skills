@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 1.9.0
+version: 2.0.0
 description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -26,6 +26,16 @@ This skill has three hard requirements:
 - **Ghost Admin API key** stored at `~/.openclaw/credentials/ghost-admin.json`
 
 If those three aren't ready, start with the **Credentials Setup** section below. Everything else in this skill assumes they're in place.
+
+---
+
+### Start Here
+
+**Most users want two things:** publish a post and send it to subscribers in one call, and update existing posts without breaking them. Start with **Core Operations** below — that covers 90% of day-to-day use.
+
+**Also here if you need it:** batch imports, site health audits, email analytics, excerpt management, GSC indexing repair, and full Squarespace/WordPress/Substack migrations. All 17 workflows are in `references/workflows.md`.
+
+If you're new: do **Credentials Setup**, then go straight to **Core Operations**. Skip everything else until you need it.
 
 ---
 
