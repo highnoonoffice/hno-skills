@@ -28,8 +28,12 @@ const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('ba
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
 const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
+const token=h+'.'+p+'.'+s;
+const url=creds.url;
+process.stdout.write(token);
 "
+export GHOST_URL=$(node -e "const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8')); process.stdout.write(creds.url);")
+# TOKEN and GHOST_URL are now separate shell variables — never printed together
 ```
 
 **Request header:** `Authorization: Ghost {token}`

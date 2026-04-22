@@ -14,7 +14,7 @@ Proven workflows from real production use on a Ghost Pro site.
 }
 ```
 
-Read with: `cat ~/.openclaw/credentials/ghost-admin.json`
+Read with: `node -e "console.log(JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8')).url)"`
 
 **Get your key:** Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
