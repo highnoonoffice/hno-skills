@@ -18,9 +18,9 @@ const sig = crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(header+
 const token = header+'.'+payload+'.'+sig;
 ```
 
-Run inline with credentials file — capture to shell variable, do not print to stdout:
+Run inline with credentials file:
 ```bash
-TOKEN_JSON=$(node -e "
+node -e "
 const crypto=require('crypto');
 const creds=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8'));
 const [id,secret]=creds.key.split(':');
@@ -28,11 +28,8 @@ const h=Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT',kid:id})).toString('ba
 const n=Math.floor(Date.now()/1000);
 const p=Buffer.from(JSON.stringify({iat:n,exp:n+300,aud:'/admin/'})).toString('base64url');
 const s=crypto.createHmac('sha256',Buffer.from(secret,'hex')).update(h+'.'+p).digest('base64url');
-process.stdout.write(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
-")
-TOKEN=$(echo $TOKEN_JSON | node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).token)")
-GHOST_URL=$(echo $TOKEN_JSON | node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).url)")
-# TOKEN and GHOST_URL are now shell variables — use directly in curl, never echo or log them
+console.log(JSON.stringify({token:h+'.'+p+'.'+s,url:creds.url}));
+"
 ```
 
 **Request header:** `Authorization: Ghost {token}`

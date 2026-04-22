@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 2.1.0
+version: 2.2.0
 description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API for all standard operations. A small number of owner-only tasks (redirects upload, code injection) require manual browser steps — these are clearly marked."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -16,6 +16,58 @@ metadata: ~
 ---
 
 # Ghost Publishing Pro
+
+## Execution Gates
+
+```xml
+<skill_gates version="1.0" mode="mandatory_pre_execution" evaluation="sequential" on_violation="stop_and_report">
+
+  <gate id="credentials_check" priority="1" severity="hard" scope="session_start">
+    <condition>About to make any Ghost API call</condition>
+    <question>Have I confirmed ~/.openclaw/credentials/ghost-admin.json exists and contains both `url` and `key` fields?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Read the credentials file first. If missing, run Credentials Setup. Do not attempt any API call without confirmed credentials.</fail_action>
+  </gate>
+
+  <gate id="fetch_before_put" priority="2" severity="hard" scope="pre_update">
+    <condition>About to PUT (update) any post</condition>
+    <question>Have I fetched the current post this session and captured its `updated_at` value?</question>
+    <pass_action>Proceed with PUT including `updated_at`.</pass_action>
+    <fail_action>Stop. Fetch the post first. A PUT without `updated_at` returns 409. No exceptions.</fail_action>
+  </gate>
+
+  <gate id="publish_email_atomic" priority="3" severity="hard" scope="pre_publish">
+    <condition>About to publish a post that should go to subscribers</condition>
+    <question>Is `email_segment` included in the same API call as `"status": "published"`?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Add `email_segment` to this call. Email cannot be triggered after the fact via API — only Ghost Admin manual resend. This is a one-shot gate.</fail_action>
+  </gate>
+
+  <gate id="bulk_write_approval" priority="4" severity="hard" scope="pre_bulk">
+    <condition>About to run any bulk operation (batch update, batch tag, batch excerpt, migration import)</condition>
+    <question>Has the user explicitly approved this bulk operation — scope, post count, and what will change?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. State the scope (how many posts, what changes), and wait for explicit approval. Bulk writes are irreversible without manual rollback.</fail_action>
+  </gate>
+
+  <gate id="settings_wall" priority="5" severity="soft" scope="pre_settings">
+    <condition>About to write to Ghost site settings, code injection, redirects, or staff</condition>
+    <question>Does the task require owner-level access that integration tokens cannot provide?</question>
+    <pass_action>Proceed via browser or owner token.</pass_action>
+    <fail_action>Flag the limitation: this endpoint returns 403 for integration tokens by design. Redirect to Ghost Admin or request owner credentials. Do not retry the same endpoint.</fail_action>
+  </gate>
+
+  <gate id="image_upload_method" priority="6" severity="soft" scope="pre_image">
+    <condition>About to upload an image to Ghost</condition>
+    <question>Am I using Python requests with multipart/form-data — not curl, not browser fetch?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Switch to Python requests. curl multipart fails silently on macOS zsh. Browser fetch is blocked by CORS. Python requests is the only reliable path.</fail_action>
+  </gate>
+
+</skill_gates>
+```
+
+---
 
 ### Before You Install
 

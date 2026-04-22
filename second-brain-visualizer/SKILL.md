@@ -1,7 +1,7 @@
 ---
 name: second-brain-visualizer
-version: 1.6.1
-description: "Reads your raw idea stream — voice notes, fragments, half-sentences — and surfaces the patterns you keep circling without realizing it. Drop anything. Find the signal later."
+version: 1.6.0
+description: "Unload your cognitive baggage. Drop ideas anywhere, find the signal later."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/second-brain-visualizer
 license: MIT-0
