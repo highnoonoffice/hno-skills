@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.5.0
+version: 2.6.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -16,6 +16,58 @@ binaries: []
 ---
 
 # Agent Ping Pong
+
+## Execution Gates
+
+```xml
+<skill_gates version="1.0" mode="mandatory_pre_execution" evaluation="sequential" on_violation="stop_and_report">
+
+  <gate id="sandbox_repo_only" priority="1" severity="hard" scope="pre_handoff">
+    <condition>About to send a spec or task block to the coding agent</condition>
+    <question>Does the block specify `repo: [username]/codex-repo` (the sandbox) — not a production repo?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Codex only builds in the sandbox. The sandbox is the only repo in Codex's PAT scope. A spec targeting any other repo will fail or — worse — write directly to production. Fix the repo field before relaying.</fail_action>
+  </gate>
+
+  <gate id="block_terminator" priority="2" severity="hard" scope="pre_handoff">
+    <condition>About to relay any [AGENT_HANDOFF] block to the coding agent</condition>
+    <question>Does the block end with `Reply with a single [AGENT_HANDOFF] block. No prose outside the block.` as the last line before the closing tag?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Add the terminator line. Without it, the coding agent may return prose-wrapped output that breaks the clipboard relay. The protocol depends on both ends enforcing this.</fail_action>
+  </gate>
+
+  <gate id="no_merge_without_approval" priority="3" severity="hard" scope="pre_merge">
+    <condition>About to instruct the coding agent to merge a PR</condition>
+    <question>Has the user explicitly approved the merge after reviewing OpenClaw's PR verdict?</question>
+    <pass_action>Proceed with merge instruction.</pass_action>
+    <fail_action>Stop. Never auto-merge. The user reviews OpenClaw's verdict, then decides. "LGTM" from OpenClaw is a recommendation, not authorization. Wait for explicit user approval.</fail_action>
+  </gate>
+
+  <gate id="pat_scope_check" priority="4" severity="hard" scope="session_start">
+    <condition>Starting a new Ping Pong session or adding a new production repo to the workflow</condition>
+    <question>Is the OpenClaw PAT scoped to the sandbox repo plus only the specific production repos approved for this workflow — not broad org or classic token access?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Verify PAT scope in GitHub Settings > Developer Settings > Fine-grained tokens. A PAT with overly broad scope is a security risk regardless of how the workflow runs. Fix scope before proceeding.</fail_action>
+  </gate>
+
+  <gate id="no_secrets_in_blocks" priority="5" severity="hard" scope="pre_handoff">
+    <condition>About to include any credential, API key, token, or secret value inside a handoff block</condition>
+    <question>Is any raw secret value present in the block payload?</question>
+    <pass_action>No secrets in block — proceed.</pass_action>
+    <fail_action>Stop. Remove all secret values from the block. The clipboard is readable by other processes. Credentials stay in agent configs only — never in block payloads.</fail_action>
+  </gate>
+
+  <gate id="review_before_port" priority="6" severity="soft" scope="pre_port">
+    <condition>About to port approved code from the sandbox repo to a production repo</condition>
+    <question>Has OpenClaw reviewed the PR and the user explicitly approved the port — not just the merge?</question>
+    <pass_action>Proceed with port.</pass_action>
+    <fail_action>Hold. A merge in the sandbox is not authorization to port. Port requires a separate explicit go-ahead from the user after reviewing what will land in production.</fail_action>
+  </gate>
+
+</skill_gates>
+```
+
+---
 
 Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while a coding agent (Codex or Claude Code) does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard. The result: you ship real code to GitHub from a conversation, your agent reviews the PR, you approve the merge. Repeat.
 
@@ -67,6 +119,56 @@ status: completed | confirmed
 ```
 
 Codex uses this for build completions, status reports, and schema negotiations. OpenClaw uses this for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
+
+---
+
+## Quick Start
+
+Here's one complete cycle so you know what you're doing before you start:
+
+**1. You tell OpenClaw what to build:**
+> "Build a Python script that reads a CSV and outputs a summary JSON."
+
+**2. OpenClaw returns a spec block. You copy it and paste it to Codex:**
+```
+[AGENT_HANDOFF]
+type: spec
+target: Codex
+task: Build a Python script that reads a CSV and outputs summary JSON
+requirements:
+  - Accept filepath as CLI arg
+  - Output: {row_count, columns, sample_rows (first 3)}
+  - Write to summary.json in same directory
+edge_cases:
+  - Empty file: write {row_count: 0, columns: [], sample_rows: []}
+  - Missing file: exit with error message
+branch: feature/csv-summary
+repo: your-username/codex-repo
+PR rule: open PR against main. Do not merge.
+Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
+[/AGENT_HANDOFF]
+```
+
+**3. Codex builds it and returns a delivery block. You copy it and paste it back to OpenClaw:**
+```
+[AGENT_HANDOFF]
+type: delivery
+target: Magnus
+status: completed
+branch: feature/csv-summary
+commit: a3f91bc
+pr: https://github.com/your-username/codex-repo/pull/1
+files_changed: scripts/csv_summary.py
+Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
+[/AGENT_HANDOFF]
+```
+
+**4. OpenClaw reviews the PR and returns a verdict. If it's clean:**
+> LGTM. Tell Codex to merge.
+
+**5. You tell Codex: "Merge."** Done.
+
+That's the full loop. Three copy-pastes, one merge decision, working code in GitHub.
 
 ---
 
@@ -374,3 +476,21 @@ You don't need to read it to relay it. But you can. That's review mode.
 - **Feature branch → PR → approve → merge.** Never push direct to main for anything non-trivial.
 - **Session context.** Start each Codex session with a one-paragraph context block: what the project is, what's already built, what this session is for. Codex doesn't have memory. Give it the brief.
 - **When Codex goes sideways.** Paste the broken output to OpenClaw. Ask for a diagnosis. Relay the fix instruction back. One extra volley is cheaper than debugging blind.
+
+---
+
+## Session Learnings — 2026-04-21
+
+**New Codex thread per build task.** Each distinct build (B1, B3, etc.) should be its own Codex thread, titled after the task. Burying multiple builds in one thread makes retrieval harder and the history ambiguous. One task, one thread.
+
+**Codex cycles are cheap — use them aggressively.** Codex tokens cost less than 1/10th of a Magnus session. Don't hoard cleanup work for the port. If Magnus spots a fixable issue during review, flag it to Joseph in one sentence and send Codex another volley. Don't wait.
+
+**Magnus flags port notes — Joseph decides if Codex fixes them.** When Magnus reviews a Codex PR and spots issues that will affect the port, surface them to Joseph with a one-sentence rationale. Joseph decides whether to send Codex a fix round or have Magnus handle it during the port. Magnus does not unilaterally dispatch Codex based on his own port observations.
+
+**Standalone modules only — no MC imports.** Codex lives in codex-repo. Any spec that references files in hno-mission-control (Finances.tsx, app/api/*, etc.) will fail because those files don't exist in Codex's repo. Codex builds pure standalone TypeScript modules. Magnus ports and wires into MC after review.
+
+**Port all modules together, not one at a time.** Porting B1 to MC and then B3 to MC separately means two builds and two restarts. Accumulate related modules, then port in one session. B3 depends on B1 anyway — port order matters and doing it in one pass handles the dependency cleanly.
+
+**Context in the handoff block helps.** Codex has no memory. A one-paragraph context block (what MC is, what tab this affects, what aesthetic to match) produces meaningfully better output than a bare spec. Worth the extra lines.
+
+**PRs to vault for spec files are pointless.** Spec files going into prompts/ on main don't need a PR — they have no review gate and no approval value. Commit direct to main. PRs are for code that needs eyes before it merges, not documentation files.
