@@ -1,6 +1,6 @@
 ---
 name: brain-map-visualizer
-version: 3.3.4
+version: 3.4.0
 description: "Visualize how attention moves across your agent's projects. 13 named attention categories. Momentum-ready edges (recentCount/lifetimeCount). Directional flow encoding. Sorted by co-access score."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
@@ -9,6 +9,51 @@ metadata: ~
 ---
 
 # Brain Map Visualizer
+
+## Execution Gates
+
+```xml
+<skill_gates version="1.0" mode="mandatory_pre_execution" evaluation="sequential" on_violation="stop_and_report">
+
+  <gate id="journal_format_check" priority="1" severity="hard" scope="pre_parse">
+    <condition>About to run the journal parser or rebuild the graph</condition>
+    <question>Do session journals exist at `memory/journal/YYYY-MM-DD.md` and contain markdown file references in the body text?</question>
+    <pass_action>Proceed with parser run.</pass_action>
+    <fail_action>Stop. Without structured journals referencing vault files, the parser produces an empty or meaningless graph. Bootstrap journal history first using the prompt in the Bootstrapping section.</fail_action>
+  </gate>
+
+  <gate id="workspace_scope" priority="2" severity="hard" scope="pre_parse">
+    <condition>About to run the parser script against a vault directory</condition>
+    <question>Is WORKSPACE_DIR set to the correct vault path and not a broader system directory?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Confirm the WORKSPACE_DIR environment variable is scoped to your agent vault only. Running against a broader path reads unintended files and degrades graph quality.</fail_action>
+  </gate>
+
+  <gate id="network_deployment_secret" priority="3" severity="hard" scope="pre_deploy">
+    <condition>About to deploy the graph API route on a networked (non-localhost) host</condition>
+    <question>Is BRAIN_MAP_SECRET set and wired into both the API route and the component fetch headers?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Without the secret, the graph API route is open to anyone on the network. Set BRAIN_MAP_SECRET before any non-localhost deployment. Localhost-only use is exempt.</fail_action>
+  </gate>
+
+  <gate id="rebuild_before_read" priority="4" severity="soft" scope="pre_interpret">
+    <condition>About to interpret graph data or answer questions about attention patterns</condition>
+    <question>Has the graph been rebuilt since the last significant batch of session journals were written?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Flag that the graph may be stale. Trigger a rebuild via the Rebuild button or `node scripts/build-brain-map-projects.js` before drawing conclusions about current attention patterns.</fail_action>
+  </gate>
+
+  <gate id="promotion_intent" priority="5" severity="soft" scope="pre_promote">
+    <condition>About to promote an Emerging Project to a named Attention Pocket</condition>
+    <question>Does the concept appear consistently across 3+ session journals with clear thematic coherence — not just incidental co-occurrence?</question>
+    <pass_action>Proceed with promotion.</pass_action>
+    <fail_action>Hold promotion. Incidental co-occurrence pollutes the Attention model. Wait for stronger signal (5+ sessions) or confirm the concept represents a real, durable work thread.</fail_action>
+  </gate>
+
+</skill_gates>
+```
+
+---
 
 The Brain Map Visualizer renders your agent's cognition as an interactive force-directed graph organized around Attention Pockets — project-level groupings that define how files relate to each other in context.
 
