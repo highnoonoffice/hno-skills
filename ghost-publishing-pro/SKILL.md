@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 2.3.0
-description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API for all standard operations. A small number of owner-only tasks (redirects upload, code injection) require manual browser steps — these are clearly marked."
+version: 2.4.0
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -11,6 +11,7 @@ credentials:
 binaries:
   - node
   - curl
+  - python3
 license: MIT
 metadata: ~
 ---
@@ -53,15 +54,15 @@ metadata: ~
   <gate id="settings_wall" priority="5" severity="soft" scope="pre_settings">
     <condition>About to write to Ghost site settings, code injection, redirects, or staff</condition>
     <question>Does the task require owner-level access that integration tokens cannot provide?</question>
-    <pass_action>Proceed via browser or owner token.</pass_action>
-    <fail_action>Flag the limitation: this endpoint returns 403 for integration tokens by design. Redirect to Ghost Admin or request owner credentials. Do not retry the same endpoint.</fail_action>
+    <pass_action>Stop. This operation is a Ghost platform limitation — outside the scope of this skill. Flag it to the user: this endpoint returns 403 for integration tokens by design and cannot be automated via the Admin API.</pass_action>
+    <fail_action>Do not attempt. Do not suggest browser fallback. State the platform limitation clearly and stop.</fail_action>
   </gate>
 
   <gate id="image_upload_method" priority="6" severity="soft" scope="pre_image">
-    <condition>About to upload an image to Ghost</condition>
-    <question>Am I using Python requests with multipart/form-data — not curl, not browser fetch?</question>
-    <pass_action>Proceed.</pass_action>
-    <fail_action>Switch to Python requests. curl multipart fails silently on macOS zsh. Browser fetch is blocked by CORS. Python requests is the only reliable path.</fail_action>
+    <condition>About to upload an image to Ghost via the /images/upload/ endpoint</condition>
+    <question>Am I using Python requests with multipart/form-data for this specific upload call?</question>
+    <pass_action>Proceed. All other API calls (posts, tags, analytics) use curl or Node.js as normal.</pass_action>
+    <fail_action>Switch to Python requests for the image upload only. curl multipart fails silently on macOS zsh for this endpoint. Browser fetch is blocked by CORS. Everything else in this skill uses curl or Node.js — this exception applies to image upload only.</fail_action>
   </gate>
 
 </skill_gates>
@@ -133,17 +134,17 @@ This skill is designed around minimal-scope credential use. Here's exactly how c
 
 Keep the credentials file out of shared folders and version control. Restrict access to your user account only using your OS file permission settings.
 
-### What This Skill Won't Do
+### Ghost Platform Limitations (Out of Scope)
 
-Ghost's Admin API integration tokens cannot access certain owner-level operations:
+These operations return `403` for integration tokens — they are Ghost platform restrictions, not skill gaps. This skill does not cover them and does not provide browser workarounds:
 
 - **Staff management** — owner-only, no API path
-- **Site settings / code injection** — API token returns `403 NoPermissionError` by design
-- **Redirects and routes files** — `GET/POST /ghost/api/admin/redirects/` returns `403` with integration tokens. Must upload via Ghost Admin → Settings → Labs → Beta features → Redirects upload button
+- **Site settings / code injection** — `403 NoPermissionError` by design
+- **Redirects and routes files** — `POST /ghost/api/admin/redirects/` returns `403` with integration tokens
 
 Theme management (upload + activation) is fully supported via the Admin API — see Workflow 15 below.
 
-If you hit a `NoPermissionError` on settings write endpoints, that is expected Ghost behavior — not a bug.
+If you hit a `NoPermissionError` on settings write endpoints, that is expected Ghost behavior — not a bug in this skill.
 
 ### Credentials Setup
 
@@ -188,7 +189,7 @@ curl -s -X POST "{url}/ghost/api/admin/posts/?source=html" \
   }]}'
 ```
 
-This is the killer feature — one API call publishes to the web and sends to all subscribers simultaneously. Do not publish first and try to send separately. Use Ghost admin to manually resend if you miss this.
+This is the killer feature — one API call publishes to the web and sends to all subscribers simultaneously. Do not publish first and try to send separately. If you miss the `email_segment` field on first publish, the newsletter cannot be resent via API — it is a one-shot operation.
 
 **Create a draft**
 
@@ -269,11 +270,11 @@ See `references/workflows.md` for full migration playbooks:
 - Batch feature image updates
 - DOCX > book-style Ghost posts with YouTube embeds
 - Native audio card embedding (upload MP3, embed as Ghost audio card)
-- Theme management (JWT upload where supported; Ghost Admin fallback)
+- Theme management (JWT upload via Admin API)
 - **Site audit** — scan all published posts for missing feature images, excerpts, meta descriptions, tags, stale slugs, and untouched content (Workflow 14)
 - **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
 - **Batch excerpt push** — write custom excerpts to all posts in a single run. 300-char hard cap, slug-based targeting, skip/fail reporting. Proven on 65 posts in production. (Workflow 16)
-- **GSC → Ghost indexing & SEO repair loop** — triage GSC coverage report, classify unindexed URLs, fix Ghost-specific redirect issues (API blocks redirect writes — Labs upload only), submit real posts for indexing, accelerate discovery with internal links. Proven on josephvoelbel.com post-Squarespace migration. (Workflow 17)
+- **GSC → Ghost indexing & SEO repair loop** — triage GSC coverage report, classify unindexed URLs, submit real posts for indexing, accelerate discovery with internal links. Note: redirect rule writes are blocked by Ghost's API for integration tokens — redirect management is outside this skill's scope. (Workflow 17)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
@@ -285,14 +286,14 @@ See `references/api.md` for complete endpoint documentation, error codes, and to
 - Token expired mid-batch — regenerate every 50 posts in long operations
 - `tags` in `fields` param causes `400 BadRequestError` — use `&include=tags` instead
 - External script tag in code injection pointing to a local/LAN hostname will silently fail on the live HTTPS site — mixed content + Private Network Access policy blocks it. All search/widget JS must be inline in the code injection block.
-- `PUT /admin/settings/` always returns `403` with integration tokens — site settings require owner access in Ghost Admin
+- `PUT /admin/settings/` always returns `403` with integration tokens — site settings are outside this skill's scope
 - `GET /admin/integrations/` also returns `403` — get Content API key from site HTML source instead (`data-key=` attribute on portal/search script tags)
 - **Custom theme: `{{content}}` must be triple-braced** — in any custom `.hbs` template, always use `{{{content}}}` (three braces). Double-braced `{{content}}` escapes the HTML and renders `undefined` instead of the post body.
 - **Custom excerpts drive search** — Ghost's Content API `fields=excerpt` returns the custom excerpt, not body text. If a post needs to surface in client-side search for a keyword, that keyword must appear in the custom excerpt.
 - **Links inside HTML cards in Lexical are double-escaped** — regex on `"url":"..."` fields won't find them. Use `json.dumps(lexical)` → string replace → `json.loads()` to safely find and replace any URL pattern inside embedded HTML.
 - **Ghost's sitemap is always clean** — Ghost Pro auto-generates sitemaps using the configured site URL. No manual sitemap editing needed.
 - **Squarespace migration leaves /blog/ links** — batch imports preserve old internal link paths with the `/blog/` prefix. After any Squarespace import, audit all posts for `/blog/` references and fix them via the API.
-- **`POST /admin/redirects/upload/` returns `403`** — redirect rules must be uploaded manually via Ghost Admin → Settings → Labs → Redirects upload button. The API endpoint is blocked for integration tokens by design.
+- **`POST /admin/redirects/upload/` returns `403`** — redirect management is blocked for integration tokens by Ghost's platform design. Outside the scope of this skill.
 
 
 ### Tag Management
