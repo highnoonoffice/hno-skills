@@ -231,6 +231,12 @@ These operations require owner-level access (browser only):
 
 ## Code injection via browser (CM6 pattern)
 
+> ⚠️ **OWNER-ONLY MANUAL STEP — do not run autonomously.**
+> This replaces site-wide JavaScript visible to all visitors. Before executing:
+> 1. Back up the existing code injection content.
+> 2. Review the exact script to be inserted.
+> 3. Execute manually — never let the agent run this without explicit owner approval.
+
 Ghost's code injection panel uses CodeMirror 6. Standard DOM input manipulation doesn't work.
 
 Navigate to: `https://your-site.ghost.io/ghost/#/settings/code-injection`

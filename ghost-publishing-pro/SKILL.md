@@ -103,7 +103,7 @@ Most workflows use only Node.js built-ins (`fs`, `https`, and the standard HMAC 
 The **Squarespace/WordPress XML migration** workflow optionally uses one npm package:
 
 ```bash
-npm install fast-xml-parser
+npm install fast-xml-parser@5.7.2
 ```
 
 Install this only if you are running a migration script. All other workflows (publish, update, schedule, image upload, analytics) require no third-party packages.

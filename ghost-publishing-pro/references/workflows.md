@@ -14,8 +14,6 @@ Proven workflows from real production use on a Ghost Pro site.
 }
 ```
 
-Read with: `node -e "console.log(JSON.parse(require('fs').readFileSync(process.env.HOME+'/.openclaw/credentials/ghost-admin.json','utf8')).url)"`
-
 **Get your key:** Ghost Admin > Settings > Integrations > Add custom integration > Admin API Key.
 
 This single integration token covers the full publishing workflow: post creation, updates, image uploads, newsletter sends, batch operations, analytics reads.
@@ -47,7 +45,7 @@ This single integration token covers the full publishing workflow: post creation
 This workflow requires one third-party npm package. Install it before running:
 
 ```bash
-npm install fast-xml-parser
+npm install fast-xml-parser@5.7.2
 ```
 
 ```js
