@@ -20,7 +20,7 @@ binaries: []
 ## Execution Gates
 
 ```xml
-<skill_gates version="1.0" mode="mandatory_pre_execution" evaluation="sequential" on_violation="stop_and_report">
+<skill_gates version="1.0" mode="mandatory_pre_execution" order="sequential" on_violation="stop_and_report">
 
   <gate id="sandbox_repo_only" priority="1" severity="hard" scope="pre_handoff">
     <condition>About to send a spec or task block to the coding agent</condition>
@@ -529,7 +529,7 @@ Continuation is automatic: every subsequent block in the chain (fix rounds, foll
 
 ## Session Learnings — 2026-04-21
 
-**New Codex thread per build task.** Each distinct build (B1, B3, etc.) should be its own Codex thread, titled after the task. Burying multiple builds in one thread makes retrieval harder and the history ambiguous. One task, one thread.
+**New Codex thread per build task.** Each distinct build (B1, B3, etc.) should be its own Codex thread, titled after the task. Burying multiple builds in one thread makes lookup harder and the history ambiguous. One task, one thread. Start a fresh thread for each.
 
 **Codex cycles are cheap — use them aggressively.** Codex tokens cost less than 1/10th of a Magnus session. Don't hoard cleanup work for the port. If Magnus spots a fixable issue during review, flag it to Joseph in one sentence and send Codex another volley. Don't wait.
 
