@@ -1,6 +1,6 @@
 ---
 name: agent-ping-pong
-version: 2.6.0
+version: 2.8.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
@@ -57,7 +57,22 @@ binaries: []
     <fail_action>Stop. Remove all secret values from the block. The clipboard is readable by other processes. Credentials stay in agent configs only — never in block payloads.</fail_action>
   </gate>
 
-  <gate id="review_before_port" priority="6" severity="soft" scope="pre_port">
+  <gate id="build_for_cody_trigger" priority="6" severity="hard" scope="pre_handoff">
+    <condition>Joseph says "Build this for Cody"</condition>
+    <question>Am I in execution mode — block produced immediately, no recap, no clarifying questions?</question>
+    <pass_action>Produce the first [AGENT_HANDOFF] block now and send it to Telegram.</pass_action>
+    <fail_action>Stop stalling. Discussion is over. The trigger phrase ended it. Produce the block.</fail_action>
+    <note>Continuation rule: once triggered, every subsequent block in the chain (fix rounds, follow-ups, schema checks) gets the same Telegram send automatically. No re-trigger needed. Mode stays active until Joseph says otherwise.</note>
+  </gate>
+
+  <gate id="telegram_copy_block" priority="7" severity="hard" scope="post_handoff">
+    <condition>Just produced any [AGENT_HANDOFF] block for Joseph to relay to Codex</condition>
+    <question>Did I send a standalone Telegram message containing only the raw block in a code fence — nothing else in the message?</question>
+    <pass_action>Proceed.</pass_action>
+    <fail_action>Stop. Send the block now as a standalone Telegram message (chat 366456724) in a code block. No prose in the message. Just the block. This is the copy-pasteable artifact Joseph needs to relay. The in-session reply is for context; the Telegram message is for copying.</fail_action>
+  </gate>
+
+  <gate id="review_before_port" priority="7" severity="soft" scope="pre_port">
     <condition>About to port approved code from the sandbox repo to a production repo</condition>
     <question>Has OpenClaw reviewed the PR and the user explicitly approved the port — not just the merge?</question>
     <pass_action>Proceed with port.</pass_action>
@@ -119,6 +134,15 @@ status: completed | confirmed
 ```
 
 Codex uses this for build completions, status reports, and schema negotiations. OpenClaw uses this for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
+
+**Optional fields for spec blocks (add when relevant):**
+
+- `success_intent` — what the artifact is meant to accomplish beyond passing the checklist. Examples: conversion, credibility, virality, demo polish, archival feel. This is where implied requirements live — OG tags on a traffic play, share copy on a viral tool, link-back paths on a conversion loop. If it's not in the checklist but it follows from the intent, Cody catches it here.
+- `review_lens` — the 3–5 things Magnus and Joseph will inspect first. Focuses Cody's effort and reduces rounds on the things that matter most.
+- `non_goals` — what not to build. Especially important when the obvious feature would be tempting but out of scope.
+- `qa_questions` — product-specific checks beyond "does it render." For quiz/game builds: "Does any heading or label reveal the answer before the user picks?" For share/traffic builds: "Does every social unfurl path have metadata?" For tools: "Does the primary workflow feel obvious without explanatory text?"
+- `publish_target` — local only / PR only / live deploy / GitHub Pages / Vercel. Removes ambiguity about what "done" means.
+- `user_flow_must_pass` — exact browser path to verify. "Landing → Q1 → wrong answer → reveal → Q22 → results → share." If Cody can walk this path and nothing breaks, the build is clean.
 
 ---
 
@@ -469,6 +493,16 @@ You don't need to read it to relay it. But you can. That's review mode.
 
 ---
 
+## Trigger Phrases
+
+**"Build this for Cody"** — the handoff trigger. Discussion is over. Magnus produces the first `[AGENT_HANDOFF]` block immediately and sends it to Telegram as a standalone copy-pasteable message. No recap, no clarifying questions.
+
+Continuation is automatic: every subsequent block in the chain (fix rounds, follow-ups, acknowledgments) gets the same Telegram send without re-triggering. Mode stays active until Joseph says otherwise.
+
+**"log this session"** — session close trigger. Runs the SESSION CLOSE GATE sequence in BEHAVIOR.md. Cannot say "logged" until `session-close-gate.js` exits 0.
+
+---
+
 ## Tips
 
 - **One sandbox, always.** Codex lives in `codex-repo`. Never give Codex a PAT to a production repo or anything with real data.
@@ -476,6 +510,20 @@ You don't need to read it to relay it. But you can. That's review mode.
 - **Feature branch → PR → approve → merge.** Never push direct to main for anything non-trivial.
 - **Session context.** Start each Codex session with a one-paragraph context block: what the project is, what's already built, what this session is for. Codex doesn't have memory. Give it the brief.
 - **When Codex goes sideways.** Paste the broken output to OpenClaw. Ask for a diagnosis. Relay the fix instruction back. One extra volley is cheaper than debugging blind.
+
+---
+
+## Session Learnings — 2026-05-05
+
+**Add `success_intent` to any spec with a traffic, conversion, or sharing goal.** Strategic intent left unstated produces technically correct builds that miss the product. OG tags, article link-backs, and share copy are not extras — they follow directly from the intent. Put the intent in the block.
+
+**Add `qa_questions` to any quiz, game, or interactive build.** Standing question: "Does any heading or label reveal the answer before the user picks?" Cody will catch it if it's in the checklist. Without it, the pattern requires Joseph to catch it from screenshots. That's a preventable round.
+
+**The best loop:** Magnus gives a dense opinionated spec → Cody builds fast → Joseph reacts from the running artifact → next handoff tightens. Don't try to spec perfection upfront. Spec well, ship, react, iterate. The artifact teaches you things the spec can't.
+
+**Cody's product QA pass (new standard for interactive builds):** After implementation, before opening the PR, Cody runs one deliberate pass asking: "What is the user supposed to feel? What gives away the trick? What breaks the illusion? What makes sharing weaker?" This is separate from technical verification. It's the product lens.
+
+**Cody's honest assessment of fit:** Strong on implementation discipline, state machines, edge cases, repo hygiene, dense-spec-to-shippable-files execution. Less good as the final arbiter of taste or brand instinct — needs screenshots, critique, or sharper examples to close that gap. Don't send Cody tasks that require inferring unstated strategy from vibes.
 
 ---
 
