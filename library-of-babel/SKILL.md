@@ -164,7 +164,7 @@ library-of-babel/
 
 ## Setup
 
-No dependencies beyond Python 3 standard library (`hashlib`, `math`, `collections`, `json`).
+Pure Python 3 standard library — no external dependencies required.
 
 ```bash
 cd library-of-babel
