@@ -207,3 +207,7 @@ The original idea to build a second brain capture system came from a conversatio
 ### License
 
 MIT-0. Copyright (c) 2026 @highnoonoffice. No attribution required.
+
+---
+
+Built by Joseph Voelbel / High Noon Office. Questions or want to build on this? josephvoelbel.com/contact

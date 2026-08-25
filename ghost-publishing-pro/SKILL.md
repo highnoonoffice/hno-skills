@@ -379,3 +379,7 @@ for post in posts:
 ### License
 
 MIT. Copyright (c) 2026 @highnoonoffice. Retain this notice in any distributed version.
+
+---
+
+Built by Joseph Voelbel / High Noon Office. Questions or want to build on this? josephvoelbel.com/contact

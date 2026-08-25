@@ -1,0 +1,9 @@
+[
+  {
+    "timestamp": "2026-04-18T21:15:35.635331+00:00",
+    "service": "some-random-api.io",
+    "event_type": "profile_miss",
+    "detail": "No profile found for 'some-random-api.io' \u2014 observation started",
+    "worked": null
+  }
+]
