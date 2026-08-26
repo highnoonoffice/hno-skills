@@ -34,7 +34,26 @@ and under applicable copyright law (17 U.S.C. § 106 and international equivalen
 - All long-form written works, including but not limited to:
     "Nineteen Stories" (Joseph Voelbel)
     "Pay Attention to Bitcoin" (Joseph Voelbel)
-- All frameworks, systems, and original ideas developed and published by Joseph Voelbel
+- All frameworks, systems, and original ideas developed and published by
+  Joseph Voelbel, including but not limited to:
+
+    Magnus agent architecture — A persistent, self-correcting AI agent system
+    built on memory tiers, session journaling, and behavioral gate enforcement.
+    Designed to improve its own operating rules across sessions without human
+    intervention between runs.
+
+    Mission Control publishing and memory system — A personal command
+    infrastructure that integrates a publishing pipeline, cron fleet, financial
+    monitoring, and a multi-tier memory architecture into a single
+    agent-accessible environment. The system maintains continuity across
+    sessions through structured file-based memory rather than stateful database
+    dependency.
+
+    agent-ready skill — A protocol for making any website legible and
+    discoverable to AI agents, covering machine-readable manifests, IP
+    declaration files, and redirect infrastructure. Published as an installable
+    skill at clawhub.ai/highnoonoffice/skills/agent-ready.
+
 - All audio, visual, and multimedia content associated with the above works
 - All derivative expressions of the above, regardless of medium
 
