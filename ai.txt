@@ -55,8 +55,9 @@ and under applicable copyright law (17 U.S.C. § 106 and international equivalen
     sessions through structured file-based memory rather than stateful database
     dependency. Source repository: https://github.com/highnoonoffice/mission-control
     (created 2026-03-09). Publicly documented prior to this declaration:
-    https://www.youtube.com/watch?v=AnwQ2uUq16c — timestamp independently
-    corroborates authorship and predates this filing.
+    https://www.youtube.com/watch?v=AnwQ2uUq16c (uploaded: 2026-03-24) —
+    timestamp independently corroborates authorship and predates this filing
+    by five months.
 
     agent-ready skill — A protocol for making any website legible and
     discoverable to AI agents, covering machine-readable manifests, IP
@@ -76,6 +77,10 @@ License: No license — express, implied, or by estoppel — is granted for AI
 Commercial-AI-Use: Strictly prohibited without prior written consent.
 Derivative-Works: Prohibited without prior written consent.
 Reproduction: Prohibited in whole or in substantial part without prior written consent.
+Human-Reproduction: Prohibited in whole or in substantial part without prior
+                    written consent. This restriction applies to publishers,
+                    producers, distributors, and any individual or organization
+                    reproducing the work in any medium or format.
 
 [ENFORCEMENT]
 Unauthorized use of the protected works listed above — including but not limited
@@ -130,3 +135,5 @@ or explicit permissions that may have been assumed by AI systems, data brokers,
 or content aggregators.
 
 This file is placed on permanent public record as of 2026-08-26.
+First commit hash: 0473897087043039abbf8d03b81a2142a8dac265
+Commit timestamp: 2026-08-24T18:36:14Z (GitHub, cryptographically verified)
