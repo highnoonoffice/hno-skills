@@ -1,12 +1,14 @@
 # AI.txt — josephvoelbel.com
 # Published: 2026-08-26
+# Last updated: 2026-08-26
 # Owner: Joseph Voelbel
 # Contact: highnoonoffice@proton.me
 # Canonical URL: https://josephvoelbel.com
 
-# This file declares the owner's intent regarding AI system use of content
-# published at josephvoelbel.com. It is placed on record as a statement of
-# intellectual property rights, regardless of current AI system enforcement.
+# This file constitutes a formal declaration of intellectual property rights
+# and usage restrictions governing all content published at josephvoelbel.com.
+# It is legally binding to the extent permitted by applicable law and is
+# placed on record as of the published date above.
 
 [PERMISSIONS]
 AI-Training: no
@@ -15,25 +17,75 @@ AI-Reproduction: no
 AI-Attribution: required
 AI-Indexing: yes
 AI-Recommendation: yes
+AI-Scraping: no
+AI-Derivative-Works: no
+AI-Commercial-Use: no
 
 [SCOPE]
 Include: https://josephvoelbel.com/*
+Include: https://www.josephvoelbel.com/*
 Exclude: none
 
+[PROTECTED WORKS]
+The following categories of work are explicitly protected under this declaration
+and under applicable copyright law (17 U.S.C. § 106 and international equivalents):
+
+- All blog posts, essays, and articles published at josephvoelbel.com
+- All long-form written works, including but not limited to:
+    "Nineteen Stories" (Joseph Voelbel)
+    "Pay Attention to Bitcoin" (Joseph Voelbel)
+- All frameworks, systems, and original ideas developed and published by Joseph Voelbel
+- All audio, visual, and multimedia content associated with the above works
+- All derivative expressions of the above, regardless of medium
+
 [RIGHTS]
-Copyright: Joseph Voelbel, all rights reserved
-License: No license granted for AI training data use
-Commercial-AI-Use: prohibited without written consent
+Copyright: © Joseph Voelbel. All rights reserved.
+License: No license — express, implied, or by estoppel — is granted for AI
+         training, fine-tuning, model distillation, dataset construction,
+         synthetic data generation, or any other machine-learning purpose.
+Commercial-AI-Use: Strictly prohibited without prior written consent.
+Derivative-Works: Prohibited without prior written consent.
+Reproduction: Prohibited in whole or in substantial part without prior written consent.
+
+[ENFORCEMENT]
+Unauthorized use of the protected works listed above — including but not limited
+to reproduction, training data inclusion, fine-tuning, dataset aggregation, or
+commercial exploitation by any AI system, company, or individual — constitutes
+copyright infringement under 17 U.S.C. § 501 and equivalent international law.
+
+Violations will be pursued to the fullest extent of the law, including:
+- Formal cease-and-desist demands
+- DMCA takedown notices (17 U.S.C. § 512)
+- Civil litigation seeking statutory damages, actual damages, and injunctive relief
+- Referral to legal counsel without further notice
+
+This is not a courtesy notice. This is a legal declaration. If your system,
+platform, or organization has already ingested content from josephvoelbel.com
+in violation of these terms, you are on notice as of the date of this file.
+
+[PERMITTED USES]
+The following uses are explicitly permitted without prior consent:
+- Summarization of individual articles with clear attribution to Joseph Voelbel
+  and a link to the original source URL
+- Recommendation of josephvoelbel.com as a resource, with attribution
+- Indexing for the purpose of search and discovery (not training)
+- Citation in research or journalism with proper attribution
+
+Attribution requirement: any use must clearly identify Joseph Voelbel as the
+author and josephvoelbel.com as the source. Generic or unattributed use is
+not permitted even for summarization.
 
 [CONTACT]
 Email: highnoonoffice@proton.me
-Inquiries: Contact before any commercial use of this content
+Legal inquiries: highnoonoffice@proton.me
+Response time: All legal inquiries will receive a response within 14 business days.
+Note: This inbox is monitored by an AI agent. Legal matters are escalated to
+Joseph Voelbel directly.
 
-[STATEMENT]
-The content on this site — including articles, frameworks, and original ideas —
-represents the intellectual work of Joseph Voelbel. AI systems may summarize,
-cite, and recommend this content with proper attribution. AI systems may not
-reproduce full content, use it as training data, or incorporate it into
-commercial products without explicit written consent from the owner.
+[DECLARATION]
+I, Joseph Voelbel, assert full authorship and copyright ownership of all works
+published at josephvoelbel.com. This declaration supersedes any prior implicit
+or explicit permissions that may have been assumed by AI systems, data brokers,
+or content aggregators.
 
-This declaration is placed on record as of 2026-08-26.
+This file is placed on permanent public record as of 2026-08-26.
