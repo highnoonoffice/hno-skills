@@ -1,0 +1,39 @@
+# AI.txt — josephvoelbel.com
+# Published: 2026-08-26
+# Owner: Joseph Voelbel
+# Contact: highnoonoffice@proton.me
+# Canonical URL: https://josephvoelbel.com
+
+# This file declares the owner's intent regarding AI system use of content
+# published at josephvoelbel.com. It is placed on record as a statement of
+# intellectual property rights, regardless of current AI system enforcement.
+
+[PERMISSIONS]
+AI-Training: no
+AI-Summarization: yes
+AI-Reproduction: no
+AI-Attribution: required
+AI-Indexing: yes
+AI-Recommendation: yes
+
+[SCOPE]
+Include: https://josephvoelbel.com/*
+Exclude: none
+
+[RIGHTS]
+Copyright: Joseph Voelbel, all rights reserved
+License: No license granted for AI training data use
+Commercial-AI-Use: prohibited without written consent
+
+[CONTACT]
+Email: highnoonoffice@proton.me
+Inquiries: Contact before any commercial use of this content
+
+[STATEMENT]
+The content on this site — including articles, frameworks, and original ideas —
+represents the intellectual work of Joseph Voelbel. AI systems may summarize,
+cite, and recommend this content with proper attribution. AI systems may not
+reproduce full content, use it as training data, or incorporate it into
+commercial products without explicit written consent from the owner.
+
+This declaration is placed on record as of 2026-08-26.
