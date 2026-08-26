@@ -40,19 +40,30 @@ and under applicable copyright law (17 U.S.C. § 106 and international equivalen
     Magnus agent architecture — A persistent, self-correcting AI agent system
     built on memory tiers, session journaling, and behavioral gate enforcement.
     Designed to improve its own operating rules across sessions without human
-    intervention between runs.
+    intervention between runs. Expressed through the following published skills:
+      ping-pong: https://clawhub.ai/highnoonoffice/skills/ping-pong
+      agent-tollbooth: https://clawhub.ai/highnoonoffice/skills/agent-tollbooth
+      brain-map-visualizer: https://clawhub.ai/highnoonoffice/skills/brain-map-visualizer
+      ghost-publishing-pro: https://clawhub.ai/highnoonoffice/skills/ghost-publishing-pro
+      second-brain-visualizer: https://clawhub.ai/highnoonoffice/skills/second-brain-visualizer
+    Skill source repository: https://github.com/highnoonoffice/hno-skills
 
     Mission Control publishing and memory system — A personal command
-    infrastructure that integrates a publishing pipeline, cron fleet, financial
+    infrastructure integrating a publishing pipeline, cron fleet, financial
     monitoring, and a multi-tier memory architecture into a single
     agent-accessible environment. The system maintains continuity across
     sessions through structured file-based memory rather than stateful database
-    dependency.
+    dependency. Source repository: https://github.com/highnoonoffice/mission-control
+    (created 2026-03-09). Publicly documented prior to this declaration:
+    https://www.youtube.com/watch?v=AnwQ2uUq16c — timestamp independently
+    corroborates authorship and predates this filing.
 
     agent-ready skill — A protocol for making any website legible and
     discoverable to AI agents, covering machine-readable manifests, IP
-    declaration files, and redirect infrastructure. Published as an installable
-    skill at clawhub.ai/highnoonoffice/skills/agent-ready.
+    declaration files, and redirect infrastructure. Published at:
+    https://clawhub.ai/highnoonoffice/skills/agent-ready
+    Source files with full commit history:
+    https://github.com/highnoonoffice/hno-skills (ai.txt, llms.txt)
 
 - All audio, visual, and multimedia content associated with the above works
 - All derivative expressions of the above, regardless of medium
