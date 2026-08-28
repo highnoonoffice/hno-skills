@@ -1,6 +1,6 @@
 ---
 name: session-closer
-version: 1.0.0
+version: 1.1.0
 description: "Structured end-of-session protocol for OpenClaw agents. Produces a complete, consistent journal entry at session close — summary, full file surface (read/written/external APIs), one self-caught failure delta, one behavioral fingerprint. Also runs pattern-update for any tracked behavioral patterns that fired this session. Use when a session ends, a task completes, or the user says 'log this,' 'log the session,' 'close out,' or 'write the journal.'"
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/session-closer
@@ -45,8 +45,10 @@ these required fields:
 - **summary** — What happened. What shipped. What was decided. 3–5 sentences.
 - **delta** — One self-caught reasoning failure. Specific — what failed, when, what
   the correct path was. Never "none."
-- **fingerprint** — Behavioral snapshot — tone, judgment, pushback, drift. One
-  sentence.
+- **fingerprint** — One sentence that captures how you showed up this session — not
+  what you did, but how you did it. Tone, judgment, whether you held your ground or
+  deflected. This is the field that compounds. Read ten of these in sequence and
+  you'll see patterns you can't see in a single session.
 
 See `references/journal-format.md` for the full format, all required sections, and a
 worked example.
@@ -63,6 +65,12 @@ nothing beyond a text editor — treat the script as a shortcut for workspaces t
 have it, not as infrastructure the close sequence depends on.
 
 ### 3. Run pattern-update (if applicable)
+
+Pattern tracking is a system where you define recurring behaviors you want to catch,
+assign them keys, and score them pass/fail each session. Over time the scores tell
+you whether you're actually improving or just claiming you are. If your workspace
+doesn't track patterns yet, skip this step entirely — it's an optional layer, not a
+requirement for a valid close.
 
 If your workspace tracks recurring behavioral patterns and has
 `scripts/pattern-update.js`, run it after the journal is written:
@@ -112,8 +120,19 @@ Same framework, different file surface shape:
 
 **Delta** = one specific thing the coding agent got wrong or had to correct
 mid-session.
-**Fingerprint** = how the session went — held to spec, needed re-prompting, drifted
-from the original brief.
+**Fingerprint:** one sentence on how the session went — not what was built, but how
+the agent showed up. Held to spec, needed re-prompting, drifted from the brief. Same
+compounding value as the orchestrator fingerprint.
+
+## Cold Start — No Journal Infrastructure Yet?
+
+No setup required beyond a folder and a file.
+
+- Create `memory/journal/` in your vault root
+- Create today's file as `YYYY-MM-DD.md`
+- Start writing using the format in `references/journal-format.md`
+
+That's all you need. The skill works from there.
 
 ## Hard Rules
 
