@@ -1,16 +1,13 @@
 # Pattern Keys
 
 `scripts/pattern-update.js` (see `SKILL.md` Step 3) scores which recurring behaviors
-fired or didn't fire in a session, using a fixed set of keys. The table below is a
-real, working example set — the keys one operator actually tracks day to day, each
-one added after a specific repeated failure showed up more than once in session
-journals. It is not a fixed taxonomy every deployment needs to adopt as-is.
+fired or didn't fire in a session, using a set of keys like the ones below.
 
-Use it two ways:
-- As-is, if these happen to match failure patterns you also want to catch.
-- As a model for defining your own — pick a short kebab-case key, write one line
-  describing exactly what it tracks, and pass it to `--passed` or `--failed` in
-  Step 3 whenever it fires.
+This table reflects one operator's tracked patterns — treat it as an example set, not
+a universal taxonomy. Swap in patterns that match your own behavioral failure modes.
+
+To define your own: pick a short kebab-case key, write one line describing exactly
+what it tracks, and pass it to `--passed` or `--failed` in Step 3 whenever it fires.
 
 | Key | What it tracks |
 |-----|-----------------|
