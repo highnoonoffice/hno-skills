@@ -120,8 +120,9 @@ Same framework, different file surface shape:
 
 **Delta** = one specific thing the coding agent got wrong or had to correct
 mid-session.
-**Fingerprint** = how the session went — held to spec, needed re-prompting, drifted
-from the original brief.
+**Fingerprint:** one sentence on how the session went — not what was built, but how
+the agent showed up. Held to spec, needed re-prompting, drifted from the brief. Same
+compounding value as the orchestrator fingerprint.
 
 ## Cold Start — No Journal Infrastructure Yet?
 
