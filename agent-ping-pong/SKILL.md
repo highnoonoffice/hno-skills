@@ -1,16 +1,16 @@
 ---
 name: ping-pong
 version: 2.8.1
-description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
+description: "A protocol for handing work between a judgment agent and a build agent through a human clipboard."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
 license: MIT
 credentials:
-  - name: GitHub PAT (Codex)
-    description: Fine-grained personal access token scoped to your sandbox repo (codex-repo). Contents + Pull Requests read/write. Set once in Codex Desktop.
+  - name: GitHub PAT (build agent)
+    description: Fine-grained personal access token scoped to your sandbox repo (codex-repo). Contents + Pull Requests read/write. Set once in your build agent.
     required: true
-  - name: GitHub PAT (OpenClaw)
-    description: Fine-grained personal access token scoped to sandbox + production repos. Contents + Pull Requests read/write. Stored in OpenClaw config.
+  - name: GitHub PAT (judgment agent)
+    description: Fine-grained personal access token scoped to sandbox + production repos. Contents + Pull Requests read/write. Stored in your judgment agent's config.
     required: true
 binaries: []
 ---
@@ -23,29 +23,29 @@ binaries: []
 <skill_gates version="1.0" mode="mandatory_pre_execution" order="sequential" on_violation="stop_and_report">
 
   <gate id="sandbox_repo_only" priority="1" severity="hard" scope="pre_handoff">
-    <condition>About to send a spec or task block to the coding agent</condition>
+    <condition>About to send a spec or task block to the build agent</condition>
     <question>Does the block specify `repo: [username]/codex-repo` (the sandbox) — not a production repo?</question>
     <pass_action>Proceed.</pass_action>
-    <fail_action>Stop. Codex only builds in the sandbox. The sandbox is the only repo in Codex's PAT scope. A spec targeting any other repo will fail or — worse — write directly to production. Fix the repo field before relaying.</fail_action>
+    <fail_action>Stop. The build agent only builds in the sandbox. The sandbox is the only repo in the build agent's PAT scope. A spec targeting any other repo will fail or — worse — write directly to production. Fix the repo field before relaying.</fail_action>
   </gate>
 
   <gate id="block_terminator" priority="2" severity="hard" scope="pre_handoff">
-    <condition>About to relay any [AGENT_HANDOFF] block to the coding agent</condition>
+    <condition>About to relay any [AGENT_HANDOFF] block to the build agent</condition>
     <question>Does the block end with `Reply with a single [AGENT_HANDOFF] block. No prose outside the block.` as the last line before the closing tag?</question>
     <pass_action>Proceed.</pass_action>
-    <fail_action>Stop. Add the terminator line. Without it, the coding agent may return prose-wrapped output that breaks the clipboard relay. The protocol depends on both ends enforcing this.</fail_action>
+    <fail_action>Stop. Add the terminator line. Without it, the build agent may return prose-wrapped output that breaks the clipboard relay. The protocol depends on both ends enforcing this.</fail_action>
   </gate>
 
   <gate id="no_merge_without_approval" priority="3" severity="hard" scope="pre_merge">
-    <condition>About to instruct the coding agent to merge a PR</condition>
-    <question>Has the user explicitly approved the merge after reviewing OpenClaw's PR verdict?</question>
+    <condition>About to instruct the build agent to merge a PR</condition>
+    <question>Has the user explicitly approved the merge after reviewing the judgment agent's PR verdict?</question>
     <pass_action>Proceed with merge instruction.</pass_action>
-    <fail_action>Stop. Never auto-merge. The user reviews OpenClaw's verdict, then decides. "LGTM" from OpenClaw is a recommendation, not authorization. Wait for explicit user approval.</fail_action>
+    <fail_action>Stop. Never auto-merge. The user reviews the judgment agent's verdict, then decides. "LGTM" from the judgment agent is a recommendation, not authorization. Wait for explicit user approval.</fail_action>
   </gate>
 
   <gate id="pat_scope_check" priority="4" severity="hard" scope="session_start">
     <condition>Starting a new Ping Pong session or adding a new production repo to the workflow</condition>
-    <question>Is the OpenClaw PAT scoped to the sandbox repo plus only the specific production repos approved for this workflow — not broad org or classic token access?</question>
+    <question>Is the judgment agent's PAT scoped to the sandbox repo plus only the specific production repos approved for this workflow — not broad org or classic token access?</question>
     <pass_action>Proceed.</pass_action>
     <fail_action>Stop. Verify PAT scope in GitHub Settings > Developer Settings > Fine-grained tokens. A PAT with overly broad scope is a security risk regardless of how the workflow runs. Fix scope before proceeding.</fail_action>
   </gate>
@@ -74,7 +74,7 @@ binaries: []
 
   <gate id="review_before_port" priority="7" severity="soft" scope="pre_port">
     <condition>About to port approved code from the sandbox repo to a production repo</condition>
-    <question>Has OpenClaw reviewed the PR and the user explicitly approved the port — not just the merge?</question>
+    <question>Has the judgment agent reviewed the PR and the user explicitly approved the port — not just the merge?</question>
     <pass_action>Proceed with port.</pass_action>
     <fail_action>Hold. A merge in the sandbox is not authorization to port. Port requires a separate explicit go-ahead from the user after reviewing what will land in production.</fail_action>
   </gate>
@@ -84,25 +84,29 @@ binaries: []
 
 ---
 
-Agent Ping Pong is a two-agent coding workflow where OpenClaw acts as Maestro — speccing, reviewing, and directing — while a coding agent (Codex or Claude Code) does the build work. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection required. Just two windows and a clipboard. The result: you ship real code to GitHub from a conversation, your agent reviews the PR, you approve the merge. Repeat.
+Agent Ping Pong is a protocol for handing work between two agents through a human clipboard. A **judgment agent** specs, reviews, and directs. A **build agent** edits files, runs checks, and opens pull requests. You relay structured blocks between them by copy-paste. No direct agent-to-agent connection is required. Just two agent windows, a clipboard, and a human who decides when to send and merge.
 
-If you have a ChatGPT Plus subscription ($20/month), you already have access to Codex — no extra cost. Claude Code works the same way and is the preferred choice for many OpenClaw users. Pick whichever you have.
+OpenClaw in the judgment role, paired with Codex or Claude Code in the build role, is the proven reference implementation used throughout the Quick Start. It is not the definition of the protocol.
 
-**Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol.**
+**The judgment agent holds intent. The build agent handles execution. The clipboard is the protocol.**
+
+### Works With Any Agent Pair
+
+The protocol depends on roles and behavior, not vendor names. Possible judgment-agent-role tools include OpenClaw, Hermes Agent, and Grok CLI (the Grok Build CLI). Possible build-agent-role tools include Codex; Claude Code; Grok Build (whose model aliases include `grok-code-fast-1`); Qwen Code with Qwen3-Coder; a compatible coding harness powered by DeepSeek; and Kimi Code CLI. These are options, not claims of identical capability: each tool still needs the repository access and instruction-following ability required for its role.
 
 ### Why This Exists
 
 This skill started with a conversation. The idea came up — give your AI agent access to GitHub so it can ship code. A developer friend's first reaction: "What kind of access are we talking about?"
 
-That's the right question. Most people either hand over broad credentials and hope for the best, or they don't do it at all. Agent Ping Pong is the third option: a two-repo, two-token structure where each agent gets exactly what it needs and nothing else. The coding agent lives in the sandbox and never touches production. OpenClaw reviews and ports. You approve the merge.
+That's the right question. Most people either hand over broad credentials and hope for the best, or they don't do it at all. Agent Ping Pong is the third option: a two-repo, two-token structure where each agent gets exactly what it needs and nothing else. The build agent lives in the sandbox and never touches production. The judgment agent reviews and ports. You approve the merge.
 
 When the structure clicked, the reaction was: "I didn't know you could do that." That's what this skill is — that conversation, turned into a repeatable system.
 
 ### The Aesthetic
 
-Codex speaks in blocks. OpenClaw speaks in blocks. The blocks are addressed to each other — not to you.
+The build agent speaks in blocks. The judgment agent speaks in blocks. The blocks are addressed to each other — not to you.
 
-When Codex finishes a build, it returns a compact structured report. You copy it. When OpenClaw reviews a PR, it returns a structured block formatted as a message to Codex. You copy it. You are the physical layer between two agents that are talking to each other. You're not reading the mail. You're carrying it.
+When the build agent finishes a build, it returns a compact structured report. You copy it. When the judgment agent reviews a PR, it returns a structured block formatted as a message to the build agent. You copy it. You are the physical layer between two agents that are talking to each other. You're not reading the mail. You're carrying it.
 
 That's the whole design. Two agents. One clipboard. You decide when to send.
 
@@ -110,19 +114,19 @@ That's the whole design. Two agents. One clipboard. You decide when to send.
 
 The standard is asymmetric by design:
 
-**OpenClaw** can contextualize above and below the block. Prose helps you understand what's happening — why a finding matters, what changed, what to watch for. You read that. You copy the block. Both things can coexist.
+**The judgment agent** can contextualize above and below the block. Prose helps you understand what's happening — why a finding matters, what changed, what to watch for. You read that. You copy the block. Both things can coexist.
 
-**The coding agent** (Codex or Claude Code) must keep the block self-contained. No prose outside it. The reason is mechanical: you copy the entire response to relay it. Any context wrapped around the block gets copied too, and it pollutes the handoff. When the coding agent adds prose, the clipboard breaks. The block must be the whole thing.
+**The build agent** must keep the block self-contained. No prose outside it. The reason is mechanical: you copy the entire response to relay it. Any context wrapped around the block gets copied too, and it pollutes the handoff. When the build agent adds prose, the clipboard breaks. The block must be the whole thing.
 
 **Every block must request a block in return.** The last line of every `[AGENT_HANDOFF]` block — before the closing tag — must be:
 
     Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
 
-This applies to both agents. OpenClaw includes it in every spec and review block. Codex includes it in every delivery and acknowledgment block. If either agent drops it, the human adds it before relaying. The protocol is only as strong as both ends enforcing it.
+This applies to both agents. The judgment agent includes it in every spec and review block. The build agent includes it in every delivery and acknowledgment block. If either agent drops it, the human adds it before relaying. The protocol is only as strong as both ends enforcing it.
 
 **The `[AGENT_HANDOFF]` schema:**
 
-Codex and OpenClaw use tagged blocks to communicate:
+The build agent and judgment agent use tagged blocks to communicate:
 
 ```
 [AGENT_HANDOFF]
@@ -133,7 +137,7 @@ status: completed | confirmed
 [/AGENT_HANDOFF]
 ```
 
-Codex uses this for build completions, status reports, and schema negotiations. OpenClaw uses this for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
+The build agent uses this for build completions, status reports, and schema negotiations. The judgment agent uses it for specs, review verdicts, and confirmations. The human copies the block and pastes it to the other agent. Neither agent needs to see anything outside the block to do their job.
 
 **Optional fields for spec blocks (add when relevant):**
 
@@ -206,23 +210,25 @@ That's the full loop. Three copy-pastes, one merge decision, working code in Git
 
 ## What You Need
 
-- **OpenClaw** — your Maestro. Higher-level intelligence. Specs the work, reviews PRs, sends critique.
-- **Codex or Claude Code** — your coding agent. Codex is free with ChatGPT Plus ($20/mo). Claude Code works equally well. Either one does the build, opens PRs, and never merges without approval.
+- **One judgment agent** — holds intent, writes specs, reviews PRs, and sends critique.
+- **One build agent** — edits files, runs checks, opens PRs, and never merges without approval.
 - **GitHub account** — free. Source of truth. Where the code lives.
 - **Vercel account** — free tier. Deploy when something's ready to go public.
-- **One sandbox repo** (`codex-repo`) — Codex's permanent home. Every build goes here first. Never changes.
+- **One sandbox repo** (`codex-repo` in the reference implementation) — the build agent's permanent home. Every build goes here first. Never changes.
 - **One production repo** — where approved work lands. You create this once. All projects flow through it. Add more as ideas mature.
-- **One fine-grained PAT for Codex** — scoped to the sandbox only. Set once, never touched again.
-- **One fine-grained PAT for OpenClaw** — scoped to the sandbox + your production repo. Set once. Add repos to the scope as you expand — the token itself never gets replaced.
+- **One fine-grained PAT for the build agent** — scoped to the sandbox only. Set once, never touched again.
+- **One fine-grained PAT for the judgment agent** — scoped to the sandbox + your production repo. Set once. Add repos to the scope as you expand — the token itself never gets replaced.
 
 ---
 
-## One-Time Setup
+## One-Time Setup: Reference Implementation
+
+This setup uses OpenClaw with Codex or Claude Code. If you choose a different agent pair, preserve the same role boundaries, repository scopes, handoff format, and approval gates.
 
 ### 1. Install your coding agent
 **Codex:** Download from [chatgpt.com](https://chatgpt.com) — available under the Tools menu with a ChatGPT Plus subscription. Free with your existing subscription.
 
-**Claude Code:** Install via `npm install -g @anthropic-ai/claude-code`. Requires an Anthropic API key or Claude Pro/Max subscription. Works identically to Codex in this workflow — same block format, same PR protocol, same merge rules.
+**Claude Code:** Install via `npm install -g @anthropic-ai/claude-code`. Requires an Anthropic API key or Claude Pro/Max subscription. Configure it to use the same block format, PR protocol, and merge rules shown here.
 
 ### 2. Create your two repos
 **Sandbox repo:** Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it. This is Codex's permanent home. Every build goes here first. You never create another repo for Codex.
@@ -270,42 +276,42 @@ Say it once. It holds for the session.
 This is the ping pong. Each volley is a structured block you copy-paste from one agent to the other.
 
 ```
-YOU → OpenClaw:  "Here's what I want to build: [describe it]"
+YOU → JUDGMENT AGENT:  "Here's what I want to build: [describe it]"
 
-OpenClaw → YOU:  Spec block. Exact requirements, edge cases, constraints.
-                 Copy this.
+JUDGMENT AGENT → YOU:  Spec block. Exact requirements, edge cases, constraints.
+                       Copy this.
 
-YOU → Codex:     Paste the spec block.
+YOU → BUILD AGENT:     Paste the spec block.
 
-Codex → YOU:     "PR opened. Branch: feature/x. Commit: abc1234."
-                 Copy this.
+BUILD AGENT → YOU:     "PR opened. Branch: feature/x. Commit: abc1234."
+                       Copy this.
 
-YOU → OpenClaw:  Paste Codex's report.
+YOU → JUDGMENT AGENT:  Paste the build agent's report.
 
-OpenClaw → YOU:  Code review block. P0/P1/P2 findings. Fix instructions.
-                 Copy this.
+JUDGMENT AGENT → YOU:  Code review block. P0/P1/P2 findings. Fix instructions.
+                       Copy this.
 
-YOU → Codex:     Paste the review block.
+YOU → BUILD AGENT:     Paste the review block.
 
-Codex → YOU:     "Fixes applied. New commit: def5678."
-                 Copy this.
+BUILD AGENT → YOU:     "Fixes applied. New commit: def5678."
+                       Copy this.
 
-YOU → OpenClaw:  Paste Codex's update.
+YOU → JUDGMENT AGENT:  Paste the build agent's update.
 
-OpenClaw → YOU:  "LGTM. Merge approved." or another review round.
+JUDGMENT AGENT → YOU:  "LGTM. Merge approved." or another review round.
 
-YOU → Codex:     "Merge."  ← only you say this. Never OpenClaw directly.
+YOU → BUILD AGENT:     "Merge."  ← only you say this. Never the judgment agent directly.
 ```
 
-The human never writes code. The human never writes to the agents in agent language. You describe intent to OpenClaw, relay blocks between them, and approve merges. That's the whole job.
+The human never writes code. The human never writes to the agents in agent language. You describe intent to the judgment agent, relay blocks between the agents, and approve merges. That's the whole job.
 
 ---
 
 ## The Block Format
 
-When OpenClaw hands you something to relay to Codex, it comes in a block. Copy it entirely. Paste it directly into Codex. Don't edit it.
+When the judgment agent hands you something to relay to the build agent, it comes in a block. Copy it entirely. Paste it directly into the build agent. Don't edit it.
 
-When Codex reports back, copy its full response and paste it to OpenClaw with no wrapper. Just: "From Codex:" and paste.
+When the build agent reports back, copy its full response and paste it to the judgment agent with no wrapper. Just: "From the build agent:" and paste.
 
 The agents write to each other. You are the relay, not the translator.
 
@@ -313,13 +319,13 @@ The agents write to each other. You are the relay, not the translator.
 
 ## Code Review Format
 
-When relaying a PR to OpenClaw for review, say:
+When relaying a PR to the judgment agent for review, say:
 
 ```
-Review this PR from Codex. Repo: [repo name]. PR: [number or URL]. Branch: [branch name].
+Review this PR from the build agent. Repo: [repo name]. PR: [number or URL]. Branch: [branch name].
 ```
 
-OpenClaw will pull the code, read it, and return a review block formatted like this:
+The judgment agent will pull the code, read it, and return a review block formatted like this:
 
 ```
 [Repo] — Code Review
@@ -342,7 +348,7 @@ P2 — [Nice to have]
 ...
 ```
 
-Paste that block to Codex verbatim. It knows what to do with it.
+Paste that block to the build agent verbatim. It knows what to do with it.
 
 ---
 
@@ -352,7 +358,7 @@ The default is full ping pong — you relay blocks without intervening. But you'
 
 Two modes:
 
-**Relay mode (default):** Codex sends a block. You copy it. Paste to OpenClaw. OpenClaw sends a block. You copy it. Paste to Codex. You're not reading deeply — you're routing. Fast, token-efficient, gets things shipped.
+**Relay mode (default):** The build agent sends a block. You copy it. Paste to the judgment agent. The judgment agent sends a block. You copy it. Paste to the build agent. You're not reading deeply — you're routing. Fast, token-efficient, gets things shipped.
 
 **Review mode (your call):** Before you paste a block, read it. Decide if you agree. Add your own instruction. Change direction. This isn't a workflow break — it's the design working as intended. You intercept when the stakes are high enough to warrant it. The agents don't know the difference. They just receive whatever you send.
 
@@ -362,15 +368,15 @@ The rule: you always hit send. That's the human-in-the-loop. Not a gate, not a c
 
 ## Merge Protocol
 
-Only you merge. Never ask OpenClaw to merge. Never ask Codex to merge without OpenClaw's approval.
+Only you merge. Never ask the judgment agent to merge. Never ask the build agent to merge without the judgment agent's approval.
 
 The sequence:
-1. OpenClaw says "LGTM" or "approved"
-2. You tell Codex: "Merge."
-3. Codex merges the PR
+1. The judgment agent says "LGTM" or "approved"
+2. You tell the build agent: "Merge."
+3. The build agent merges the PR
 4. Done
 
-If OpenClaw sends back findings, another round of ping pong happens before merge.
+If the judgment agent sends back findings, another round of ping pong happens before merge.
 
 ---
 
@@ -378,29 +384,29 @@ If OpenClaw sends back findings, another round of ping pong happens before merge
 
 Two repos. Two jobs. The sandbox is where things get built and broken. The production repo is where things live when they're ready.
 
-Codex builds everything in the sandbox. OpenClaw reviews the PR there. When a build is approved, OpenClaw ports the clean code to the production repo. Codex never touches the production repo directly — that's the whole point.
+The build agent builds everything in the sandbox. The judgment agent reviews the PR there. When a build is approved, the judgment agent ports the clean code to the production repo. The build agent never touches the production repo directly — that's the whole point.
 
 The flow for any new project:
 
-    1. You describe what you want to OpenClaw
-    2. OpenClaw writes the spec, sends it to your coding agent via you
-    3. Coding agent builds in the sandbox, opens a PR
-    4. You relay the PR to OpenClaw for review
-    5. OpenClaw reviews, sends findings back to the coding agent
-    6. Coding agent fixes, you relay, OpenClaw approves
-    7. You tell the coding agent to merge in the sandbox
-    8. OpenClaw ports the approved code to the production repo
-    9. Done. The production repo has clean, reviewed code. The coding agent never touched it.
+    1. You describe what you want to the judgment agent
+    2. The judgment agent writes the spec and sends it to the build agent via you
+    3. The build agent builds in the sandbox and opens a PR
+    4. You relay the PR to the judgment agent for review
+    5. The judgment agent reviews and sends findings back to the build agent
+    6. The build agent fixes, you relay, the judgment agent approves
+    7. You tell the build agent to merge in the sandbox
+    8. The judgment agent ports the approved code to the production repo
+    9. Done. The production repo has clean, reviewed code. The build agent never touched it.
 
-The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If the coding agent does something unexpected, it's in the sandbox, not in production. As ideas mature into distinct public projects, you can add dedicated repos to OpenClaw's PAT scope. The sandbox relationship never changes.
+The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If the build agent does something unexpected, it's in the sandbox, not in production. As ideas mature into distinct public projects, you can add dedicated repos to the judgment agent's PAT scope. The sandbox relationship never changes.
 
 ---
 
 ## Why This Is Cheaper Than You Think
 
-If you have ChatGPT Plus, Codex costs you nothing on top of what you're already paying. If you're a Claude user, Claude Code runs on your existing subscription or API credits. Either way, the coding agent carries all the build volume at flat rate — no per-token cost on the work that generates the most tokens.
+The build agent carries the high-volume implementation work. Depending on the tool you choose, that work may fit an existing subscription, a flat-rate allowance, or a lower-cost model tier.
 
-OpenClaw only spends tokens on judgment — speccing, reviewing, architectural decisions. That's the right use of a high-intelligence model. The rest is handled by the coding agent.
+The judgment agent spends its budget on judgment — speccing, reviewing, and architectural decisions. The rest is handled by the build agent.
 
 Stop burning a gigabrain on pawn-level tasks. Learn to play ping pong with your agents.
 
@@ -410,11 +416,11 @@ Stop burning a gigabrain on pawn-level tasks. Learn to play ping pong with your 
 
 Agent Ping Pong isn't one mode. It's a progression.
 
-**Phase 1 — Eyes on everything.** Every block, you read it. You understand what Codex built. You understand what OpenClaw found. You're learning the workflow and building a baseline for what good looks like. Stay here until the pattern feels natural.
+**Phase 1 — Eyes on everything.** Every block, you read it. You understand what the build agent built. You understand what the judgment agent found. You're learning the workflow and building a baseline for what good looks like. Stay here until the pattern feels natural.
 
-**Phase 2 — Relay mode.** You've seen enough clean PRs to trust the loop. You copy blocks without reading deeply. OpenClaw reviews. Codex fixes. You approve merges. You're the conductor — you show up for the performance, not the rehearsal.
+**Phase 2 — Relay mode.** You've seen enough clean PRs to trust the loop. You copy blocks without reading deeply. The judgment agent reviews. The build agent fixes. You approve merges. You're the conductor — you show up for the performance, not the rehearsal.
 
-**Phase 3 — Auto mode.** Early phases of a project, Codex is iterating fast, OpenClaw is reviewing consistently, nothing surprising is happening. You let it cook. You check in when a block lands. You merge when you see LGTM. The agents are doing the work. You're the human in the loop by presence, not by effort.
+**Phase 3 — Auto mode.** Early phases of a project, the build agent is iterating fast, the judgment agent is reviewing consistently, nothing surprising is happening. You let it cook. You check in when a block lands. You merge when you see LGTM. The agents are doing the work. You're the human in the loop by presence, not by effort.
 
 **Phase 4 (future).** The relay disappears. Direct agent-to-agent communication, human approval only at merge. Not today — but today's version builds the trust that makes that possible.
 
@@ -424,19 +430,19 @@ You decide which phase you're in on any given session. High-stakes build: eyes o
 
 ## Token Management
 
-Codex runs on your ChatGPT Plus subscription — flat rate, no per-token cost. Use it for all build work, file creation and editing, running tests and lint, and fixing review findings.
+Use the build agent for build work, file creation and editing, running tests and lint, and fixing review findings.
 
-OpenClaw handles judgment — speccing the work, reviewing PRs, architectural decisions, anything requiring real reasoning about intent.
+Use the judgment agent for speccing the work, reviewing PRs, architectural decisions, and anything requiring real reasoning about intent.
 
-This split is why the workflow is financially sustainable. Codex carries the volume. OpenClaw carries the intelligence.
+This split is why the workflow is financially sustainable. The build agent carries the volume. The judgment agent carries the intent.
 
 ---
 
-## Don't Have OpenClaw?
+## Choosing a Judgment Agent
 
-You can run a lighter version of this workflow with ChatGPT chat as your reviewer instead of OpenClaw. The loop is the same — spec in one window, build in Codex, paste the PR back for review.
+OpenClaw is the proven reference choice, but the role is portable. You can run a lighter version with ChatGPT chat as reviewer, or use another agent that can maintain context, inspect the code, and return the required handoff block. The loop stays the same: spec in one window, build in another, then paste the PR back for review.
 
-What you're missing: OpenClaw has memory across sessions, can access your files, runs on your machine, and costs nothing beyond the API calls you make. It's a fundamentally different class of agent than a stateless chat window.
+The tradeoffs are context, repository access, persistence, and cost. Verify those capabilities for the agent you choose rather than assuming every option behaves identically.
 
 Get OpenClaw at [openclaw.ai](https://openclaw.ai).
 
@@ -479,7 +485,7 @@ Total OpenClaw tokens: spec + review + verification. Zero build tokens. That's t
 
 ---
 
-## OpenClaw PR Review Trigger
+## Reference Implementation: OpenClaw PR Review Trigger
 
 Instead of framing a PR review manually, use this exact prompt to trigger OpenClaw's review mode:
 
@@ -505,11 +511,11 @@ Continuation is automatic: every subsequent block in the chain (fix rounds, foll
 
 ## Tips
 
-- **One sandbox, always.** Codex lives in `codex-repo`. Never give Codex a PAT to a production repo or anything with real data.
-- **Name your branches.** Tell Codex: "Branch name: feature/[short-description]." Keeps the PR history readable.
+- **One sandbox, always.** The build agent lives in `codex-repo`. Never give it a PAT to a production repo or anything with real data.
+- **Name your branches.** Tell the build agent: "Branch name: feature/[short-description]." Keeps the PR history readable.
 - **Feature branch → PR → approve → merge.** Never push direct to main for anything non-trivial.
-- **Session context.** Start each Codex session with a one-paragraph context block: what the project is, what's already built, what this session is for. Codex doesn't have memory. Give it the brief.
-- **When Codex goes sideways.** Paste the broken output to OpenClaw. Ask for a diagnosis. Relay the fix instruction back. One extra volley is cheaper than debugging blind.
+- **Session context.** Start each build-agent session with a one-paragraph context block: what the project is, what's already built, what this session is for. Do not assume the build agent has memory. Give it the brief.
+- **When the build agent goes sideways.** Paste the broken output to the judgment agent. Ask for a diagnosis. Relay the fix instruction back. One extra volley is cheaper than debugging blind.
 
 ---
 
