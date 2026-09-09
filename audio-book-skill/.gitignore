@@ -1,0 +1,38 @@
+# Generated outputs and job artifacts
+out/
+output/
+segments/
+*.wav
+*.mp3
+*.mp4
+*.m4a
+manifest.json
+
+# Model weights / caches (download on first run; never commit)
+*.safetensors
+*.pt
+*.onnx
+.cache/
+models/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Private manuscripts and credentials (keep out of the public skill)
+private/
+credentials/
+*.key
+*.pem
+*.env
+.env
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Allow the example manuscript through despite broad ignores above
+!example/example_manuscript.md
