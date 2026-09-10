@@ -1,0 +1,123 @@
+[
+  {
+    "id": "current-role",
+    "question": "What is Joseph's current job?",
+    "aliases": [
+      "Where does Joseph work now",
+      "What does Joseph do at Thomson Reuters",
+      "current employer",
+      "job title",
+      "What is Joseph currently working on",
+      "What is Joseph doing these days"
+    ],
+    "answer": "Joseph is a Senior Instructional Designer and AI Transformation Lead at Thomson Reuters (Remote), a role he has held since October 2021. He was promoted in 2023, named a 2025 AI Champion, and has presented at the company's CFO Leadership Table.",
+    "tags": ["experience", "current-work", "thomson-reuters"],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2",
+    "seed": true
+  },
+  {
+    "id": "education",
+    "question": "What is Joseph's educational background?",
+    "aliases": [
+      "Where did Joseph go to school",
+      "What degrees does Joseph have",
+      "university",
+      "college"
+    ],
+    "answer": "Joseph holds a Master of Communication Management from the USC Annenberg School and a Bachelor of Arts in English/Writing from New York University.",
+    "tags": ["education"],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2, corroborated by JV_CV_HB and JV_CV_TBC",
+    "seed": true
+  },
+  {
+    "id": "ai-transformation-work",
+    "question": "What kind of AI work has Joseph done at Thomson Reuters?",
+    "aliases": [
+      "What is the AI Transformation Lead role",
+      "enterprise AI training work",
+      "AI literacy programs",
+      "CoCounsel accreditation"
+    ],
+    "answer": "As AI Transformation Lead, Joseph architected a company-wide AI Primer using Open Arena (Llama, Claude, GPT-4) that became the enterprise AI fluency standard for all sales reps. He pioneered enterprise-wide two-way AI role plays using Gong-sourced personas to simulate real customer interactions, and co-designed the CoCounsel Legal Accreditation, the first competency-based certification built on AI role plays, which reached over 90 percent completion.",
+    "tags": ["experience", "ai", "thomson-reuters"],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2",
+    "seed": true
+  },
+  {
+    "id": "rag-technical-work",
+    "question": "Has Joseph built any RAG or LLM systems himself?",
+    "aliases": [
+      "technical AI skills",
+      "RAG chain design",
+      "AI Character Engine",
+      "prompt engineering experience"
+    ],
+    "answer": "Joseph built an AI Character Engine in Open Arena using a RAG chain powered by Opus 4.5, which cut role-play development time by 35 to 50 percent. His technical AI skills include prompt engineering, RAG chain design, model selection across Llama, Claude, and GPT, hallucination and risk mitigation, and AI grading rubric design.",
+    "tags": ["experience", "ai", "technical"],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2",
+    "seed": true
+  },
+  {
+    "id": "published-writing",
+    "question": "Has Joseph published any writing?",
+    "aliases": [
+      "Is Joseph an author",
+      "books written",
+      "Pay Attention to Bitcoin",
+      "audiobook narration"
+    ],
+    "answer": "Joseph is the author of Pay Attention to Bitcoin (2024). He also writes essays and fiction, and produced complete audiobook narrations of Jorge Luis Borges's Ficciones and Ralph Waldo Emerson's Essays: First Series, which have drawn over 387,000 views on YouTube.",
+    "tags": ["writing", "published-work"],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2 (book credential); CLAUDE.md operator context (narration channel)",
+    "seed": true
+  },
+  {
+    "id": "high-noon-office",
+    "question": "What is High Noon Office?",
+    "aliases": [
+      "What does Joseph do outside his day job",
+      "ClawHub skills",
+      "AI consulting",
+      "independent business",
+      "BUSYZEN"
+    ],
+    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it, he publishes free agent skills on ClawHub (clawhub.ai/highnoonoffice), which have been downloaded over 5,900 times, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
+    "tags": ["current-work", "business", "ai"],
+    "confidence": "medium",
+    "source": "CLAUDE.md operator context",
+    "seed": true
+  },
+  {
+    "id": "graceful-miss-demo",
+    "question": "What is Joseph's favorite food?",
+    "aliases": [
+      "favorite color",
+      "personal life details not on the resume"
+    ],
+    "answer": "I don't have that in Joseph's resume. Ask about his work at Thomson Reuters, his AI projects, his education, or his published writing.",
+    "tags": ["meta", "demo"],
+    "confidence": "high",
+    "source": "n/a, seed example demonstrating graceful-miss behavior for out-of-corpus questions",
+    "seed": true
+  },
+  {
+    "id": "the-rug",
+    "question": "Did Joseph run a comedy or satire publication?",
+    "aliases": [
+      "The Rug",
+      "TheRugNews.com",
+      "crypto comedy",
+      "Editor-in-Chief"
+    ],
+    "answer": "Joseph was Editor-in-Chief of The Rug, a satirical crypto-comedy brand at TheRugNews.com, which he ran for roughly two years, publishing over 100 articles and building a following of nearly 5,000 on X. It was a past project, not a current one.",
+    "tags": ["writing", "past-work"],
+    "confidence": "medium",
+    "source": "JV_CV_TBC",
+    "seed": true
+  }
+]
