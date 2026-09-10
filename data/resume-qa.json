@@ -829,5 +829,63 @@
     "confidence": "high",
     "source": "interview 2026-09-10",
     "seed": false
+  },
+  {
+    "id": "the-throughline",
+    "question": "What connects Joseph's Bitcoin book, his fiction, and his AI work?",
+    "aliases": [
+      "the throughline",
+      "how do your projects connect",
+      "Bitcoin fiction AI connection",
+      "what ties your work together",
+      "man contains multitudes"
+    ],
+    "answer": "Joseph partly declines the premise. He could draw a clean throughline (he's a creative writer, he can make anything connect) but doesn't think it's necessary or honest. The real answer is Walt Whitman's \"I contain multitudes\" and the idea, often attributed to Joyce, that a person is only ever writing one novel in different forms. What actually links the work is curiosity itself, not a shared thesis. He's interested in systems and in where value accrues. Borges was a philosopher, linguist, and cartographer who approached fiction with a PhD's rigor; Nineteen Stories is an exploration of the unknown, of sitting with the questions you don't have answers to; and Bitcoin drew him because he was interested in honest money that doesn't quietly steal your purchasing power through inflation. He pursues what interests him, and lets it be many things at once.",
+    "tags": [
+      "philosophy",
+      "writing",
+      "bio"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "bitcoin-thesis-core",
+    "question": "Why does Joseph think people should pay attention to Bitcoin?",
+    "aliases": [
+      "Bitcoin thesis",
+      "why Bitcoin",
+      "honest money",
+      "digital gold",
+      "the core Bitcoin argument"
+    ],
+    "answer": "Because what people pay attention to is where value accrues, and Bitcoin is an honest ledger with a finite supply that can't be inflated out of its own value. Joseph isn't a diehard maximalist; he wrote the book because he was interested in money that doesn't steal from you. When you hold dollars in a bank paying a few basis points, inflation erodes your purchasing power in the background, and he doesn't like the idea of that quiet theft. He thinks of Bitcoin as digital gold: sovereign money you can secure and store yourself. The thesis, in his view, is playing out.",
+    "tags": [
+      "writing",
+      "philosophy"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "attention-is-a-currency",
+    "question": "What does Joseph mean by \"attention is a currency\"?",
+    "aliases": [
+      "attention is a currency",
+      "attention economy",
+      "where attention goes value follows",
+      "Dutch guilder pound dollar Bitcoin",
+      "attention drives value"
+    ],
+    "answer": "Everything competes for our attention, and attention drives value. Look at the evolution of money across the last three centuries: the Dutch guilder was the world's unit of account, then the British pound, then the US dollar, and each shift followed attention shifting toward that nation-state. Whether it's seashells, cigarettes, or poker chips, where attention focuses, value accrues, and right now attention appears to be shifting toward Bitcoin. The deeper point is personal: the mind is powerful, so be mindful of what you focus on. As kids we're always told to pay attention, everyone trying to organize your operating system, but you're the driver. You decide what you focus on, and what you focus on grows in value.",
+    "tags": [
+      "philosophy",
+      "writing"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
   }
 ]
