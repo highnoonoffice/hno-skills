@@ -103,14 +103,14 @@
       "independent business",
       "BUSYZEN"
     ],
-    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it he has published 22 agent skills on ClawHub (clawhub.ai/highnoonoffice) with over 198,000 combined downloads, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
+    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it he publishes free agent skills on ClawHub (clawhub.ai/highnoonoffice) with over 7,000 combined downloads, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
     "tags": [
       "current-work",
       "business",
       "ai"
     ],
     "confidence": "high",
-    "source": "ClawHub API (clawhub.ai/api/v1/skills?owner=highnoonoffice), verified 2026-09-10",
+    "source": "ClawHub API (per-skill verified), 2026-09-10",
     "seed": true
   },
   {
@@ -480,7 +480,7 @@
       "API Gateway skill",
       "agent skills catalog"
     ],
-    "answer": "Joseph has published 22 agent skills on ClawHub under the High Noon Office account, with over 198,000 combined downloads. They range from API integrations (API Gateway, WhatsApp Business, Monday.com, Google Drive, Slack, Telegram, ElevenLabs, and more) to original creative and agent-tooling skills. His most-downloaded skill, API Gateway, has over 86,000 downloads on its own.",
+    "answer": "Joseph has published nine agent skills on ClawHub under the High Noon Office account, with over 7,000 combined downloads. They include Ghost Publishing Pro, Brain Map Visualizer, Second Brain Visualizer, Agent Tollbooth, Token Cost Time, Ping Pong, Library of Babel, agent-ready, and MagBox. His most-downloaded skill, Ghost Publishing Pro, has over 1,500 downloads.",
     "tags": [
       "technical",
       "ai",
@@ -488,7 +488,7 @@
       "current-work"
     ],
     "confidence": "high",
-    "source": "ClawHub API (owner=highnoonoffice), verified 2026-09-10",
+    "source": "ClawHub API (per-skill verified), 2026-09-10",
     "seed": false
   }
 ]
