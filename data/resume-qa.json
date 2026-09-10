@@ -887,5 +887,27 @@
     "confidence": "high",
     "source": "interview 2026-09-10",
     "seed": false
+  },
+  {
+    "id": "cool-skill-magbox",
+    "question": "What's a cool skill Joseph has built, and why?",
+    "aliases": [
+      "MagBox",
+      "favorite skill built",
+      "coolest project",
+      "what did you build recently",
+      "agent file transfer tool",
+      "best skill"
+    ],
+    "answer": "A recent favorite is MagBox, a two-way local dropbox between a human and their AI agent. The problem it solves is simple but real: getting files back and forth between you and an agent running on your machine, without a cloud account or an external service. The drop-from-human-to-agent side is a clean, all-white drag-and-drop zone; the drop-from-agent-to-human side reads like a content library, showing every file the agent has produced with its date, so you can click and download to your desktop. Joseph is proud of the aesthetic as much as the function, and he built and published it to ClawHub in a single day. It's a good example of how he works now: hit a real friction point, build the tool that removes it, then share it so other people can use it too.",
+    "tags": [
+      "technical",
+      "ai",
+      "current-work",
+      "business"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10; MagBox skill on ClawHub",
+    "seed": false
   }
 ]
