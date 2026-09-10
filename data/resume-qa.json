@@ -84,13 +84,13 @@
       "Pay Attention to Bitcoin",
       "audiobook narration"
     ],
-    "answer": "Joseph is the author of Pay Attention to Bitcoin (2024). He also writes essays and fiction, and produced complete audiobook narrations of Jorge Luis Borges's Ficciones and Ralph Waldo Emerson's Essays: First Series, which have drawn over 387,000 views on YouTube.",
+    "answer": "Joseph is the author of two published books: Nineteen Stories (2017), a collection of nineteen short stories inspired by Borges, and Pay Attention to Bitcoin (2024), a primer on Bitcoin as digital gold. He has also written the Kansas trilogy of novels (Lantis, PS Dear Douglas, and The Vagabond Chronicles). He writes essays and fiction, and produced complete audiobook narrations of Jorge Luis Borges's Ficciones and Ralph Waldo Emerson's Essays: First Series.",
     "tags": [
       "writing",
       "published-work"
     ],
     "confidence": "high",
-    "source": "JV_CV_2026_v2 (book credential); CLAUDE.md operator context (narration channel)",
+    "source": "josephvoelbel.com/books; Audible and Goodreads author pages; operator context",
     "seed": true
   },
   {
@@ -103,14 +103,14 @@
       "independent business",
       "BUSYZEN"
     ],
-    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it, he publishes free agent skills on ClawHub (clawhub.ai/highnoonoffice), which have been downloaded over 5,900 times, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
+    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it he has published 22 agent skills on ClawHub (clawhub.ai/highnoonoffice) with over 198,000 combined downloads, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
     "tags": [
       "current-work",
       "business",
       "ai"
     ],
-    "confidence": "medium",
-    "source": "CLAUDE.md operator context",
+    "confidence": "high",
+    "source": "ClawHub API (clawhub.ai/api/v1/skills?owner=highnoonoffice), verified 2026-09-10",
     "seed": true
   },
   {
@@ -369,6 +369,126 @@
     ],
     "confidence": "medium",
     "source": "JV_CV_TBC",
+    "seed": false
+  },
+  {
+    "id": "who-is-joseph",
+    "question": "Who is Joseph Voelbel?",
+    "aliases": [
+      "what does Joseph do",
+      "introduce Joseph",
+      "Joseph in one sentence",
+      "tell me about Joseph"
+    ],
+    "answer": "Joseph Voelbel is an AI Learning Experience Designer, Author, and Philosopher. He is a Senior Instructional Designer and AI Transformation Lead at Thomson Reuters, and the founder of High Noon Office, his independent AI lab. He has published two books and a trilogy of novels, narrates literary audiobooks, and builds AI tools. He lives in Minneapolis.",
+    "tags": [
+      "identity",
+      "current-work",
+      "bio"
+    ],
+    "confidence": "high",
+    "source": "josephvoelbel.com; Goodreads author page; operator context",
+    "seed": false
+  },
+  {
+    "id": "nineteen-stories",
+    "question": "What is Nineteen Stories?",
+    "aliases": [
+      "Nineteen Stories book",
+      "19 Stories",
+      "Joseph's short story collection",
+      "first book",
+      "fiction collection"
+    ],
+    "answer": "Nineteen Stories (2017) is Joseph's first published book, a collection of nineteen short stories inspired by the dense, opaque style of Jorge Luis Borges. It is dedicated to his father and opens with a Borges epigraph. The stories range across mysticism, philosophy, and consciousness, and the number nineteen itself carries a numerological meaning in the collection's structure. It is available on Amazon and Audible.",
+    "tags": [
+      "writing",
+      "published-work",
+      "fiction"
+    ],
+    "confidence": "high",
+    "source": "josephvoelbel.com/books; Audible author page; Nineteen Stories full text",
+    "seed": false
+  },
+  {
+    "id": "kansas-trilogy",
+    "question": "Has Joseph written any novels?",
+    "aliases": [
+      "Kansas trilogy",
+      "Lantis",
+      "PS Dear Douglas",
+      "The Vagabond Chronicles",
+      "long-form fiction",
+      "novels"
+    ],
+    "answer": "Yes. Beyond his short fiction, Joseph wrote the Kansas trilogy, a set of three novels: Lantis, PS Dear Douglas, and The Vagabond Chronicles.",
+    "tags": [
+      "writing",
+      "fiction"
+    ],
+    "confidence": "high",
+    "source": "operator context, 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "youtube-narration",
+    "question": "Does Joseph have a YouTube channel?",
+    "aliases": [
+      "audiobook narration",
+      "Borges narration YouTube",
+      "YouTube views",
+      "narration channel",
+      "Ficciones audiobook"
+    ],
+    "answer": "Joseph runs a YouTube channel where he narrates literary audiobooks, most notably the complete Ficciones by Jorge Luis Borges. The channel has drawn more than 395,000 lifetime views since 2011. His most-viewed narrations include Tlön, Uqbar, Orbis Tertius (over 75,000 views), The Library of Babel (over 71,000), and The Garden of Forking Paths (over 60,000).",
+    "tags": [
+      "writing",
+      "published-work",
+      "narration"
+    ],
+    "confidence": "high",
+    "source": "YouTube Studio analytics (lifetime), verified 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "library-of-babel",
+    "question": "What is the Library of Babel project Joseph built?",
+    "aliases": [
+      "Library of Babel",
+      "Borges engine",
+      "babel.josephvoelbel.com",
+      "mathematical library"
+    ],
+    "answer": "The Library of Babel is a tool Joseph designed and deployed that turns Borges's infinite library into a working mathematical engine. Paste any text and it returns that text's permanent address in the library; give coordinates and it returns the exact page that has always lived there. There is no database and no randomness, so the same input always produces the same result. It is live at babel.josephvoelbel.com and published as an installable agent skill.",
+    "tags": [
+      "technical",
+      "ai",
+      "writing",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "babel.josephvoelbel.com; Library of Babel skill on ClawHub",
+    "seed": false
+  },
+  {
+    "id": "clawhub-catalog",
+    "question": "What agent skills has Joseph published?",
+    "aliases": [
+      "ClawHub skills",
+      "how many skills",
+      "download count",
+      "API Gateway skill",
+      "agent skills catalog"
+    ],
+    "answer": "Joseph has published 22 agent skills on ClawHub under the High Noon Office account, with over 198,000 combined downloads. They range from API integrations (API Gateway, WhatsApp Business, Monday.com, Google Drive, Slack, Telegram, ElevenLabs, and more) to original creative and agent-tooling skills. His most-downloaded skill, API Gateway, has over 86,000 downloads on its own.",
+    "tags": [
+      "technical",
+      "ai",
+      "business",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "ClawHub API (owner=highnoonoffice), verified 2026-09-10",
     "seed": false
   }
 ]
