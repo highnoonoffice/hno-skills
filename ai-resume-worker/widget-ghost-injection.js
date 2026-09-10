@@ -14,6 +14,7 @@
     var ab=document.getElementById('jv-ask-answer');
     var q=(i.value||'').trim();
     if(!q)return;
+    i.value='';
     ab.style.display='block';
     ab.innerHTML='Thinking…';
     load().then(function(){
