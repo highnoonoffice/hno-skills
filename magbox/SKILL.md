@@ -1,6 +1,6 @@
 ---
 name: magbox
-description: "Local dropbox between you and your agent. Move files through two aesthetically pleasing local directories with browser views."
+description: "Local dropbox between you and your agent. Move files through two aesthetically pleasing local directories with browser views. A drag-and-drop folder that goes to your agent and a viewable library of what your agent sends to you."
 license: MIT
 metadata:
   version: "0.2.0"
