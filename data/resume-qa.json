@@ -490,5 +490,126 @@
     "confidence": "high",
     "source": "ClawHub API (per-skill verified), 2026-09-10",
     "seed": false
+  },
+  {
+    "id": "what-i-do-with-ai",
+    "question": "What does Joseph actually do with AI at work all day?",
+    "aliases": [
+      "what is the AI Transformation Lead role day to day",
+      "how does Joseph use AI at work",
+      "AI sales training work",
+      "what does Joseph build with AI"
+    ],
+    "answer": "Joseph uses AI to improve the productivity of Thomson Reuters' salesforce by simulating the sales conversation itself: discovery calls, objection resolution, value messaging, even a difficult gatekeeper. He pulls high signal from real recorded sales calls, strips out all personally identifiable information, and studies the linguistic structure of how customers actually talk. That gets fed into AI characters he builds, each one a specific buyer like a solo-practitioner lawyer or a head of legal at a corporation. He has built over 100 of these across the entire company, spanning small, midsize, and global large law firms, tax and accounting, government, and corporate, across the US, UK, and Canada, with over 2,000 completions and an 84 percent engagement rate.",
+    "tags": [
+      "ai",
+      "current-work",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "how-i-build-a-character",
+    "question": "How does Joseph build an AI sales-training character?",
+    "aliases": [
+      "how do you build a synthetic buyer",
+      "AI character design process",
+      "Derek Martinez how built",
+      "making an AI character feel real",
+      "character design form"
+    ],
+    "answer": "It starts with a character-design form: about 20 questions Joseph asks subject-matter experts, covering the goal of the conversation, which customer segment the buyer represents, the objections reps hear in the field, what success looks like, and three to five real Gong transcripts of that kind of call. He synthesizes all of it through a skill he built (originally a RAG chain in Thomson Reuters' Open Arena, later ported to a Claude skill) that produces six assets: an evaluation rubric, a learner-facing scoring guide, a customer background, learner instructions, and the big one, the system instructions, which can run 5,000 to 8,000 words defining the character's core identity and behavior. The principle he distills it to is high signal, low noise: real call transcripts plus expert field input equals a high-fidelity character. He did exactly this for the CoCounsel legal launch, building buyers for reps to practice against across the US, UK, and Canada.",
+    "tags": [
+      "ai",
+      "technical",
+      "current-work",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "context-stacking-llm-efficiency",
+    "question": "What is Joseph's hardest-won technique for working with LLMs?",
+    "aliases": [
+      "context stacking",
+      "drive it till the wheels fall off",
+      "context window compaction",
+      "fork summaries",
+      "LLM efficiency technique",
+      "putting a leash on it"
+    ],
+    "answer": "The hardest technical gap in working with LLMs is knowing the state of the context window. When a window gets bloated, the model undergoes compaction, loses its history, and starts to hallucinate, and early adopters often drive a thread into the ground without realizing it. Joseph's answer has three moves. First, drive it till the wheels fall off, so you actually learn how a model degrades. Second, write fork summaries, markdown files capturing the decisions and action items from a thread, saved to the project and pasted into the next thread for continuity across four or five instances in a single build. Third, and his biggest breakthrough, context stacking: put the model on a leash and make it research, report back, and refine across several turns before you ever let it produce the deliverable. Stacking context before the build gets you the optimal result.",
+    "tags": [
+      "ai",
+      "technical",
+      "philosophy"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "preventing-ai-hallucination",
+    "question": "How does Joseph keep an AI training character from hallucinating or going off-script?",
+    "aliases": [
+      "prevent hallucination",
+      "AI character accuracy",
+      "keeping AI on script",
+      "guardrails for AI characters"
+    ],
+    "answer": "It comes down to the system instructions, which have been refined across the 100-plus characters he has built. The move is to ground the character in so much specific context that it never has to invent: not just a rule like don't hallucinate, but a full identity, where the character lives, the season, background family detail, the real objections pulled from field recordings, and the exact way the character should respond to each one. An 8,000-word system instruction heavily mitigates hallucination. The failure case is the thin prompt, telling a model only that it's a lawyer on a sales call; it doesn't know its name, where it lives, or how it should behave, and it hallucinates. More guardrails and more grounded data equal higher signal.",
+    "tags": [
+      "ai",
+      "technical",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "ai-grading-rubric-process",
+    "question": "How does Joseph design an AI grading rubric for sales conversations?",
+    "aliases": [
+      "AI grading rubric",
+      "how to grade a sales conversation with AI",
+      "eval rubric design",
+      "scoring guide",
+      "1 to 10 grading scale"
+    ],
+    "answer": "He reverse-engineers the rubric from the objectives and goals on the character-design form. For an objection-resolution call, that means building the eval around the two or three mandatory objections reps actually hear, like a small firm saying they can get most of the way there with a cheaper enterprise model and have their team review the rest. Joseph tries to standardize around four criteria, and because the AI grades the transcript itself, the rubric is really teaching the model how to grade, so he makes it precise and example-driven. He uses a 1-to-10 scale rather than a lighter one because it allows more nuance, with each band stacking more context until 9-to-10 is a meaty paragraph describing excellence. Learners see only the distilled scoring guide as quick, breathable bullet points, but the underlying eval rubric is treated seriously because it determines the grade.",
+    "tags": [
+      "ai",
+      "technical",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "llm-efficiency-consulting-detail",
+    "question": "What does Joseph's LLM efficiency consulting actually look like?",
+    "aliases": [
+      "LLM efficiency consulting",
+      "voice to text productivity",
+      "helping people use AI better",
+      "LLM coaching",
+      "working with AI more efficiently"
+    ],
+    "answer": "It's about helping people get far more out of the LLMs they already use, and the techniques are model-agnostic. His favorite example: a colleague later in her career, strong on stage but finger-pecking simple sentences at her LLM. Joseph had her install free voice-to-text software and talk to the model the way she talks in meetings, and she said that single change revolutionized how she worked. The broader toolkit is the same set of efficiencies he uses himself: voice-to-text as the biggest productivity unlock, context stacking, driving a thread till the wheels fall off, and fork summaries, plus getting people to beef up their instructions and skill files, turn on memory, and build reusable context that carries across projects. He trades these practices with peers like the CEO of RetailWire, and offers the same to friends, family, and business professionals.",
+    "tags": [
+      "ai",
+      "business",
+      "technical",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
   }
 ]
