@@ -166,7 +166,7 @@
       "thomson-reuters",
       "recognition"
     ],
-    "confidence": "high",
+    "confidence": "medium",
     "source": "JV_CV_2026_v2 and JV_2025_FULL VERSION (same CEO quote corroborated in both)",
     "seed": false
   },
@@ -202,7 +202,7 @@
       "thomson-reuters",
       "speaking"
     ],
-    "confidence": "high",
+    "confidence": "medium",
     "source": "JV_CV_2026_v2, corroborated by JV_2025_FULL VERSION",
     "seed": false
   },
