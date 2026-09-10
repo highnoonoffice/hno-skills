@@ -1,6 +1,6 @@
 ---
 name: magbox
-description: "Move non-sensitive files between a human and an agent through two local directories and browser views. Use for file handoffs on the same trusted network, not inline answers or remote delivery."
+description: "Local dropbox between you and your agent. Move non-sensitive files between a human and an agent through two local directories and browser views. Use for file handoffs on the same trusted network, not inline answers or remote delivery."
 license: MIT
 metadata:
   version: "0.2.0"
