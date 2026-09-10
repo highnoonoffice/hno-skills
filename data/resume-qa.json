@@ -691,5 +691,143 @@
     "confidence": "high",
     "source": "interview 2026-09-10",
     "seed": false
+  },
+  {
+    "id": "what-makes-training-work",
+    "question": "What makes corporate training actually work instead of forgettable?",
+    "aliases": [
+      "training philosophy",
+      "what makes training stick",
+      "compliance training",
+      "instructional design philosophy",
+      "making training not boring"
+    ],
+    "answer": "The goal is stickiness: just enough information that the learner won't forget it, delivered in a way that meets them where they are. Joseph works mainly in Articulate Rise, and now that he builds custom code blocks, everything is company-branded, interactive, and intuitive, which has changed how learners feel about training. If content is too data-heavy, he turns it into a one-page takeaway they can download; if it's behavioral, he makes it a game with a 60-second timer per question, points, and a pass threshold. The proof is that people take screenshots of his training and keep them on their desktop to pull up during live sales calls. Even a compliance course, like the government-sector training he's built four years running, gets framed around what's in it for the rep: know which data might trip a legal wire, loop in the general counsel's office early, and don't let the deal get wrecked. He frames every training as a way to help reps make more money.",
+    "tags": [
+      "l-and-d",
+      "philosophy",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "dramatic-writing-in-design",
+    "question": "How does Joseph's dramatic-writing background show up in his learning design?",
+    "aliases": [
+      "dramatic writing NYU",
+      "storytelling in training",
+      "writing background learning design",
+      "how does creative writing help",
+      "character craft"
+    ],
+    "answer": "Joseph studied dramatic writing at NYU and has written plays, a complete web series, partially finished films, novels, and essays. That craft comes out directly in the AI role-play characters. When he names a character and gives it traits, he's writing a story, building a believable person with real background, though he keeps it grounded and relevant rather than inventing a pet gerbil named Gary. What has given him longevity in the field is welding the two halves together: the dramatic-writing instinct for character and the analytical, deadline-driven reasoning of a corporate job. The mix is what scratches the itch and keeps the work alive for him.",
+    "tags": [
+      "l-and-d",
+      "writing",
+      "bio"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "proudest-training-project",
+    "question": "What training project is Joseph proudest of?",
+    "aliases": [
+      "proudest work",
+      "biggest win",
+      "CoCounsel training",
+      "best project",
+      "most meaningful training"
+    ],
+    "answer": "Building the full sales enablement for CoCounsel, Thomson Reuters' flagship agentic-AI legal product, across every segment and across the US, UK, and Canada. The product itself helps firms work more efficiently on trustable, attorney-vetted content, and Joseph taught the whole company not just how to sell it but what it is, why it works, and the objections they'll hear depending on their subsegment. The impact was substantive, and the informal feedback around the company was that it genuinely raised their game at revenue enablement.",
+    "tags": [
+      "l-and-d",
+      "current-work",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "measuring-training-success",
+    "question": "How does Joseph measure whether training worked?",
+    "aliases": [
+      "measuring training ROI",
+      "completion rates",
+      "training metrics",
+      "did the training work",
+      "L&D measurement"
+    ],
+    "answer": "The classic metric is completion rate, and Joseph routinely lands 70 to 90 percent across projects, but the number he actually cares about is the one most L&D people don't chase: correlating who completed the training with who hit quota. The goal is a bottom-line figure he can report up to leadership, whether the business got its bang for the buck. If he built training for a new company, he'd want a baseline of how everyone performed over the prior period, then measure the new training against that baseline. And the simplest signal of all: whether reps come back unprompted and say the training was great. If you don't hear anything, it probably wasn't.",
+    "tags": [
+      "l-and-d",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "getting-up-to-speed-fast",
+    "question": "How does Joseph learn a new product fast enough to teach it?",
+    "aliases": [
+      "learning new products",
+      "subject matter experts",
+      "getting up to speed",
+      "how do you teach a product you don't know",
+      "SME process"
+    ],
+    "answer": "Subject-matter experts, and the ability to record them. If Joseph had to fully master every product he trains on, the training would never ship. So the move is to get from zero to one as fast as possible, then hand the SMEs something concrete to react to. They punch it up, correct it, and add the field nuance, and he packages the result in a way that sticks. Getting the draft in front of the experts fast, rather than trying to become the expert first, is what makes the timeline work.",
+    "tags": [
+      "l-and-d",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "future-of-corporate-ld",
+    "question": "Where is corporate learning and development heading as AI improves?",
+    "aliases": [
+      "future of L&D",
+      "will AI take L&D jobs",
+      "is instructional design dying",
+      "future of training",
+      "AI and learning design"
+    ],
+    "answer": "Changing, and probably growing. There's always a need for training, and the fear that AI will just build the course for you doesn't hold up yet: drop a PowerPoint into one of these tools and what comes out is rough. It will get better month over month, but making training genuinely great still takes an architectural, orchestration-minded brain. Joseph expects learning design to get stickier, not obsolete, because there will always be new hires, onboarding, and people who need to practice their reps on a sales goal. All of that comes back to learning experience design, which is exactly where his department operates.",
+    "tags": [
+      "l-and-d",
+      "philosophy",
+      "ai"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "unsung-skill-connection",
+    "question": "What's Joseph's most valuable skill that doesn't show up on a resume?",
+    "aliases": [
+      "hidden skill",
+      "best soft skill",
+      "connecting with people",
+      "unsung skill",
+      "what makes you good to work with"
+    ],
+    "answer": "Connecting with anybody. Joseph listens, people feel heard, and they want to work with him, and it's less about being affable than about being real. He also shows genuine appreciation: if someone spends time with him on a call or sends him a document, he says thank you and means it. That's given him a kind of stickiness inside the company, and it's the same thing he'd bring to working with anyone else.",
+    "tags": [
+      "l-and-d",
+      "bio",
+      "philosophy"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
   }
 ]
