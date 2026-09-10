@@ -611,5 +611,85 @@
     "confidence": "high",
     "source": "interview 2026-09-10",
     "seed": false
+  },
+  {
+    "id": "enterprise-ai-adoption",
+    "question": "What do most people get wrong about enterprise AI adoption?",
+    "aliases": [
+      "enterprise AI adoption mistakes",
+      "why AI adoption stalls",
+      "AI in the workflow",
+      "what companies get wrong about AI"
+    ],
+    "answer": "The biggest early mistake is making people leave their workflow to use AI. At first, Thomson Reuters mandated AI usage and tracked it, but the LLMs lived in a separate place, so adoption lagged. The moment the company partnered with Anthropic and Claude showed up inside Microsoft 365, in Word, PowerPoint, and Excel, adoption skyrocketed. People use a tool when it's already there. The second gap is education: companies push everyone to use AI but rarely teach how. People type single sentences instead of stacking context. Joseph delivered a ten-minute segment on six productivity hacks to nearly 300 people across his division, and it lit a fuse, but the fact that the training was needed six or seven months into adoption shows how much productivity gets missed in the gap between telling people to use AI and teaching them how.",
+    "tags": [
+      "ai",
+      "business",
+      "thomson-reuters"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "how-thinking-about-ai-changed",
+    "question": "How has Joseph's thinking about AI changed over time?",
+    "aliases": [
+      "how did you get into AI",
+      "were you against AI",
+      "AI journey",
+      "what changed your mind about AI",
+      "multi-agent workflows"
+    ],
+    "answer": "As a writer, Joseph was initially against AI, on the conviction that it couldn't write for him, and he still believes his own writing beats it. What changed in January 2026 was realizing AI could do the homework and research that frees his own writing: the novels, the website, the ClawHub skills, his agent Magnus. He took a Maven course on building agentic workflows, which taught him to write system instructions, sometimes 20,000 to 30,000 words, defining how multiple agents behave, talk to each other, pass information, and stay in their lanes: a research agent, a writing agent, an orchestrator that delegates, a library agent that handles retrieval, a QA agent that reviews everything before it reaches the human. That lit a fire. From there he installed OpenClaw, built Magnus, and started building Mission Control, a single command center that brings his productivity tools into one place.",
+    "tags": [
+      "ai",
+      "philosophy",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "what-is-magnus",
+    "question": "What is Magnus, Joseph's AI agent?",
+    "aliases": [
+      "Magnus agent",
+      "OpenClaw agent",
+      "autonomous agent",
+      "Joseph's AI assistant",
+      "why did you build Magnus"
+    ],
+    "answer": "Magnus is Joseph's personal autonomous agent, built on OpenClaw, the open-source agent framework. It runs headless on a Mac mini in the corner of his room, and he communicates with it through Telegram. He named it Magnus because he's an author and likes naming characters, and because of a childhood story: his uncle once asked what he wanted, and small Joseph said he wanted his own little worker man. Magnus is literally that. He built it to learn how the tools work by using them on real problems, then documenting the solutions so others can learn too. A recent example: researching a novel he's writing called The Asylum, he fed a large body of research into Magnus and had it build a text-to-speech audiobook tool, debugging a sentence-truncation issue down to a character-count problem, then published the finished skill to ClawHub. To Joseph, Magnus represents the ability to solve your own problems and then hand the solution to everyone else.",
+    "tags": [
+      "ai",
+      "technical",
+      "current-work",
+      "bio"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
+  },
+  {
+    "id": "first-two-weeks-engagement",
+    "question": "If a company hired Joseph to build an AI system from scratch, what would the first two weeks look like?",
+    "aliases": [
+      "how does Joseph start a project",
+      "first two weeks",
+      "onboarding a client",
+      "context development",
+      "how do you build an AI system"
+    ],
+    "answer": "It would be almost entirely context development. Send everything: PDFs, quarterly reports, financials. Then a few recorded brainstorming sessions, three to five one-hour calls, talking through the goals, the speed bumps, what the company is good at, and what it wants to be better at. The whole first stretch is building a foundation of shared context between the company and the agents Joseph works with, because that's how you actually work with an LLM. Only once there's enough context to stand on does he spec out the build: define the OKRs, pick the first target and its MVP, put it on a timeline, assign the right people, and then start building.",
+    "tags": [
+      "ai",
+      "business",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "interview 2026-09-10",
+    "seed": false
   }
 ]
