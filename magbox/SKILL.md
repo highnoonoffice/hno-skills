@@ -1,6 +1,6 @@
 ---
 name: magbox
-description: "Local dropbox between you and your agent. Move files through two aesthetically pleasing local directories and browser views. Use for file handoffs on the same trusted network, not inline answers or remote delivery."
+description: "Local dropbox between you and your agent. Move files through two aesthetically pleasing local directories with browser views."
 license: MIT
 metadata:
   version: "0.2.0"
