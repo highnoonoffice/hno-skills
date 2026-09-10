@@ -11,7 +11,11 @@
       "What is Joseph doing these days"
     ],
     "answer": "Joseph is a Senior Instructional Designer and AI Transformation Lead at Thomson Reuters (Remote), a role he has held since October 2021. He was promoted in 2023, named a 2025 AI Champion, and has presented at the company's CFO Leadership Table.",
-    "tags": ["experience", "current-work", "thomson-reuters"],
+    "tags": [
+      "experience",
+      "current-work",
+      "thomson-reuters"
+    ],
     "confidence": "high",
     "source": "JV_CV_2026_v2",
     "seed": true
@@ -26,7 +30,9 @@
       "college"
     ],
     "answer": "Joseph holds a Master of Communication Management from the USC Annenberg School and a Bachelor of Arts in English/Writing from New York University.",
-    "tags": ["education"],
+    "tags": [
+      "education"
+    ],
     "confidence": "high",
     "source": "JV_CV_2026_v2, corroborated by JV_CV_HB and JV_CV_TBC",
     "seed": true
@@ -41,7 +47,11 @@
       "CoCounsel accreditation"
     ],
     "answer": "As AI Transformation Lead, Joseph architected a company-wide AI Primer using Open Arena (Llama, Claude, GPT-4) that became the enterprise AI fluency standard for all sales reps. He pioneered enterprise-wide two-way AI role plays using Gong-sourced personas to simulate real customer interactions, and co-designed the CoCounsel Legal Accreditation, the first competency-based certification built on AI role plays, which reached over 90 percent completion.",
-    "tags": ["experience", "ai", "thomson-reuters"],
+    "tags": [
+      "experience",
+      "ai",
+      "thomson-reuters"
+    ],
     "confidence": "high",
     "source": "JV_CV_2026_v2",
     "seed": true
@@ -56,7 +66,11 @@
       "prompt engineering experience"
     ],
     "answer": "Joseph built an AI Character Engine in Open Arena using a RAG chain powered by Opus 4.5, which cut role-play development time by 35 to 50 percent. His technical AI skills include prompt engineering, RAG chain design, model selection across Llama, Claude, and GPT, hallucination and risk mitigation, and AI grading rubric design.",
-    "tags": ["experience", "ai", "technical"],
+    "tags": [
+      "experience",
+      "ai",
+      "technical"
+    ],
     "confidence": "high",
     "source": "JV_CV_2026_v2",
     "seed": true
@@ -71,7 +85,10 @@
       "audiobook narration"
     ],
     "answer": "Joseph is the author of Pay Attention to Bitcoin (2024). He also writes essays and fiction, and produced complete audiobook narrations of Jorge Luis Borges's Ficciones and Ralph Waldo Emerson's Essays: First Series, which have drawn over 387,000 views on YouTube.",
-    "tags": ["writing", "published-work"],
+    "tags": [
+      "writing",
+      "published-work"
+    ],
     "confidence": "high",
     "source": "JV_CV_2026_v2 (book credential); CLAUDE.md operator context (narration channel)",
     "seed": true
@@ -87,22 +104,13 @@
       "BUSYZEN"
     ],
     "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it, he publishes free agent skills on ClawHub (clawhub.ai/highnoonoffice), which have been downloaded over 5,900 times, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
-    "tags": ["current-work", "business", "ai"],
+    "tags": [
+      "current-work",
+      "business",
+      "ai"
+    ],
     "confidence": "medium",
     "source": "CLAUDE.md operator context",
-    "seed": true
-  },
-  {
-    "id": "graceful-miss-demo",
-    "question": "What is Joseph's favorite food?",
-    "aliases": [
-      "favorite color",
-      "personal life details not on the resume"
-    ],
-    "answer": "I don't have that in Joseph's resume. Ask about his work at Thomson Reuters, his AI projects, his education, or his published writing.",
-    "tags": ["meta", "demo"],
-    "confidence": "high",
-    "source": "n/a, seed example demonstrating graceful-miss behavior for out-of-corpus questions",
     "seed": true
   },
   {
@@ -115,9 +123,252 @@
       "Editor-in-Chief"
     ],
     "answer": "Joseph was Editor-in-Chief of The Rug, a satirical crypto-comedy brand at TheRugNews.com, which he ran for roughly two years, publishing over 100 articles and building a following of nearly 5,000 on X. It was a past project, not a current one.",
-    "tags": ["writing", "past-work"],
+    "tags": [
+      "writing",
+      "past-work"
+    ],
     "confidence": "medium",
     "source": "JV_CV_TBC",
     "seed": true
+  },
+  {
+    "id": "ai-role-play-characters",
+    "question": "What are some specific AI characters Joseph has built for sales training?",
+    "aliases": [
+      "Derek Martinez AI character",
+      "Patricia AI character",
+      "named AI personas",
+      "AI role play examples"
+    ],
+    "answer": "Joseph built named AI customer personas for Thomson Reuters sales role plays, each with a distinct background and personality matched to a specific training scenario. One, Derek Martinez, was called out on a company Town Hall as critical to a segment's Q4 success, with reps saying they learned more from him than from any other training that year. Another, Patricia, was praised by a VP of Sales as magician level work. Internal estimates tied the role play program to a 15 to 25 percent increase in sales skill capacity and a 5 to 10 percent faster onboarding ramp.",
+    "tags": [
+      "experience",
+      "ai",
+      "thomson-reuters",
+      "technical"
+    ],
+    "confidence": "medium",
+    "source": "JV_2025_FULL VERSION (internal self-review document)",
+    "seed": false
+  },
+  {
+    "id": "ceo-ai-primer-endorsement",
+    "question": "Did company leadership recognize Joseph's AI work?",
+    "aliases": [
+      "CEO endorsement",
+      "Steve Hasker quote",
+      "leadership recognition"
+    ],
+    "answer": "Thomson Reuters CEO Steve Hasker publicly endorsed the AI Primer program Joseph architected, saying the company should market it to sales people as a huge benefit of working at Thomson Reuters, becoming an expert in AI selling. That recognition helped establish Joseph as the team's go to AI expert and led to his invitations to present to company leadership.",
+    "tags": [
+      "experience",
+      "ai",
+      "thomson-reuters",
+      "recognition"
+    ],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2 and JV_2025_FULL VERSION (same CEO quote corroborated in both)",
+    "seed": false
+  },
+  {
+    "id": "devlearn-2022-presentation",
+    "question": "Has Joseph spoken at any conferences?",
+    "aliases": [
+      "DevLearn presentation",
+      "public speaking",
+      "conference talk"
+    ],
+    "answer": "Joseph presented at DevLearn 2022 in Las Vegas on modular learning efficiencies using Vyond.",
+    "tags": [
+      "experience",
+      "speaking"
+    ],
+    "confidence": "medium",
+    "source": "JV_CV_TBC",
+    "seed": false
+  },
+  {
+    "id": "annual-sales-meeting-2026",
+    "question": "What did Joseph do at the 2026 Annual Sales Meeting?",
+    "aliases": [
+      "ASM 2026",
+      "Annual Sales Meeting Las Vegas",
+      "sales influencer interviews"
+    ],
+    "answer": "Joseph was invited as the AI role play expert at Thomson Reuters' 2026 Annual Sales Meeting in Las Vegas, where he interviewed more than 35 top performing sales influencers to capture and distribute AI adoption best practices across the company.",
+    "tags": [
+      "experience",
+      "ai",
+      "thomson-reuters",
+      "speaking"
+    ],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2, corroborated by JV_2025_FULL VERSION",
+    "seed": false
+  },
+  {
+    "id": "sales-character-design-openclaw",
+    "question": "What does Joseph's AI sales character design work involve?",
+    "aliases": [
+      "synthetic buyers",
+      "sales practice characters",
+      "Magnus OpenClaw",
+      "LLM efficiency consulting detail"
+    ],
+    "answer": "Through High Noon Office, Joseph designs AI powered sales practice characters, synthetic buyers that sales reps use to rehearse objections, read the room, and close deals before talking to a real customer. He also consults on LLM efficiency, helping people get more useful output from tools like ChatGPT, Codex, and OpenClaw. He built and runs his own autonomous agent, Magnus, on OpenClaw.",
+    "tags": [
+      "current-work",
+      "business",
+      "ai",
+      "technical"
+    ],
+    "confidence": "high",
+    "source": "josephvoelbel.com site-head.html agent context block (Joseph's own published description)",
+    "seed": false
+  },
+  {
+    "id": "book-detail",
+    "question": "What is Joseph's book about?",
+    "aliases": [
+      "Pay Attention to Bitcoin details",
+      "book subtitle",
+      "book chapters",
+      "bitcoin book"
+    ],
+    "answer": "Joseph's book is Pay Attention to Bitcoin: The Rise of Digital Gold and Its Place in the Evolution of Money, self published in July 2024 through Amazon and Lulu Press in both print and ebook form. It runs twelve chapters covering topics like the gold standard, the Federal Reserve, hash rates, the bitcoin halving, and sound money. Author Seb Bunney, who wrote The Hidden Cost of Money, called it insightful, poetic, and easy to read.",
+    "tags": [
+      "writing",
+      "published-work"
+    ],
+    "confidence": "high",
+    "source": "Pay Attention to Bitcoin manuscript and cover PDF, corroborated by Gmail publication correspondence",
+    "seed": false
+  },
+  {
+    "id": "bankless-publishing",
+    "question": "Did Joseph write for any bitcoin publications?",
+    "aliases": [
+      "Bankless Publishing",
+      "Bankless DAO",
+      "Medium bitcoin articles",
+      "bitcoin journalism"
+    ],
+    "answer": "Joseph was a content manager and staff writer for Bankless Publishing, part of Bankless DAO, where he wrote bitcoin focused essays for Medium including pieces on the BlackRock bitcoin ETF, hash rates, and the bitcoin halving. One article on River's product, written for Bankless Publishing's newsletter, reached over 20,000 subscribers with a 33 percent open rate and more than 10,000 views. This was a past role, not current.",
+    "tags": [
+      "writing",
+      "past-work"
+    ],
+    "confidence": "medium",
+    "source": "River Cover Letter_Joseph (2023)",
+    "seed": false
+  },
+  {
+    "id": "book-origin-story",
+    "question": "How did Joseph first get interested in bitcoin?",
+    "aliases": [
+      "bitcoin origin story",
+      "alternative currencies interest",
+      "circular economies"
+    ],
+    "answer": "Joseph traces his interest in alternative money back to 2012, when he presented on local currencies and circular economies for his graduate work at USC. He first encountered bitcoin later that year at Burning Man, started a small newsletter about it in 2017, and has written about the space since.",
+    "tags": [
+      "writing",
+      "background"
+    ],
+    "confidence": "medium",
+    "source": "Pay Attention to Bitcoin, author preface (first person account)",
+    "seed": false
+  },
+  {
+    "id": "pm-process-skills",
+    "question": "What project management skills does Joseph use?",
+    "aliases": [
+      "LOOPs framework",
+      "stakeholder communication",
+      "PM skills"
+    ],
+    "answer": "Joseph uses the LOOPs framework for project management, along with Teams transcript summaries and structured stakeholder communication, to manage instructional design projects and keep asynchronous developer teams and subject matter experts on schedule.",
+    "tags": [
+      "experience",
+      "technical",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2",
+    "seed": false
+  },
+  {
+    "id": "tr-product-portfolio",
+    "question": "What Thomson Reuters products has Joseph built training for?",
+    "aliases": [
+      "HighQ",
+      "Fraud Detect",
+      "GoFileRoom",
+      "FindLaw",
+      "Case Center",
+      "product training list"
+    ],
+    "answer": "Joseph has written training and value proposition content for a wide range of Thomson Reuters products, including HighQ for Government and for Law Firms, ID Risk Analytics, Fraud Detect, Case Tracking, GoFileRoom, FindLaw Legal Tracker Advanced, FindLaw Legal Network Advertising, FindLaw Website Program Suite, Case Center, CoCounsel, Practical Law Clause Finder, and Westlaw Precision.",
+    "tags": [
+      "experience",
+      "thomson-reuters",
+      "technical"
+    ],
+    "confidence": "medium",
+    "source": "JV_CV_TBC",
+    "seed": false
+  },
+  {
+    "id": "sales-training-impact-metrics",
+    "question": "What measurable business results has Joseph's training work produced?",
+    "aliases": [
+      "sales impact numbers",
+      "completion rate stats",
+      "training ROI"
+    ],
+    "answer": "In one Thomson Reuters product launch, Joseph's training helped generate 2 million dollars in sales within two months, exceeding a 1.3 million dollar target by 50 percent. A bespoke Westlaw Precision eLearning program he co-designed reached a 78 percent completion rate across more than 800 learners, exceeding its 60 percent completion target by 18 percent.",
+    "tags": [
+      "experience",
+      "thomson-reuters"
+    ],
+    "confidence": "medium",
+    "source": "JV_CV_TBC",
+    "seed": false
+  },
+  {
+    "id": "ai-champions-network",
+    "question": "What is the AI Champions Network Joseph is part of?",
+    "aliases": [
+      "AI Champions Network",
+      "CoCo Legal Product Launch",
+      "Doing Business with Gov Compliance"
+    ],
+    "answer": "Joseph is part of Thomson Reuters' AI Champions Network, which promotes AI adoption and shares best practices across the company. He was appointed a lieutenant for sales manager sync and delivered a just in time Elevator Pitch mission for the CoCounsel Legal Product Launch in Q3 2025, reaching 83 percent completion across 550 reps. He also delivered a Doing Business with Gov Compliance initiative that reached 85 percent completion in 2025.",
+    "tags": [
+      "experience",
+      "ai",
+      "thomson-reuters",
+      "current-work"
+    ],
+    "confidence": "high",
+    "source": "JV_CV_2026_v2",
+    "seed": false
+  },
+  {
+    "id": "education-gpa-detail",
+    "question": "What were Joseph's grades in school?",
+    "aliases": [
+      "GPA",
+      "academic performance",
+      "USC GPA",
+      "NYU GPA"
+    ],
+    "answer": "Joseph earned a 3.92 GPA in his Master of Communication Management at USC Annenberg and a 3.75 GPA in his Bachelor of Arts in English and Writing at New York University.",
+    "tags": [
+      "education"
+    ],
+    "confidence": "medium",
+    "source": "JV_CV_TBC",
+    "seed": false
   }
 ]
