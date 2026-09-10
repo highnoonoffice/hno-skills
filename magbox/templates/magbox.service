@@ -1,0 +1,24 @@
+# MagBox systemd service (Linux).
+# Install:
+#   1. Edit User, node path, and script path below.
+#   2. sudo cp magbox.service /etc/systemd/system/magbox.service
+#   3. sudo systemctl daemon-reload && sudo systemctl enable --now magbox
+#   4. Verify: curl http://localhost:9900/
+# Optional dir overrides: add Environment= lines (see [Service] below).
+
+[Unit]
+Description=MagBox two-way LAN file bridge
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+ExecStart=/usr/bin/node /ABSOLUTE/PATH/TO/magbox-server.js
+Restart=always
+RestartSec=3
+# Environment=MAGBOX_PORT=9900
+# Environment=MAGBOX_TO_AGENT=/home/YOUR_USER/Inbox
+# Environment=MAGBOX_FROM_AGENT=/home/YOUR_USER/Outbox
+
+[Install]
+WantedBy=multi-user.target
