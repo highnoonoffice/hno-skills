@@ -17,7 +17,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.josephvoelbel.com',
 ]);
 
-const RATE_LIMIT_PER_10_MIN = 5;
+const RATE_LIMIT_PER_10_MIN = 20;
 const DAILY_CALL_CEILING = 500;
 const MAX_QUESTION_LENGTH = 500;
 const MAX_CONTEXT_ENTRIES = 5;
