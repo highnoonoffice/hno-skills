@@ -1,0 +1,18 @@
+name = "ai-resume-worker"
+main = "index.js"
+compatibility_date = "2026-09-10"
+
+[vars]
+# Verified against Anders's own environment info as the current Haiku model
+# ID at the time this was written. Model IDs rotate; before relying on this
+# in production, confirm it's still valid (e.g. a successful test call, or
+# check Anthropic's docs / GET https://api.anthropic.com/v1/models with your
+# real key) and update here if needed. This is a var, not a secret, so you
+# can change it with `wrangler deploy` and no code edit.
+ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
+
+# Created by: wrangler kv namespace create AI_RESUME_KV
+# That command prints an "id" — paste it below before deploying.
+[[kv_namespaces]]
+binding = "AI_RESUME_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
