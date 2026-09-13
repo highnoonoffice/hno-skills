@@ -103,14 +103,14 @@
       "independent business",
       "BUSYZEN"
     ],
-    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it he publishes free agent skills on ClawHub (clawhub.ai/highnoonoffice) with over 7,000 combined downloads, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
+    "answer": "High Noon Office is Joseph's independent AI lab and engineering operation, the successor to his earlier imprint BUSYZEN. Through it he publishes free agent skills on ClawHub (https://clawhub.ai/highnoonoffice) with over 7,600 combined downloads across ten published skills, and takes on paid work designing AI sales-practice characters, synthetic buyers that sales reps use to rehearse before talking to real customers, as well as LLM efficiency consulting.",
     "tags": [
       "current-work",
       "business",
       "ai"
     ],
     "confidence": "high",
-    "source": "ClawHub API (per-skill verified), 2026-09-10",
+    "source": "ClawHub profile (verified live), 2026-09-13",
     "seed": true
   },
   {
@@ -480,7 +480,7 @@
       "API Gateway skill",
       "agent skills catalog"
     ],
-    "answer": "Joseph has published nine agent skills on ClawHub under the High Noon Office account, with over 7,000 combined downloads. They include Ghost Publishing Pro, Brain Map Visualizer, Second Brain Visualizer, Agent Tollbooth, Token Cost Time, Ping Pong, Library of Babel, agent-ready, and MagBox. His most-downloaded skill, Ghost Publishing Pro, has over 1,500 downloads.",
+    "answer": "Joseph has published ten agent skills on ClawHub under the High Noon Office account (https://clawhub.ai/highnoonoffice), with over 7,600 combined downloads. They are: Ghost Publishing Pro (https://clawhub.ai/highnoonoffice/skills/ghost-publishing-pro), Brain Map Visualizer (https://clawhub.ai/highnoonoffice/skills/brain-map-visualizer), Second Brain Visualizer (https://clawhub.ai/highnoonoffice/skills/second-brain-visualizer), Agent Tollbooth (https://clawhub.ai/highnoonoffice/skills/agent-tollbooth), Token Cost Time (https://clawhub.ai/highnoonoffice/skills/token-cost-time), Agent Ping-Pong (https://clawhub.ai/highnoonoffice/skills/ping-pong), Library of Babel (https://clawhub.ai/highnoonoffice/skills/library-of-babel), session-closer (https://clawhub.ai/highnoonoffice/skills/session-closer), agent-ready (https://clawhub.ai/highnoonoffice/skills/agent-ready), MagBox (https://clawhub.ai/highnoonoffice/skills/magbox). His most-downloaded skill, Ghost Publishing Pro, has over 1,500 downloads.",
     "tags": [
       "technical",
       "ai",
@@ -488,7 +488,7 @@
       "current-work"
     ],
     "confidence": "high",
-    "source": "ClawHub API (per-skill verified), 2026-09-10",
+    "source": "ClawHub profile (verified live per-skill), 2026-09-13",
     "seed": false
   },
   {
