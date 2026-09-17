@@ -38,3 +38,7 @@ Skills install through OpenClaw. Visit [clawhub.com](https://clawhub.com) and se
 ---
 
 Built by [Joseph Voelbel](https://josephvoelbel.com) · High Noon Office
+
+### agent-ping-pong
+Clipboard Judgment↔Builder protocol (v3.0.0). Canonical: [agent-ping-pong](https://github.com/highnoonoffice/agent-ping-pong). Mirror in `agent-ping-pong/`.
+
