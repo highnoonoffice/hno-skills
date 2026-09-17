@@ -1,7 +1,7 @@
 ---
 title: "Skill Registry"
 created: 2026-03-18
-modified: 2026-03-18T17:58:00-05:00
+modified: 2026-09-17
 tags: [skills, registry, reference, index]
 status: active
 ---
@@ -13,6 +13,16 @@ Operational registry for all skills available to Magnus. One row per skill — t
 ---
 
 ## Published Skills (ClawHub)
+
+### agent-ping-pong (v3.0.0)
+- **Fires when:** multi-agent coding handoffs, clipboard relay between Judgment and Builder, PR review loops, merge-gate protocol
+- **Trigger phrases:** "ping pong", "agent handoff", "relay this to the builder", "spec and review loop", "clipboard protocol"
+- **Credentials:** optional fine-grained GitHub PATs for Judgment (read/review PRs) and Builder (push branches + open PRs); least privilege; no secrets inside `[AGENT_HANDOFF]` blocks
+- **Dependencies:** two agent windows + human clipboard; GitHub for PRs
+- **Last verified:** 2026-09-17 ✅ (synced from highnoonoffice/agent-ping-pong main after PR #3)
+- **Canonical repo:** https://github.com/highnoonoffice/agent-ping-pong
+- **Index path:** `agent-ping-pong/` in this repo (mirror of canonical skill)
+- **Notes:** v3 is agent-agnostic (Judgment/Builder roles, short vs full handoff guidance). Default pattern is direct PR on the target repo; sandbox→port is appendix-only. Human is sole merge authority (LGTM ≠ merge).
 
 ### ghost-publishing-pro (v1.0.4)
 - **Fires when:** publishing Ghost posts, sending newsletters, migrating blogs, Ghost API errors, image uploads, scheduling, analytics
