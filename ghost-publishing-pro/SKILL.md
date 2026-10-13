@@ -1,6 +1,6 @@
 ---
 name: ghost-publishing-pro
-version: 2.5.0
+version: 2.6.0
 description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 18 workflows covering article publishing, newsletter sends (including already-published posts), batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
@@ -378,7 +378,7 @@ for post in posts:
 > **Safe-mode note:** All tag write endpoints (`POST`, `PUT`, `DELETE`) require owner-level Admin API credentials. If you get a `403`, either switch to an owner token or manage tags manually in Ghost Admin → Settings → Tags. The list endpoint (`GET`) works with standard integration tokens.
 
 ### Changelog
-- **2.5.0** (2026-10-13): Newsletter fixes from production. Added Workflow 18 (send a newsletter for an already-published post via revert-and-republish; no staff session needed). Corrected the `publish_email_atomic` gate, which wrongly said a post-publish send was impossible via API. Moved `newsletter`/`email_segment` to query-string params in all examples. Documented the 403 on `/emails/` for integration keys and why recipient counts run below subscriber counts.
+- **2.6.0** (2026-10-13; ClawHub numbering — previous ClawHub release was 2.5.3): Newsletter fixes from production. Added Workflow 18 (send a newsletter for an already-published post via revert-and-republish; no staff session needed). Corrected the `publish_email_atomic` gate, which wrongly said a post-publish send was impossible via API. Moved `newsletter`/`email_segment` to query-string params in all examples. Documented the 403 on `/emails/` for integration keys and why recipient counts run below subscriber counts.
 
 ### License
 
