@@ -1,7 +1,7 @@
 ---
 name: ghost-publishing-pro
-version: 2.4.0
-description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 17 workflows covering article publishing, batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
+version: 2.5.0
+description: "Headless Ghost publishing. Write, audit, and automate your entire Ghost operation from your AI workflow — 18 workflows covering article publishing, newsletter sends (including already-published posts), batch imports, site health audits, email performance, bulk excerpt push, and GSC indexing repair. Admin API only. No browser, no dashboard, no context switching."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/ghost-publishing-pro
 credentials:
@@ -39,9 +39,9 @@ metadata: ~
 
   <gate id="publish_email_atomic" priority="3" severity="hard" scope="pre_publish">
     <condition>About to publish a post that should go to subscribers</condition>
-    <question>Is `email_segment` included in the same API call as `"status": "published"`?</question>
+    <question>Does the publishing call carry `?newsletter={slug}&amp;email_segment={segment}` as URL query parameters, and has the user approved this send?</question>
     <pass_action>Proceed.</pass_action>
-    <fail_action>Stop. Add `email_segment` to this call. Email cannot be triggered after the fact via API — only Ghost Admin manual resend. This is a one-shot gate.</fail_action>
+    <fail_action>Stop. Put `newsletter` and `email_segment` on the query string of the call that sets `"status": "published"` (query params are the documented and production-verified route). Email fires only on the draft → published transition. If the post is already published and has never been emailed, use Workflow 18 (send newsletter for an already-published post). Never send without explicit approval. A send is irreversible and reaches every member in the segment.</fail_action>
   </gate>
 
   <gate id="bulk_write_approval" priority="4" severity="hard" scope="pre_bulk">
@@ -86,7 +86,7 @@ If those three aren't ready, start with the **Credentials Setup** section below.
 
 **Most users want two things:** publish a post and send it to subscribers in one call, and update existing posts without breaking them. Start with **Core Operations** below — that covers 90% of day-to-day use.
 
-**Also here if you need it:** batch imports, site health audits, email analytics, excerpt management, GSC indexing repair, and full Squarespace/WordPress/Substack migrations. All 17 workflows are in `references/workflows.md`.
+**Also here if you need it:** batch imports, site health audits, email analytics, excerpt management, GSC indexing repair, and full Squarespace/WordPress/Substack migrations. All 18 workflows are in `references/workflows.md`.
 
 If you're new: do **Credentials Setup**, then go straight to **Core Operations**. Skip everything else until you need it.
 
@@ -275,6 +275,7 @@ See `references/workflows.md` for full migration playbooks:
 - **Content performance intelligence** — three-section report: email performance (open rate, click rate, CTO, divergence analysis), web-only post health + amplification candidates, pages health snapshot. Audience snapshot with subscriber tier breakdown. (Workflow 15)
 - **Batch excerpt push** — write custom excerpts to all posts in a single run. 300-char hard cap, slug-based targeting, skip/fail reporting. Proven on 65 posts in production. (Workflow 16)
 - **GSC → Ghost indexing & SEO repair loop** — triage GSC coverage report, classify unindexed URLs, submit real posts for indexing, accelerate discovery with internal links. Note: redirect rule writes are blocked by Ghost's API for integration tokens — redirect management is outside this skill's scope. (Workflow 17)
+- **Send a newsletter for an already-published post** — revert to draft, republish with the newsletter on the query string and the original `published_at`, verify the email record. No browser, no staff session. (Workflow 18)
 
 See `references/api.md` for complete endpoint documentation, error codes, and token generation details.
 
@@ -375,6 +376,9 @@ for post in posts:
 ```
 
 > **Safe-mode note:** All tag write endpoints (`POST`, `PUT`, `DELETE`) require owner-level Admin API credentials. If you get a `403`, either switch to an owner token or manage tags manually in Ghost Admin → Settings → Tags. The list endpoint (`GET`) works with standard integration tokens.
+
+### Changelog
+- **2.5.0** (2026-10-13): Newsletter fixes from production. Added Workflow 18 (send a newsletter for an already-published post via revert-and-republish; no staff session needed). Corrected the `publish_email_atomic` gate, which wrongly said a post-publish send was impossible via API. Moved `newsletter`/`email_segment` to query-string params in all examples. Documented the 403 on `/emails/` for integration keys and why recipient counts run below subscriber counts.
 
 ### License
 
