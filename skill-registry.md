@@ -24,12 +24,12 @@ Operational registry for all skills available to Magnus. One row per skill — t
 - **Index path:** `agent-ping-pong/` in this repo (mirror of canonical skill)
 - **Notes:** v3 is agent-agnostic (Judgment/Builder roles, short vs full handoff guidance). Default pattern is direct PR on the target repo; sandbox→port is appendix-only. Human is sole merge authority (LGTM ≠ merge).
 
-### ghost-publishing-pro (v1.0.4)
+### ghost-publishing-pro (v2.6.0)
 - **Fires when:** publishing Ghost posts, sending newsletters, migrating blogs, Ghost API errors, image uploads, scheduling, analytics
 - **Trigger phrases:** "publish to Ghost", "send newsletter", "Ghost API", "update post", "migrate from Squarespace/WordPress/Substack"
 - **Credentials:** `~/.openclaw/credentials/ghost-admin.json` — `{ url, key }` (Admin API key from Ghost Settings > Integrations)
 - **Dependencies:** Ghost Admin API, Node.js (JWT generation — no npm needed)
-- **Last verified:** 2026-03-18 ✅
+- **Last verified:** 2026-10-13 ✅ (newsletter send to an already-published post verified in production)
 - **ClawHub:** https://clawhub.ai/highnoonoffice/ghost-publishing-pro
 - **Publish method:** Direct API via `cli/clawhub-api.md` — never use the browser importer
 - **Known limitations:** `email_segment` only fires on first publish — missed it means manual resend from Ghost admin. Theme uploads require browser automation (owner-level only).
