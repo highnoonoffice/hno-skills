@@ -24,7 +24,7 @@ Operational registry for all skills available to Magnus. One row per skill — t
 - **Index path:** `agent-ping-pong/` in this repo (mirror of canonical skill)
 - **Notes:** v3 is agent-agnostic (Judgment/Builder roles, short vs full handoff guidance). Default pattern is direct PR on the target repo; sandbox→port is appendix-only. Human is sole merge authority (LGTM ≠ merge).
 
-### ghost-publishing-pro (v2.6.0)
+### ghost-publishing-pro (v2.6.1)
 - **Fires when:** publishing Ghost posts, sending newsletters, migrating blogs, Ghost API errors, image uploads, scheduling, analytics
 - **Trigger phrases:** "publish to Ghost", "send newsletter", "Ghost API", "update post", "migrate from Squarespace/WordPress/Substack"
 - **Credentials:** `~/.openclaw/credentials/ghost-admin.json` — `{ url, key }` (Admin API key from Ghost Settings > Integrations)

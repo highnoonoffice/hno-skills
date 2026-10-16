@@ -138,17 +138,7 @@ Key book-style rules:
 - Wrap in `lang="en"` for hyphenation to work
 - `font-family: Georgia, serif` for book feel
 
-**YouTube embed (responsive):**
-```html
-<figure class="kg-card kg-embed-card">
-  <iframe width="560" height="315"
-    src="https://www.youtube-nocookie.com/embed/{VIDEO_ID}"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-  </iframe>
-</figure>
-```
+**YouTube embed:** native Lexical `embed` card only. See SKILL.md gate `youtube_native_embed`. Never a raw iframe.
 
 **Email newsletter rules (critical):**
 - JS is stripped in Ghost email delivery — no interactive elements
@@ -227,12 +217,12 @@ curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
 # Copy the returned URL
 ```
 
-**Step 2: Create the post with embed + feature image** (`POST /posts/?source=html&newsletter={newsletter_slug}&email_segment=all` to also email it; drop the query params for web-only)
+**Step 2: Create the post with feature image**, then **Step 3: insert the video as a native embed card** (fetch `lexical`, insert the embed node from SKILL.md after the intro paragraph, PUT with current `updated_at`). Create as draft, add the embed, then publish, so the email includes the card. Step 2 call: (`POST /posts/?source=html&newsletter={newsletter_slug}&email_segment=all` to also email it; drop the query params for web-only)
 ```json
 {
   "posts": [{
     "title": "Video Title",
-    "html": "<p>Intro paragraph setting up the video.</p>\n\n<figure class=\"kg-card kg-embed-card\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube-nocookie.com/embed/{VIDEO_ID}\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></figure>\n\n<p>Description or transcript excerpt below the video.</p>",
+    "html": "<p>Intro paragraph setting up the video.</p>\n\n<p>Description or transcript excerpt below the video.</p>",
     "feature_image": "https://your-ghost-site.com/content/images/returned-thumbnail-url.jpg",
     "status": "published",
     "tags": [{"name": "Video"}]
@@ -241,10 +231,10 @@ curl -s -X POST "{url}/ghost/api/admin/images/upload/" \
 ```
 
 **YouTube embed rules:**
-- Use `youtube-nocookie.com` not `youtube.com` — avoids cookie consent banners
-- `kg-card kg-embed-card` classes tell Ghost to render it as an embed card (proper responsive sizing)
+- Native Lexical `embed` node only. A raw iframe (even with `kg-embed-card` classes) breaks in email: blank 16:9 gap, no link to the video
+- Use the watch URL (`youtube.com/watch?v=`) as `url`; Ghost builds the responsive player
 - Thumbnail dimensions: 1280×720 (16:9) — Ghost crops to this for feature image display
-- The embed renders in email but autoplay is blocked — acceptable behavior
+- In email, the native card renders as a thumbnail with a play button linking to YouTube
 
 ---
 
@@ -314,7 +304,7 @@ Ghost sends HTML email through its own template wrapper. What gets stripped:
 What works in email:
 - Inline styles
 - Standard HTML (p, h2, h3, ul, ol, blockquote, hr, img)
-- YouTube embeds (renders as linked thumbnail in most clients)
+- YouTube native embed cards (render as a linked thumbnail). Raw iframes do NOT: they leave a blank gap
 - Web fonts from Google Fonts loaded inline
 
 **Subscriber segments:**
